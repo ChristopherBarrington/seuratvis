@@ -1,0 +1,25 @@
+Package: seuratvis
+Title: Visualise data in a Seurat object
+Version: 0.1.0
+Authors@R: 
+    person(given='Christopher', family='Barrington',
+           role=c('aut', 'cre'),
+           email='christopher.barrington@crick.ac.uk',
+           comment=c(ORCID='my.orcid'))
+Description: Seurat is used to process and analuyse single cell data. This package reads a Seurat object and presents visualisation of the data to the user.
+License: license to thrill
+Encoding: UTF-8
+LazyData: true
+Depends:
+  shiny,
+  shinydashboard,
+  dqshiny,
+  shinycssloaders,
+  ggvis,
+  hdf5r,
+  viridis,
+  ComplexHeatmap,
+  Seurat,
+  tidyverse,
+  magrittr
+RoxygenNote: 7.0.2
