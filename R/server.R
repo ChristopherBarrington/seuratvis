@@ -17,6 +17,8 @@
 # # seurat <- human_CS17_thoracic
 # seurat <- human_CS17_brachial
 
+gene_names_to_description <- c()
+if(file.exists('D:/seurat-vis/temp-gene-info.tsv'))
 read.delim('D:/seurat-vis/temp-gene-info.tsv') %>%
   filter(description!='') %>%
   mutate(description=str_remove_all(description, pattern=' \\[Source.+$')) %>%
