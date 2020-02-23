@@ -1,5 +1,6 @@
 # seuratvis
- visualise data contained in a Seurat object
+
+visualise data contained in a Seurat object
 
 This package is very early stages and under development. Bug reports and feature suggestions are welcome!
 
@@ -26,7 +27,7 @@ launchApp()
 
 The app should now open a window using the gene names provided by the vector and the data in the `seurat` object.
 
-# Developments
+# developments
 
 * installation process - this will become an installation using `devtools::install_github` instead.
 * loading seurat objects by uploading a dataset (maybe)
