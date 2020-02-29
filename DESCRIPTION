@@ -5,7 +5,7 @@ Authors@R:
     person(given='Christopher', family='Barrington',
            role=c('aut', 'cre'),
            email='christopher.barrington@crick.ac.uk',
-           comment=c(ORCID='my.orcid'))
+           comment=c(ORCID='0000-0003-1281-2658'))
 Description: Seurat is used to process and analuyse single cell data. This package reads a Seurat object and presents visualisation of the data to the user.
 License: license to thrill
 Encoding: UTF-8
