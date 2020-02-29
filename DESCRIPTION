@@ -1,6 +1,6 @@
 Package: seuratvis
 Title: Visualise data in a Seurat object
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person(given='Christopher', family='Barrington',
            role=c('aut', 'cre'),
