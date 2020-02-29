@@ -7,8 +7,7 @@
 # library(tidyverse)
 # library(magrittr)
 
-colours_list <- c('yellow','cyan','green','red','blue','purple','pink','orange','gray','white','brown','seagreen','deeppink','darkslategray','blue','rosybrown','ivory','thistle','sandybrown','darkslategrey','palegoldenrod','white','blanchedalmond','navy','pink','lightskyblue','aquamarine','powderblue','mintcream','lavenderblush','maroon','darkorange','mediumturquoise','floralwhite','antiquewhite','gray','mediumblue','aqua','orange','coral','lightgreen','hotpink','lightcyan','forestgreen','lightpink','cornsilk','darkkhaki','royalblue','mistyrose','darkgoldenrod','salmon','honeydew','deepskyblue','snow','yellowgreen','ghostwhite','blueviolet','saddlebrown','darkgreen','lime','chocolate','grey','olive','darkblue','mediumpurple','peachpuff','paleturquoise','indigo','beige','khaki','lightcoral','springgreen','sienna','silver','yellow','orchid','slategray','seashell','lightseagreen','darkorchid','dodgerblue','cornflowerblue','red','lawngreen','papayawhip','midnightblue','violet','dimgrey','darkslateblue','greenyellow','rebeccapurple','lightyellow','indianred','cyan','lightblue','skyblue','lightslategray','mediumorchid','chartreuse','tomato','lightgoldenrodyellow','burlywood','steelblue','wheat','darkturquoise','mediumseagreen','fuchsia','darkviolet','gold','firebrick','bisque','lightsalmon','orangered','teal','mediumspringgreen','lemonchiffon','mediumvioletred','lightgrey','mediumslateblue','black','gainsboro','darkmagenta','slateblue','limegreen','darkolivegreen','purple','moccasin','lavender','cadetblue','mediumaquamarine','lightsteelblue','azure','darkred','brown','darkcyan','peru','navajowhite','crimson','darkgray','lightgray','turquoise','palevioletred','darkgrey','darkseagreen','darksalmon','plum','green','goldenrod','olivedrab','slategrey','linen','lightslategrey','palegreen','dimgray','whitesmoke','magenta','tan','oldlace','aliceblue') %>% sort()
-
+colours_list <- c("#000000","#4D4D4D","#666666","#7F7F7F","#999999","#B3B3B3","#E5E5E5","#FFFFFF","#faf0e6","#27408B","#000080","#0000FF","#1E90FF","#63B8FF","#97FFFF","#00FFFF","#00868B","#008B45","#458B00","#008B00","#00FF00","#7FFF00","#54FF9F","#00FF7F","#7FFFD4","#8B4500","#8B0000","#FF0000","#FF6A6A","#FF7F00","#FFFF00","#FFF68F","#F4A460","#551A8B","#8B008B","#8B0A50","#9400D3","#FF00FF","#FF1493","#E066FF")
 
 # load('int.RData') ######
 # # seurat <- human_CS17_thoracic
@@ -140,14 +139,10 @@ gene_name.dropdown <- autocomplete_input(id = 'gene_of_interest.dd', label = 'Ge
 seurat_cluster_set.dropdown <- selectInput(inputId = 'seurat_cluster_set.dd', label = 'Seurat cluster definitions',
                                            choices = 'seurat_clusters', selected = 'seurat_clusters',
                                            multiple = FALSE)
-
-expression_min.colour.dropdown <- selectInput(inputId = 'expression_min.colour.dd', label = 'Low expression colour',
-                                              choices = colours_list, selected = 'linen',
-                                              multiple = FALSE)
-
-expression_max.colour.dropdown <- selectInput(inputId = 'expression_max.colour.dd', label = 'High expression colour',
-                                              choices = colours_list, selected = 'darkviolet',
-                                              multiple = FALSE)
+#### colour selector palette box
+colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=colours_list, allowTransparent=FALSE, returnName=TRUE)
+append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
+append(colourInput.defaults, list(inputId='expression_max.colour', label='High', value='darkviolet')) %>% do.call(what=colourInput) -> expression_max.colour.selector
 
 expression_range.slider <- sliderInput(inputId='expression_range.slider', label='Expression limits',
                                        min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))
@@ -194,15 +189,16 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                   expression_range.slider,
                                                   seurat_cluster_set.dropdown,
                                                   gene_highlighting.label_clusters),
-                                plot_options=box(title = 'Plot options',
-                                                 status = 'info',
-                                                 solidHeader = TRUE,
-                                                 width = 3,
-                                                 collapsible = TRUE,
+                                plot_options=box(title='Plot options',
+                                                 status='info',
+                                                 solidHeader=TRUE,
+                                                 width=4,
+                                                 collapsible=TRUE,
+                                                 shiny::tags$label('Feature value colours'), br(),
+                                                 column(width=6, expression_min.colour.selector),
+                                                 column(width=6, expression_max.colour.selector),
                                                  gene_highlighting.point_size,
-                                                 opacity.slider,
-                                                 expression_min.colour.dropdown,
-                                                 expression_max.colour.dropdown),
+                                                 opacity.slider),
                                 n_cells=valueBoxOutput(outputId='genes_highlighting.n_cells_box', width=2),
                                 n_genes=valueBoxOutput(outputId='genes_highlighting.n_genes_box', width=2),
                                 n_reads=valueBoxOutput(outputId='genes_highlighting.n_reads_box', width=2),

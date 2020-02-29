@@ -314,7 +314,7 @@ shinyAppServer <- function(input, output, session) {
       ggplot() +
       aes(x=UMAP_1, y=UMAP_2, colour=expression_value) +
       geom_point(size=input$gene_highlighting.point_size.slider, alpha=input$opacity.slider) +
-      scale_colour_gradient(low=input$expression_min.colour.dd, high=input$expression_max.colour.dd, limits=input$expression_range.slider, oob=scales::squish) +
+      scale_colour_gradient(low=input$expression_min.colour, high=input$expression_max.colour, limits=input$expression_range.slider, oob=scales::squish) +
       theme_void() +
       theme(legend.position='none')})
   
