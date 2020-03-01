@@ -251,7 +251,8 @@ shinyAppServer <- function(input, output, session) {
   # ###############################################################################################
   # gene expression tab ---------------------------------------------------------------------------
   
-  ## update UI when gene is selected
+  ## update UI
+  ### when gene is selected
   reactive(x={
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
@@ -262,6 +263,26 @@ shinyAppServer <- function(input, output, session) {
     
     progress$inc(detail='Done')
     NULL}) -> update_slider
+
+  ### when palette full palette type is selected
+  observeEvent(eventExpr=input$expression_palette_full, handlerExpr={
+    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
+    on.exit(progress$close())
+    progress$set(value=0, message='Updating colour palette UI')
+
+    palette_type <- ifelse(input$expression_palette_full, 'square', 'limited')
+
+    for(inputId in c('expression_min.colour','expression_max.colour'))
+      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette)
+
+    progress$inc(detail='Done')}) -> update_palette_type
+
+  ### add new colours to palette
+  observeEvent(eventExpr=input$expression_min.colour, handlerExpr={
+    add_to_colour_palette(input$expression_min.colour)})
+
+  observeEvent(eventExpr=input$expression_max.colour, handlerExpr={
+    add_to_colour_palette(input$expression_max.colour)})
 
   ## gene highlighting
   # genes_highlighting.reactions <- reactiveValues(data=NULL, expression_map=NULL, cluster_expression=NULL, expression_map.running=0, cluster_expression.running=0)
@@ -533,4 +554,9 @@ shinyAppServer <- function(input, output, session) {
   output$cell_filtering.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
   output$genes_highlighting.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
   output$features_heatmap.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
+
+  # any code to exectue when the session ends
+  session$onSessionEnded(function() {
+    colour_palette <<- default_colour_palette() # do not carry custom palettes between sessions
+  })
 }
