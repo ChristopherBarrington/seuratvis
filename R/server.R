@@ -13,8 +13,6 @@
 # library(tidyverse)
 # library(magrittr)
 
-colours_list <- c("#000000","#4D4D4D","#666666","#7F7F7F","#999999","#B3B3B3","#E5E5E5","#FFFFFF","#faf0e6","#27408B","#000080","#0000FF","#1E90FF","#63B8FF","#97FFFF","#00FFFF","#00868B","#008B45","#458B00","#008B00","#00FF00","#7FFF00","#54FF9F","#00FF7F","#7FFFD4","#8B4500","#8B0000","#FF0000","#FF6A6A","#FF7F00","#FFFF00","#FFF68F","#F4A460","#551A8B","#8B008B","#8B0A50","#9400D3","#FF00FF","#FF1493","#E066FF")
-
 # load('int.RData') ######
 # # seurat <- human_CS17_thoracic
 # seurat <- human_CS17_brachial
@@ -267,7 +265,7 @@ shinyAppServer <- function(input, output, session) {
     NULL}) -> update_slider
 
   ### when palette full palette type is selected
-  observeEvent(eventExpr=input$expression_palette_full, {
+  observeEvent(eventExpr=input$expression_palette_full, handlerExpr={
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Updating colour palette UI')
@@ -275,10 +273,16 @@ shinyAppServer <- function(input, output, session) {
     palette_type <- ifelse(input$expression_palette_full, 'square', 'limited')
 
     for(inputId in c('expression_min.colour','expression_max.colour'))
-      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=unique(c(colours_list, input[[inputId]])))
+      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette)
 
-    progress$inc(detail='Done')
-    NULL}) -> update_palette
+    progress$inc(detail='Done')}) -> update_palette_type
+
+  ### add new colours to palette
+  observeEvent(eventExpr=input$expression_min.colour, handlerExpr={
+    add_to_colour_palette(input$expression_min.colour)})
+
+  observeEvent(eventExpr=input$expression_max.colour, handlerExpr={
+    add_to_colour_palette(input$expression_max.colour)})
 
   ## gene highlighting
   # genes_highlighting.reactions <- reactiveValues(data=NULL, expression_map=NULL, cluster_expression=NULL, expression_map.running=0, cluster_expression.running=0)
@@ -550,4 +554,9 @@ shinyAppServer <- function(input, output, session) {
   output$cell_filtering.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
   output$genes_highlighting.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
   output$features_heatmap.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
+
+  # any code to exectue when the session ends
+  session$onSessionEnded(function() {
+    colour_palette <<- default_colour_palette() # do not carry custom palettes between sessions
+  })
 }
