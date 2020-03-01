@@ -483,7 +483,7 @@ shinyAppServer <- function(input, output, session) {
              color='purple')})
   output$genes_highlighting.selected_gene_box <- renderValueBox(expr={
     valueBox(value=input$gene_of_interest.dd,
-             subtitle={gene_names_to_description[input$gene_of_interest.dd] %>% str_trunc(width=100) %>% (function(x) if_else(is.na(x), 'Selected gene', x))},
+             subtitle={gene_names_to_description[input$gene_of_interest.dd] %>% (function(x) if_else(is.null(x) | is.na(x), 'Selected gene', x)) %>% str_trunc(width=100)},
              icon=icon('jedi-order'),
              color='purple')})
   output$genes_highlighting.n_genes_box <- renderValueBox(expr={
