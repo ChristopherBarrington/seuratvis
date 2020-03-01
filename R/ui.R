@@ -143,6 +143,7 @@ seurat_cluster_set.dropdown <- selectInput(inputId = 'seurat_cluster_set.dd', la
 colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=colours_list, allowTransparent=FALSE, returnName=TRUE)
 append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
 append(colourInput.defaults, list(inputId='expression_max.colour', label='High', value='darkviolet')) %>% do.call(what=colourInput) -> expression_max.colour.selector
+expression_paletette_type_selector <- checkboxInput(inputId='expression_palette_full', label='Show full palette?', value=FALSE)
 
 expression_range.slider <- sliderInput(inputId='expression_range.slider', label='Expression limits',
                                        min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))
@@ -197,6 +198,7 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                  shiny::tags$label('Feature value colours'), br(),
                                                  column(width=6, expression_min.colour.selector),
                                                  column(width=6, expression_max.colour.selector),
+                                                 column(width=12, expression_paletette_type_selector),
                                                  gene_highlighting.point_size,
                                                  opacity.slider),
                                 n_cells=valueBoxOutput(outputId='genes_highlighting.n_cells_box', width=2),
