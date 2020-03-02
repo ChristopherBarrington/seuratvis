@@ -141,7 +141,7 @@ seurat_cluster_set.dropdown <- selectInput(inputId = 'seurat_cluster_set.dd', la
 colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=colour_palette, allowTransparent=FALSE, returnName=TRUE)
 append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
 append(colourInput.defaults, list(inputId='expression_max.colour', label='High', value='darkviolet')) %>% do.call(what=colourInput) -> expression_max.colour.selector
-expression_paletette_type_selector <- checkboxInput(inputId='expression_palette_full', label='Show full palette?', value=FALSE)
+materialSwitch(inputId='expression_palette_full', label='Show full palette?', value=FALSE, right=TRUE, status='success') -> expression_paletette_type_selector
 
 expression_range.slider <- sliderInput(inputId='expression_range.slider', label='Expression limits',
                                        min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))

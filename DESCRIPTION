@@ -17,6 +17,7 @@ Depends:
   shinydashboard,
   dqshiny,
   shinycssloaders,
+  shinyWidgets,
   colourpicker,
   ggvis,
   hdf5r,
