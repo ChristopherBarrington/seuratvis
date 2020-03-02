@@ -29,6 +29,5 @@ The app should now open a window using the gene names provided by the vector and
 
 # developments
 
-* installation process - this will become an installation using `devtools::install_github` instead.
 * loading seurat objects by uploading a dataset (maybe)
 * check for `seurat` object before continuing installation etc or remove dependence for the object to be in workspace for installation
