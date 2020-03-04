@@ -41,16 +41,16 @@ max_genes_per_cell.slider <- sliderInput(inputId='max_genes_per_cell.slider', la
                                          step=step_size)
 
 min_expression_per_cell.slider <- sliderInput(inputId='min_expression_per_cell.slider', label='Minimum total expression per cell',
-                                         min={FetchData(seurat, 'nCount_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-                                         max={FetchData(seurat, 'nCount_RNA') %>% deframe() %>% quantile(p=0.25) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                         value={FetchData(seurat, 'nCount_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-                                         step=step_size)
+                                              min={FetchData(seurat, 'nCount_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
+                                              max={FetchData(seurat, 'nCount_RNA') %>% deframe() %>% quantile(p=0.25) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
+                                              value={FetchData(seurat, 'nCount_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
+                                              step=step_size)
 
 max_expression_per_cell.slider <- sliderInput(inputId='max_expression_per_cell.slider', label='Maximum total expression per cell',
-                                         min={FetchData(seurat, 'nCount_RNA') %>% deframe() %>% quantile(p=0.85) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                         max={FetchData(seurat, 'nCount_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                         value={FetchData(seurat, 'nCount_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                         step=step_size)
+                                              min={FetchData(seurat, 'nCount_RNA') %>% deframe() %>% quantile(p=0.85) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
+                                              max={FetchData(seurat, 'nCount_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
+                                              value={FetchData(seurat, 'nCount_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
+                                              step=step_size)
 
 ### define layout boxes
 cell_filtering.plot_boxes.defaults <- list(status='success', solidHeader=TRUE, width=4, collapsible=TRUE)
@@ -84,6 +84,13 @@ cell_filtering.boxes <- list(total_expression_knee={append(cell_filtering.plot_b
                              n_reads_per_cell=valueBoxOutput(outputId='cell_filtering.n_reads_per_cell_box', width=2))
 
 ### assemble tab content
+# cell_filtering.content <- tabItem(tabName='cell_filtering-tab',
+#                                   h1('Identify cells that can be removed with quality filters'),
+#                                   fluidRow(cell_filtering.boxes$project_name,
+#                                            cell_filtering.boxes$n_reads,
+#                                            cell_filtering.boxes$n_cells,
+#                                            cell_filtering.boxes$n_reads_per_cell,
+#                                            cell_filtering.boxes$n_genes_per_cell))
 cell_filtering.content <- tabItem(tabName='cell_filtering-tab',
                                   h1('Identify cells that can be removed with quality filters'),
                                   fluidRow(cell_filtering.boxes$project_name,
