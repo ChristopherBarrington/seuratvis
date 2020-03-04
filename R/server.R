@@ -70,6 +70,9 @@ shinyAppServer <- function(input, output, session) {
   if(!is.null(seurat@reductions$umap))
     seurat_metadata_umap <- cbind(seurat@meta.data, seurat@reductions$umap@cell.embeddings)
 
+  if(is.null(seurat@meta.data$seurat_clusters))
+    seurat@meta.data$seurat_clusters <- 0
+
   progress$inc(detail='Counting clusters identified in each set')
   select_at(seurat@meta.data, vars(contains('_snn_res.'), 'seurat_clusters')) %>%
     mutate_all(function(x) {as.character(x) %>% as.numeric()}) %>%
@@ -515,6 +518,9 @@ shinyAppServer <- function(input, output, session) {
       summarise_at(vars(feature_names), mean) -> heatmap_data
     }
 
+    if(nrow(heatmap_data)<=1) # temporary fix
+      return(NULL)
+
     heatmap_data %>%
       (function(x) Heatmap(matrix=t(scales::squish(x=as.matrix(x[,-1]), range=c(0,4))),
                            cluster_columns=FALSE,
@@ -525,8 +531,8 @@ shinyAppServer <- function(input, output, session) {
                            show_heatmap_legend=FALSE,
                            top_annotation=HeatmapAnnotation(`Cluster ID`=x$cluster_id, show_legend=FALSE),
                            col=viridis_pal()(30),
-                           width=unit(1, 'npc'),
-                           height=unit(1, 'npc')))}) %>% debounce(2500)
+                           # height=unit(1, 'npc'),
+                           width=unit(1, 'npc')))}) %>% debounce(2500)
   
   # ###############################################################################################
   # return plots to shiny -------------------------------------------------------------------------
