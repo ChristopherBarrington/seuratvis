@@ -18,7 +18,7 @@ starter_gene <- sample(x=rownames(seurat), size=1)
 # tab definitions
 
 ## cell filtering tab
-cell_filtering.tab <- menuItem(text='Cell filtering', tabName="cell_filtering-tab", icon=icon('filter'))
+cell_filtering.tab <- menuItem(text='Cell filtering', tabName='cell_filtering-tab', icon=icon('filter'))
 
 ### define ui elements
 percent_mitochondria.slider <- sliderInput(inputId='percent_mitochondria.slider', label='Mitochondria fraction',
@@ -53,48 +53,22 @@ max_expression_per_cell.slider <- sliderInput(inputId='max_expression_per_cell.s
                                          step=step_size)
 
 ### define layout boxes
-cell_filtering.boxes <- list(total_expression_knee=box(title='Expression per cell',
-                                                       footer='Total number of reads attributed to a cell',
-                                                       status='success',
-                                                       solidHeader=TRUE,
-                                                       width=4,
-                                                       collapsible=TRUE,
-                                                       {plotOutput('cell_filtering-total_expression_knee') %>% withSpinner()}),
-                             total_expression_density=box(title='Expression per cell',
-                                                          footer='Total number of reads attributed to a cell',
-                                                          status='success',
-                                                          solidHeader=TRUE,
-                                                          width=4,
-                                                          collapsible=TRUE,
-                                                          {plotOutput('cell_filtering-total_expression_density') %>% withSpinner()}),
-                             unique_genes_knee=box(title='Genes per cell',
-                                                   footer='Number of distinct genes detected in a cell',
-                                                   status='success',
-                                                   solidHeader=TRUE,
-                                                   width=4,
-                                                   collapsible=TRUE,
-                                                   {plotOutput('cell_filtering-unique_genes_knee') %>% withSpinner()}),
-                             unique_features_density=box(title='Features per cell',
-                                                         footer='Number of distinct features detected in a cell',
-                                                         status='success',
-                                                         solidHeader=TRUE,
-                                                         width=4,
-                                                         collapsible=TRUE,
-                                                         {plotOutput('cell_filtering-unique_features_density') %>% withSpinner()}),
-                             percent_mitochondria_knee=box(title='Mitochondrial expression',
-                                                           footer='Proportion of mitochondrial genes detected in a cell',
-                                                           status='success',
-                                                           solidHeader=TRUE,
-                                                           width=4,
-                                                           collapsible=TRUE,
-                                                           {plotOutput('cell_filtering-percent_mitochondria_knee') %>% withSpinner()}),
-                             percent_mitochondria_density=box(title='Mitochondrial expression',
-                                                              footer='Proportion of mitochondrial genes detected in a cell',
-                                                              status='success',
-                                                              solidHeader=TRUE,
-                                                              width=4,
-                                                              collapsible=TRUE,
-                                                              {plotOutput('cell_filtering-percent_mitochondria_density') %>% withSpinner()}),
+cell_filtering.plot_boxes.defaults <- list(status='success', solidHeader=TRUE, width=4, collapsible=TRUE)
+cell_filtering.plot_boxes.total_expression.defaults <- append(cell_filtering.plot_boxes.defaults, list(title='Expression per cell', footer='Total number of reads attributed to a cell'))
+cell_filtering.plot_boxes.unique_genes.defaults <- append(cell_filtering.plot_boxes.defaults, list(title='Genes per cell', footer='Number of distinct genes detected in a cell'))
+cell_filtering.plot_boxes.percent_mitochondria.defaults <- append(cell_filtering.plot_boxes.defaults, list(title='Mitochondrial expression', footer='Proportion of mitochondrial genes detected in a cell'))
+cell_filtering.boxes <- list(total_expression_knee={append(cell_filtering.plot_boxes.total_expression.defaults, list({plotOutput(outputId='cell_filtering-total_expression_knee') %>% withSpinner()})) %>% do.call(what=box)},
+                             total_expression_density={append(cell_filtering.plot_boxes.total_expression.defaults, list({plotOutput(outputId='cell_filtering-total_expression_density') %>% withSpinner()})) %>% do.call(what=box)},
+                             total_expression_boxplot={append(cell_filtering.plot_boxes.total_expression.defaults, list({plotOutput(outputId='cell_filtering-total_expression_boxplot') %>% withSpinner()})) %>% do.call(what=box)},
+
+                             unique_features_knee={append(cell_filtering.plot_boxes.unique_genes.defaults, list({plotOutput(outputId='cell_filtering-unique_genes_knee') %>% withSpinner()})) %>% do.call(what=box)},
+                             unique_features_density={append(cell_filtering.plot_boxes.unique_genes.defaults, list({plotOutput(outputId='cell_filtering-unique_genes_density') %>% withSpinner()})) %>% do.call(what=box)},
+                             unique_features_boxplot={append(cell_filtering.plot_boxes.unique_genes.defaults, list({plotOutput(outputId='cell_filtering-unique_genes_boxplot') %>% withSpinner()})) %>% do.call(what=box)},
+
+                             percent_mitochondria_knee={append(cell_filtering.plot_boxes.percent_mitochondria.defaults, list({plotOutput(outputId='cell_filtering-percent_mitochondria_knee') %>% withSpinner()})) %>% do.call(what=box)},
+                             percent_mitochondria_density={append(cell_filtering.plot_boxes.percent_mitochondria.defaults, list({plotOutput(outputId='cell_filtering-percent_mitochondria_density') %>% withSpinner()})) %>% do.call(what=box)},
+                             percent_mitochondria_boxplot={append(cell_filtering.plot_boxes.percent_mitochondria.defaults, list({plotOutput(outputId='cell_filtering-percent_mitochondria_boxplot') %>% withSpinner()})) %>% do.call(what=box)},
+
                              thresholds=box(title='Thresholds',
                                             status='info',
                                             solidHeader=TRUE,
@@ -117,17 +91,20 @@ cell_filtering.content <- tabItem(tabName='cell_filtering-tab',
                                            cell_filtering.boxes$n_cells,
                                            cell_filtering.boxes$n_reads_per_cell,
                                            cell_filtering.boxes$n_genes_per_cell),
-                                  fluidRow(cell_filtering.boxes$total_expression_knee,
-                                           cell_filtering.boxes$unique_genes_knee,
-                                           cell_filtering.boxes$percent_mitochondria_knee),
-                                  fluidRow(cell_filtering.boxes$total_expression_density,
-                                           cell_filtering.boxes$unique_features_density,
+                                  fluidRow(cell_filtering.boxes$total_expression_boxplot,
+                                           cell_filtering.boxes$total_expression_knee,
+                                           cell_filtering.boxes$total_expression_density),
+                                  fluidRow(cell_filtering.boxes$unique_features_boxplot,
+                                           cell_filtering.boxes$unique_features_knee,
+                                           cell_filtering.boxes$unique_features_density),
+                                  fluidRow(cell_filtering.boxes$percent_mitochondria_boxplot,
+                                           cell_filtering.boxes$percent_mitochondria_knee,
                                            cell_filtering.boxes$percent_mitochondria_density),
                                   fluidRow(cell_filtering.boxes$thresholds))
 
 
 ## gene highlighting on map tab
-gene_highlighting.tab <- menuItem(text='Highlight genes', tabName="gene_highlighting-tab", icon=icon('search'))
+gene_highlighting.tab <- menuItem(text='Highlight genes', tabName='gene_highlighting-tab', icon=icon('search'))
 
 ### define ui elements
 gene_name.dropdown <- autocomplete_input(id = 'gene_of_interest.dd', label = 'Gene name',
@@ -209,7 +186,7 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                 selected_gene=valueBoxOutput(outputId='genes_highlighting.selected_gene_box', width=7))
 
 ### assemble tab content
-gene_highlighting.content <- tabItem(tabName = "gene_highlighting-tab",
+gene_highlighting.content <- tabItem(tabName='gene_highlighting-tab',
                                      h1('Highlight expression of interesting genes on the map'),
                                      fluidRow(gene_highlighting.boxes$project_name,
                                               gene_highlighting.boxes$selected_gene),

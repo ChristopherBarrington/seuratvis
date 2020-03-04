@@ -204,7 +204,7 @@ shinyAppServer <- function(input, output, session) {
       set_names('y') %>%
       ggplot() +
       aes(x=y) +
-      labs(x='Total UMIs per cell') +
+      labs(x='Total UMIs per cell', y='Density') +
       geom_vline(xintercept=input$min_expression_per_cell.slider, colour='#377eb8', size=1) +
       geom_vline(xintercept=input$max_expression_per_cell.slider, colour='#e41a1c', size=1) +
       stat_density(geom='line', trim=TRUE, size=2) +
@@ -223,7 +223,7 @@ shinyAppServer <- function(input, output, session) {
       set_names('y') %>%
       ggplot() +
       aes(x=y) +
-      labs(x='Detected features per cell') +
+      labs(x='Detected features per cell', y='Density') +
       geom_vline(xintercept=input$min_genes_per_cell.slider, colour='#377eb8', size=1) +
       geom_vline(xintercept=input$max_genes_per_cell.slider, colour='#e41a1c', size=1) +
       stat_density(geom='line', trim=TRUE, size=2) +
@@ -231,7 +231,7 @@ shinyAppServer <- function(input, output, session) {
       theme_bw()+
       theme()})
 
-  ## make density plot of detected features
+  ## make density plot of mitochondrial expression
   cell_filtering.percent_mitochondria_density.plot <- reactive(x={
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
@@ -242,11 +242,77 @@ shinyAppServer <- function(input, output, session) {
       set_names('y') %>%
       ggplot() +
       aes(x=y) +
-      labs(x='Proportion mitochondrial expression') +
+      labs(x='Proportion mitochondrial expression', y='Density') +
       geom_vline(xintercept=input$percent_mitochondria.slider, colour='#e41a1c', size=1) +
       stat_density(geom='line', trim=TRUE, size=2) +
       theme_bw()+
       theme()})
+
+  ## make boxplot of total cell expression
+  cell_filtering.total_expression_boxplot.plot <- reactive(x={
+    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
+    on.exit(progress$close())
+    progress$set(value=0, message='Making percentage mitochondria boxplot')
+  
+    progress$inc(detail='Making plot')
+    FetchData(seurat, 'nCount_RNA') %>%
+      set_names('y') %>%
+      ggplot() +
+      aes(x=0, y=y) +
+      labs(y='Total UMIs per cell') +
+      geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
+      geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
+      coord_cartesian(xlim=c(-1, 1), ylim=c(input$min_expression_per_cell.slider, input$max_expression_per_cell.slider)) +
+      theme_bw()+
+      theme(axis.ticks.x=element_line(colour='white'),
+            axis.text.x=element_text(colour='white'),
+            axis.title.x=element_text(colour='white'),
+            panel.grid.major.x=element_blank(),
+            panel.grid.minor.x=element_blank())})
+
+  ## make boxplot of detected features
+  cell_filtering.unique_genes_boxplot.plot <- reactive(x={
+    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
+    on.exit(progress$close())
+    progress$set(value=0, message='Making percentage mitochondria boxplot')
+  
+    progress$inc(detail='Making plot')
+    FetchData(seurat, 'nFeature_RNA') %>%
+      set_names('y') %>%
+      ggplot() +
+      aes(x=0, y=y) +
+      labs(y='Detected features per cell') +
+      geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
+      geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
+      coord_cartesian(xlim=c(-1, 1), ylim=c(input$min_genes_per_cell.slider, input$max_genes_per_cell.slider)) +
+      theme_bw()+
+      theme(axis.ticks.x=element_line(colour='white'),
+            axis.text.x=element_text(colour='white'),
+            axis.title.x=element_text(colour='white'),
+            panel.grid.major.x=element_blank(),
+            panel.grid.minor.x=element_blank())})
+
+  ## make boxplot of mitochondrial expression
+  cell_filtering.percent_mitochondria_boxplot.plot <- reactive(x={
+    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
+    on.exit(progress$close())
+    progress$set(value=0, message='Making percentage mitochondria boxplot')
+  
+    progress$inc(detail='Making plot')
+    FetchData(seurat, 'percent_mt') %>%
+      set_names('y') %>%
+      ggplot() +
+      aes(x=0, y=y) +
+      labs(y='Proportion mitochondrial expression') +
+      geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
+      geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
+      coord_cartesian(xlim=c(-1, 1), ylim=c(0, ceiling(input$percent_mitochondria.slider))) +
+      theme_bw()+
+      theme(axis.ticks.x=element_line(colour='white'),
+            axis.text.x=element_text(colour='white'),
+            axis.title.x=element_text(colour='white'),
+            panel.grid.major.x=element_blank(),
+            panel.grid.minor.x=element_blank())})
 
   # ###############################################################################################
   # gene expression tab ---------------------------------------------------------------------------
@@ -508,13 +574,20 @@ shinyAppServer <- function(input, output, session) {
              color='purple')})
 
   ## cell filtering tab
+  ### knee plots
   renderPlot(cell_filtering.total_expression_knee.plot()) -> output$`cell_filtering-total_expression_knee`
   renderPlot(cell_filtering.unique_genes_knee.plot()) -> output$`cell_filtering-unique_genes_knee`
   renderPlot(cell_filtering.percent_mitochondria_knee.plot()) -> output$`cell_filtering-percent_mitochondria_knee`
 
+  ### density plots
   renderPlot(cell_filtering.total_expression_density.plot()) -> output$`cell_filtering-total_expression_density`
-  renderPlot(cell_filtering.unique_features_density.plot()) -> output$`cell_filtering-unique_features_density`
+  renderPlot(cell_filtering.unique_features_density.plot()) -> output$`cell_filtering-unique_genes_density`
   renderPlot(cell_filtering.percent_mitochondria_density.plot()) -> output$`cell_filtering-percent_mitochondria_density`
+
+  ### boxplots
+  renderPlot(cell_filtering.total_expression_boxplot.plot()) -> output$`cell_filtering-total_expression_boxplot`
+  renderPlot(cell_filtering.unique_genes_boxplot.plot()) -> output$`cell_filtering-unique_genes_boxplot`
+  renderPlot(cell_filtering.percent_mitochondria_boxplot.plot()) -> output$`cell_filtering-percent_mitochondria_boxplot`
 
   output$cell_filtering.n_reads_box <- renderValueBox({
     react_to_cell_filtering()
