@@ -81,10 +81,14 @@ shinyAppServer <- function(input, output, session) {
     summarise(N=length(unique(ID))+1) %>%
     deframe() -> seurat_cluster_per_set
 
+
   list(n_cells=nrow(seurat@meta.data),
        total_reads=sum(seurat@meta.data$nCount_RNA),
        median_reads_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
-       median_genes_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0)) -> cell_filtering_data.reference
+       median_genes_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
+       min_reads_per_cell=min(seurat@meta.data$nCount_RNA), max_reads_per_cell=max(seurat@meta.data$nCount_RNA),
+       min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
+       max_percent_mitochondria=max(seurat@meta.data$percent_mt)) -> cell_filtering_data.reference
 
   available_assays <- Assays(seurat)
   available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
@@ -98,21 +102,26 @@ shinyAppServer <- function(input, output, session) {
   # cell filtering tab ----------------------------------------------------------------------------
 
   ## react to cell filtering parameters
-  cell_filtering_data.reactions <- reactiveValues(filtered_cell_set=NULL, n_cells=0, total_reads=0, median_reads_per_cell=0, median_genes_per_cell=0)
+  reactiveValues(filtered_cell_set=NULL, n_cells=0, total_reads=0, median_reads_per_cell=0, median_genes_per_cell=0,
+                 min_genes_per_cell=NULL, max_genes_per_cell=NULL,
+                 min_expression_per_cell=NULL, max_expression_per_cell=NULL,
+                 max_percent_mitochondria=NULL) -> cell_filtering_data.reactions
+
   reactive(x={
     progress <- shiny::Progress$new(session=session, min=0, max=4/10)
     on.exit(progress$close())
     progress$set(value=0, message='Reacting to threshold parameters')
 
     progress$inc(detail='Extracting input options')
-    min_genes_per_cell <- input$min_genes_per_cell.slider
-    max_genes_per_cell <- input$max_genes_per_cell.slider
-    min_expression_per_cell <- input$min_expression_per_cell.slider
-    max_expression_per_cell <- input$max_expression_per_cell.slider
+    min_genes_per_cell <- cell_filtering_data.reactions$min_genes_per_cell
+    max_genes_per_cell <- cell_filtering_data.reactions$max_genes_per_cell
+    min_expression_per_cell <- cell_filtering_data.reactions$min_expression_per_cell
+    max_expression_per_cell <- cell_filtering_data.reactions$max_expression_per_cell
+    max_percent_mitochondria <- cell_filtering_data.reactions$max_percent_mitochondria
 
     progress$inc(detail='Filtering @meta.data')
     seurat@meta.data %>%
-      filter(percent_mt <= input$percent_mitochondria.slider &
+      filter(percent_mt <= max_percent_mitochondria &
              between(x=nFeature_RNA, left=min_genes_per_cell, right=max_genes_per_cell) &
              between(x=nCount_RNA, left=min_expression_per_cell, right=max_expression_per_cell)) -> filtered_cell_set
 
@@ -126,23 +135,68 @@ shinyAppServer <- function(input, output, session) {
     progress$inc(detail='Returning')
     NULL}) -> react_to_cell_filtering
 
+  ## react to unique features detected density plot brush
+  observeEvent(eventExpr=input$unique_genes_density.brush, handlerExpr={
+    cell_filtering_data.reactions$min_genes_per_cell <- round(input$unique_genes_density.brush$xmin)
+    cell_filtering_data.reactions$max_genes_per_cell <- round(input$unique_genes_density.brush$xmax)
+
+    updateTextInput(session=session, inputId='min_features_per_cell.textinput', value=cell_filtering_data.reactions$min_genes_per_cell)
+    updateTextInput(session=session, inputId='max_features_per_cell.textinput', value=cell_filtering_data.reactions$max_genes_per_cell)})
+
+  observeEvent(eventExpr=input$min_features_per_cell.textinput, handlerExpr={
+    # session$resetBrush(brushId='unique_genes_density.brush')
+    cell_filtering_data.reactions$min_genes_per_cell <- round(as.numeric(input$min_features_per_cell.textinput))})
+
+  observeEvent(eventExpr=input$max_features_per_cell.textinput, handlerExpr={
+    # session$resetBrush(brushId='unique_genes_density.brush')
+    cell_filtering_data.reactions$max_genes_per_cell <- round(as.numeric(input$max_features_per_cell.textinput))})
+
+  ## react to total UMIs density plot brush
+  observeEvent(eventExpr=input$total_expression_density.brush, handlerExpr={
+    cell_filtering_data.reactions$min_expression_per_cell <- round(input$total_expression_density.brush$xmin)
+    cell_filtering_data.reactions$max_expression_per_cell <- round(input$total_expression_density.brush$xmax)
+
+    updateTextInput(session=session, inputId='min_expression_per_cell.textinput', value=cell_filtering_data.reactions$min_expression_per_cell)
+    updateTextInput(session=session, inputId='max_expression_per_cell.textinput', value=cell_filtering_data.reactions$max_expression_per_cell)})
+
+  observeEvent(eventExpr=input$min_expression_per_cell.textinput, handlerExpr={
+    # session$resetBrush(brushId='total_expression_density.brush')
+    cell_filtering_data.reactions$min_expression_per_cell <- round(as.numeric(input$min_expression_per_cell.textinput))})
+
+  observeEvent(eventExpr=input$max_expression_per_cell.textinput, handlerExpr={
+    # session$resetBrush(brushId='total_expression_density.brush')
+    cell_filtering_data.reactions$max_expression_per_cell <- round(as.numeric(input$max_expression_per_cell.textinput))})
+
+  ## react to percent mitochondria density plot brush
+  observeEvent(eventExpr=input$percent_mitochondria_density.brush, handlerExpr={
+    cell_filtering_data.reactions$percent_mitochondria <- round(input$percent_mitochondria_density.brush$xmax)
+
+    updateTextInput(session=session, inputId='percent_mitochondria.textinput', value=cell_filtering_data.reactions$percent_mitochondria)})
+
+  observeEvent(eventExpr=input$percent_mitochondria.textinput, handlerExpr={
+    # session$resetBrush(brushId='percent_mitochondria_density.brush')
+    cell_filtering_data.reactions$max_percent_mitochondria <- round(as.numeric(input$percent_mitochondria.textinput))})
+
   ## make knee plot of total expression
   cell_filtering.total_expression_knee.plot <- reactive(x={
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making total expression knee plot')
 
+    min_value <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), cell_filtering_data.reference$min_reads_per_cell, cell_filtering_data.reactions$min_expression_per_cell)
+    max_value <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), cell_filtering_data.reference$max_reads_per_cell, cell_filtering_data.reactions$max_expression_per_cell)
+
     progress$inc(detail='Making plot')
     FetchData(seurat, 'nCount_RNA') %>%
       set_names('y') %>%
       arrange(desc(y)) %>%
       mutate(x=seq(n()),
-             pass=between(x=y, left=input$min_expression_per_cell.slider, right=input$max_expression_per_cell.slider)) %>%
+             pass=between(x=y, left=min_value, right=max_value)) %>%
       ggplot()+
       aes(x=x, y=y, colour=pass)+
       labs(x='Ranked cells', y='Total expression per cell', colour='Cells passing threshold')+
-      geom_hline(yintercept=input$min_expression_per_cell.slider, size=1) +
-      geom_hline(yintercept=input$max_expression_per_cell.slider, size=1) +
+      geom_hline(yintercept=min_value, size=1) +
+      geom_hline(yintercept=max_value, size=1) +
       geom_point(alpha=1, shape=16)+
       scale_y_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
       scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
@@ -156,17 +210,20 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making unique genes detected knee plot')
 
+    min_value <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(cell_filtering_data.reference$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
+    max_value <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(cell_filtering_data.reference$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
+
     progress$inc(detail='Making plot')
     FetchData(seurat, 'nFeature_RNA') %>%
       set_names('y') %>%
       arrange(desc(y)) %>%
       mutate(x=seq(n()),
-             pass=between(x=y, left=input$min_genes_per_cell.slider, right=input$max_genes_per_cell.slider)) %>%
+             pass=between(x=y, left=min_value, right=max_value)) %>%
       ggplot()+
       aes(x=x, y=y, colour=pass)+
       labs(x='Ranked cells', y='Genes detected per cell', colour='Cells passing threshold')+
-      geom_hline(yintercept=input$min_genes_per_cell.slider, size=1) +
-      geom_hline(yintercept=input$max_genes_per_cell.slider, size=1) +
+      geom_hline(yintercept=min_value, size=1) +
+      geom_hline(yintercept=max_value, size=1) +
       geom_point(alpha=1, shape=16)+
       scale_y_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
       scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
@@ -179,17 +236,19 @@ shinyAppServer <- function(input, output, session) {
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making mitochondrial expression knee plot')
+
+    max_value <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), cell_filtering_data.reference$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
   
     progress$inc(detail='Making plot')
     FetchData(seurat, 'percent_mt') %>%
       set_names('y') %>%
       arrange(desc(y)) %>%
       mutate(x=seq(n()),
-             pass=y<=input$percent_mitochondria.slider) %>%
+             pass=y<=max_value) %>%
       ggplot()+
       aes(x=x, y=y, colour=pass)+
       labs(x='Ranked cells', y='Proportion mitochondrial expression', colour='Cells passing threshold')+
-      geom_hline(yintercept=input$percent_mitochondria.slider, size=1) +
+      geom_hline(yintercept=max_value, size=1) +
       geom_point(alpha=1, shape=16)+
       scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
       scale_colour_brewer(palette='Set1', direction=1) +
@@ -208,8 +267,6 @@ shinyAppServer <- function(input, output, session) {
       ggplot() +
       aes(x=y) +
       labs(x='Total UMIs per cell', y='Density') +
-      geom_vline(xintercept=input$min_expression_per_cell.slider, colour='#377eb8', size=1) +
-      geom_vline(xintercept=input$max_expression_per_cell.slider, colour='#e41a1c', size=1) +
       stat_density(geom='line', trim=TRUE, size=2) +
       scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
       theme_bw()+
@@ -227,8 +284,6 @@ shinyAppServer <- function(input, output, session) {
       ggplot() +
       aes(x=y) +
       labs(x='Detected features per cell', y='Density') +
-      geom_vline(xintercept=input$min_genes_per_cell.slider, colour='#377eb8', size=1) +
-      geom_vline(xintercept=input$max_genes_per_cell.slider, colour='#e41a1c', size=1) +
       stat_density(geom='line', trim=TRUE, size=2) +
       scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
       theme_bw()+
@@ -246,7 +301,6 @@ shinyAppServer <- function(input, output, session) {
       ggplot() +
       aes(x=y) +
       labs(x='Proportion mitochondrial expression', y='Density') +
-      geom_vline(xintercept=input$percent_mitochondria.slider, colour='#e41a1c', size=1) +
       stat_density(geom='line', trim=TRUE, size=2) +
       theme_bw()+
       theme()})
@@ -257,6 +311,9 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
   
+    min_y <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), cell_filtering_data.reference$min_reads_per_cell, cell_filtering_data.reactions$min_expression_per_cell)
+    max_y <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), cell_filtering_data.reference$max_reads_per_cell, cell_filtering_data.reactions$max_expression_per_cell)
+
     progress$inc(detail='Making plot')
     FetchData(seurat, 'nCount_RNA') %>%
       set_names('y') %>%
@@ -265,7 +322,7 @@ shinyAppServer <- function(input, output, session) {
       labs(y='Total UMIs per cell') +
       geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
       geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
-      coord_cartesian(xlim=c(-1, 1), ylim=c(input$min_expression_per_cell.slider, input$max_expression_per_cell.slider)) +
+      coord_cartesian(xlim=c(-1, 1), ylim=c(min_y, max_y)) +
       theme_bw()+
       theme(axis.ticks.x=element_line(colour='white'),
             axis.text.x=element_text(colour='white'),
@@ -279,6 +336,9 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
   
+    min_y <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(cell_filtering_data.reference$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
+    max_y <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(cell_filtering_data.reference$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
+
     progress$inc(detail='Making plot')
     FetchData(seurat, 'nFeature_RNA') %>%
       set_names('y') %>%
@@ -287,7 +347,7 @@ shinyAppServer <- function(input, output, session) {
       labs(y='Detected features per cell') +
       geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
       geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
-      coord_cartesian(xlim=c(-1, 1), ylim=c(input$min_genes_per_cell.slider, input$max_genes_per_cell.slider)) +
+      coord_cartesian(xlim=c(-1, 1), ylim=c(min_y, max_y)) +
       theme_bw()+
       theme(axis.ticks.x=element_line(colour='white'),
             axis.text.x=element_text(colour='white'),
@@ -301,7 +361,9 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
   
-    progress$inc(detail='Making plot')
+    max_y <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), cell_filtering_data.reference$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
+
+   progress$inc(detail='Making plot')
     FetchData(seurat, 'percent_mt') %>%
       set_names('y') %>%
       ggplot() +
@@ -309,7 +371,7 @@ shinyAppServer <- function(input, output, session) {
       labs(y='Proportion mitochondrial expression') +
       geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
       geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
-      coord_cartesian(xlim=c(-1, 1), ylim=c(0, ceiling(input$percent_mitochondria.slider))) +
+      coord_cartesian(xlim=c(-1, 1), ylim=c(0, ceiling(max_y))) +
       theme_bw()+
       theme(axis.ticks.x=element_line(colour='white'),
             axis.text.x=element_text(colour='white'),
@@ -597,6 +659,8 @@ shinyAppServer <- function(input, output, session) {
 
   output$cell_filtering.n_reads_box <- renderValueBox({
     react_to_cell_filtering()
+cat(file=stderr(), sprintf('cell_filtering_data.reactions$total_reads: %s\n', cell_filtering_data.reactions$total_reads))
+cat(file=stderr(), sprintf('cell_filtering_data.reference$total_reads: %s\n', cell_filtering_data.reference$total_reads))
     valueBox(value=scales::comma(cell_filtering_data.reactions$total_reads),
              subtitle=sprintf(fmt='Total reads remaining (%.1f%%)', cell_filtering_data.reactions$total_reads/cell_filtering_data.reference$total_reads*100),
              icon=icon('old-republic'),
