@@ -126,7 +126,7 @@ shinyAppServer <- function(input, output, session) {
              between(x=nCount_RNA, left=min_expression_per_cell, right=max_expression_per_cell)) -> filtered_cell_set
 
     progress$inc(detail='Saving results to reactiveValues')
-cat(file=stderr(), sprintf('nrow: %s\n', nrow(filtered_cell_set)))
+
     cell_filtering_data.reactions$filtered_cell_set <- filtered_cell_set
     cell_filtering_data.reactions$n_cells <- nrow(filtered_cell_set)
     cell_filtering_data.reactions$total_reads <- sum(filtered_cell_set$nCount_RNA)
@@ -170,7 +170,7 @@ cat(file=stderr(), sprintf('nrow: %s\n', nrow(filtered_cell_set)))
 
   ## react to percent mitochondria density plot brush
   observeEvent(eventExpr=input$percent_mitochondria_density.brush, handlerExpr={
-    cell_filtering_data.reactions$percent_mitochondria <- round(input$percent_mitochondria_density.brush$xmax)
+    cell_filtering_data.reactions$percent_mitochondria <- round(input$percent_mitochondria_density.brush$xmax, digits=1)
 
     updateTextInput(session=session, inputId='percent_mitochondria.textinput', value=cell_filtering_data.reactions$percent_mitochondria)})
 
@@ -682,6 +682,9 @@ cat(file=stderr(), sprintf('nrow: %s\n', nrow(filtered_cell_set)))
              subtitle=sprintf(fmt='Median genes per cell (%+d)', cell_filtering_data.reactions$median_genes_per_cell-cell_filtering_data.reference$median_genes_per_cell),
              icon=icon('crow'),
              color='purple')})
+
+  output$`cell_filtering-subset_conditions` <- renderText({
+    sprintf(fmt='nFeatures_RNA>=%d & nFeatures_RNA<=%d &\nnCount_RNA>=%d & nCount_RNA<=%d &\npercent_mt<=%.1f ', cell_filtering_data.reactions$min_genes_per_cell, cell_filtering_data.reactions$max_genes_per_cell, cell_filtering_data.reactions$min_expression_per_cell, cell_filtering_data.reactions$max_expression_per_cell, cell_filtering_data.reactions$percent_mitochondria)})
 
   # features heatmap tab
   renderPlot(features_heatmap.heatmap.plot()) -> output$`features_heatmap-heatmap`

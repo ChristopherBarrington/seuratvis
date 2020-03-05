@@ -29,36 +29,7 @@ max_expression_per_cell.textinput <- textInput(inputId='max_expression_per_cell.
 
 percent_mitochondria.textinput <- textInput(inputId='percent_mitochondria.textinput', label='Maximum percentage mitochondrial features', placeholder='100')
 
-# percent_mitochondria.slider <- sliderInput(inputId='percent_mitochondria.slider', label='Mitochondria fraction',
-#                                            min=0,
-#                                            max=round(max(FetchData(seurat, 'percent_mt'))+(0.1/2)),
-#                                            value=round(max(FetchData(seurat, 'percent_mt'))+(0.1/2)),
-#                                            step=0.1)
-# 
-# step_size <- 100
-# min_genes_per_cell.slider <- sliderInput(inputId='min_genes_per_cell.slider', label='Minimum number of genes per cell',
-#                                          min={FetchData(seurat, 'nFeature_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-#                                          max={FetchData(seurat, 'nFeature_RNA') %>% deframe() %>% quantile(p=0.25) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-#                                          value={FetchData(seurat, 'nFeature_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-#                                          step=step_size)
-# 
-# max_genes_per_cell.slider <- sliderInput(inputId='max_genes_per_cell.slider', label='Maximum number of genes per cell',
-#                                          min={FetchData(seurat, 'nFeature_RNA') %>% deframe() %>% quantile(p=0.85) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-#                                          max={FetchData(seurat, 'nFeature_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-#                                          value={FetchData(seurat, 'nFeature_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-#                                          step=step_size)
-# 
-# min_expression_per_cell.slider <- sliderInput(inputId='min_expression_per_cell.slider', label='Minimum total expression per cell',
-#                                               min={FetchData(seurat, 'nCount_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-#                                               max={FetchData(seurat, 'nCount_RNA') %>% deframe() %>% quantile(p=0.25) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-#                                               value={FetchData(seurat, 'nCount_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-#                                               step=step_size)
-# 
-# max_expression_per_cell.slider <- sliderInput(inputId='max_expression_per_cell.slider', label='Maximum total expression per cell',
-#                                               min={FetchData(seurat, 'nCount_RNA') %>% deframe() %>% quantile(p=0.85) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-#                                               max={FetchData(seurat, 'nCount_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-#                                               value={FetchData(seurat, 'nCount_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-#                                               step=step_size)
+subset_conditions.textoutput <- verbatimTextOutput(outputId='cell_filtering-subset_conditions')
 
 ### define layout boxes
 cell_filtering.plot_boxes.defaults <- list(status='success', solidHeader=TRUE, width=4, collapsible=TRUE)
@@ -85,9 +56,10 @@ cell_filtering.boxes <- list(total_expression_knee={append(cell_filtering.plot_b
                                             # column(width=3, min_expression_per_cell.slider, max_expression_per_cell.slider),
                                             # column(width=3, min_genes_per_cell.slider, max_genes_per_cell.slider),
                                             # column(width=3, percent_mitochondria.slider),
-                                            column(width=4, min_expression_per_cell.textinput, max_expression_per_cell.textinput),
-                                            column(width=4, min_features_per_cell.textinput, max_features_per_cell.textinput),
-                                            column(width=4, percent_mitochondria.textinput)),
+                                            column(width=2, min_expression_per_cell.textinput, max_expression_per_cell.textinput),
+                                            column(width=2, min_features_per_cell.textinput, max_features_per_cell.textinput),
+                                            column(width=2, percent_mitochondria.textinput),
+                                            column(width=4, shiny::tags$label('Conditional expression to select cells'), br(), subset_conditions.textoutput)),
 
                              project_name=valueBoxOutput(outputId='cell_filtering.project_name_box', width=4),
                              n_reads=valueBoxOutput(outputId='cell_filtering.n_reads_box', width=2),
