@@ -170,13 +170,13 @@ shinyAppServer <- function(input, output, session) {
 
   ## react to percent mitochondria density plot brush
   observeEvent(eventExpr=input$percent_mitochondria_density.brush, handlerExpr={
-    cell_filtering_data.reactions$percent_mitochondria <- round(input$percent_mitochondria_density.brush$xmax, digits=1)
+    cell_filtering_data.reactions$max_percent_mitochondria <- round(input$percent_mitochondria_density.brush$xmax, digits=1)
 
-    updateTextInput(session=session, inputId='percent_mitochondria.textinput', value=cell_filtering_data.reactions$percent_mitochondria)})
+    updateTextInput(session=session, inputId='percent_mitochondria.textinput', value=cell_filtering_data.reactions$max_percent_mitochondria)})
 
   observeEvent(eventExpr=input$percent_mitochondria.textinput, handlerExpr={
     # session$resetBrush(brushId='percent_mitochondria_density.brush')
-    cell_filtering_data.reactions$max_percent_mitochondria <- round(as.numeric(input$percent_mitochondria.textinput))})
+    cell_filtering_data.reactions$max_percent_mitochondria <- as.numeric(input$percent_mitochondria.textinput)})
 
   ## make knee plot of total expression
   cell_filtering.total_expression_knee.plot <- reactive(x={
@@ -684,7 +684,7 @@ shinyAppServer <- function(input, output, session) {
              color='purple')})
 
   output$`cell_filtering-subset_conditions` <- renderText({
-    sprintf(fmt='nFeatures_RNA>=%d & nFeatures_RNA<=%d &\nnCount_RNA>=%d & nCount_RNA<=%d &\npercent_mt<=%.1f ', cell_filtering_data.reactions$min_genes_per_cell, cell_filtering_data.reactions$max_genes_per_cell, cell_filtering_data.reactions$min_expression_per_cell, cell_filtering_data.reactions$max_expression_per_cell, cell_filtering_data.reactions$percent_mitochondria)})
+    sprintf(fmt='# %s\n# n=%s\nnCount_RNA>=%d & nCount_RNA<=%d &\nnFeatures_RNA>=%d & nFeatures_RNA<=%d &\npercent_mt<=%.1f', seurat@project.name, scales::comma(cell_filtering_data.reactions$n_cells), cell_filtering_data.reactions$min_expression_per_cell, cell_filtering_data.reactions$max_expression_per_cell, cell_filtering_data.reactions$min_genes_per_cell, cell_filtering_data.reactions$max_genes_per_cell, cell_filtering_data.reactions$max_percent_mitochondria)})
 
   # features heatmap tab
   renderPlot(features_heatmap.heatmap.plot()) -> output$`features_heatmap-heatmap`

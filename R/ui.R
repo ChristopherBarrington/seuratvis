@@ -27,7 +27,7 @@ max_features_per_cell.textinput <- textInput(inputId='max_features_per_cell.text
 min_expression_per_cell.textinput <- textInput(inputId='min_expression_per_cell.textinput', label='Minimum total UMIs per cell', placeholder='500')
 max_expression_per_cell.textinput <- textInput(inputId='max_expression_per_cell.textinput', label='Maximum total UMIs per cell', placeholder='7500')
 
-percent_mitochondria.textinput <- textInput(inputId='percent_mitochondria.textinput', label='Maximum percentage mitochondrial features', placeholder='100')
+percent_mitochondria.textinput <- textInput(inputId='percent_mitochondria.textinput', label='Maximum mitochondrial (%)', placeholder='100')
 
 subset_conditions.textoutput <- verbatimTextOutput(outputId='cell_filtering-subset_conditions')
 
