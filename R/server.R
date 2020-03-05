@@ -126,7 +126,6 @@ shinyAppServer <- function(input, output, session) {
              between(x=nCount_RNA, left=min_expression_per_cell, right=max_expression_per_cell)) -> filtered_cell_set
 
     progress$inc(detail='Saving results to reactiveValues')
-
     cell_filtering_data.reactions$filtered_cell_set <- filtered_cell_set
     cell_filtering_data.reactions$n_cells <- nrow(filtered_cell_set)
     cell_filtering_data.reactions$total_reads <- sum(filtered_cell_set$nCount_RNA)
@@ -199,8 +198,8 @@ shinyAppServer <- function(input, output, session) {
       geom_hline(yintercept=min_value, size=1) +
       geom_hline(yintercept=max_value, size=1) +
       geom_point(alpha=1, shape=16)+
-      scale_y_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
-      scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
+      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
+      scale_y_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(y) scales::comma(y, accuracy=1))+
       scale_colour_brewer(palette='Set1', direction=1) +
       theme_bw()+
       theme(legend.position='none', legend.title=element_blank())})
@@ -226,8 +225,8 @@ shinyAppServer <- function(input, output, session) {
       geom_hline(yintercept=min_value, size=1) +
       geom_hline(yintercept=max_value, size=1) +
       geom_point(alpha=1, shape=16)+
-      scale_y_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
-      scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
+      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
+      scale_y_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(y) scales::comma(y, accuracy=1))+
       scale_colour_brewer(palette='Set1', direction=1) +
       theme_bw()+
       theme(legend.position='none', legend.title=element_blank())})
@@ -251,7 +250,7 @@ shinyAppServer <- function(input, output, session) {
       labs(x='Ranked cells', y='Proportion mitochondrial expression', colour='Cells passing threshold')+
       geom_hline(yintercept=max_value, size=1) +
       geom_point(alpha=1, shape=16)+
-      scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
+      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
       scale_colour_brewer(palette='Set1', direction=1) +
       theme_bw()+
       theme(legend.position='none', legend.title=element_blank())})
@@ -269,7 +268,7 @@ shinyAppServer <- function(input, output, session) {
       aes(x=y) +
       labs(x='Total UMIs per cell', y='Density') +
       stat_density(geom='line', trim=TRUE, size=2) +
-      scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
+      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
       theme_bw()+
       theme()})
 
@@ -286,7 +285,7 @@ shinyAppServer <- function(input, output, session) {
       aes(x=y) +
       labs(x='Detected features per cell', y='Density') +
       stat_density(geom='line', trim=TRUE, size=2) +
-      scale_x_log10(minor_breaks=minor_breaks_log10, labels=scales::comma)+
+      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
       theme_bw()+
       theme()})
 
@@ -324,8 +323,9 @@ shinyAppServer <- function(input, output, session) {
       geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
       geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
       coord_cartesian(xlim=c(-1, 1), ylim=c(min_y, max_y)) +
+      scale_y_continuous(labels=function(y) scales::comma(y, accuracy=1)) +
       theme_bw()+
-      theme(axis.ticks.x=element_line(colour='white'),
+      theme(axis.ticks.length.x=unit(0, 'pt'),
             axis.text.x=element_text(colour='white'),
             axis.title.x=element_text(colour='white'),
             panel.grid.major.x=element_blank(),
@@ -349,8 +349,9 @@ shinyAppServer <- function(input, output, session) {
       geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
       geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
       coord_cartesian(xlim=c(-1, 1), ylim=c(min_y, max_y)) +
+      scale_y_continuous(labels=function(y) scales::comma(y, accuracy=1)) +
       theme_bw()+
-      theme(axis.ticks.x=element_line(colour='white'),
+      theme(axis.ticks.length.x=unit(0, 'pt'),
             axis.text.x=element_text(colour='white'),
             axis.title.x=element_text(colour='white'),
             panel.grid.major.x=element_blank(),
@@ -374,7 +375,7 @@ shinyAppServer <- function(input, output, session) {
       geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
       coord_cartesian(xlim=c(-1, 1), ylim=c(0, ceiling(max_y))) +
       theme_bw()+
-      theme(axis.ticks.x=element_line(colour='white'),
+      theme(axis.ticks.length.x=unit(0, 'pt'),
             axis.text.x=element_text(colour='white'),
             axis.title.x=element_text(colour='white'),
             panel.grid.major.x=element_blank(),
@@ -684,6 +685,7 @@ shinyAppServer <- function(input, output, session) {
              color='purple')})
 
   output$`cell_filtering-subset_conditions` <- renderText({
+    react_to_cell_filtering()
     sprintf(fmt='# %s\n# n=%s\nnCount_RNA>=%d & nCount_RNA<=%d &\nnFeature_RNA>=%d & nFeature_RNA<=%d &\npercent_mt<=%.1f', seurat@project.name, scales::comma(cell_filtering_data.reactions$n_cells), cell_filtering_data.reactions$min_expression_per_cell, cell_filtering_data.reactions$max_expression_per_cell, cell_filtering_data.reactions$min_genes_per_cell, cell_filtering_data.reactions$max_genes_per_cell, cell_filtering_data.reactions$max_percent_mitochondria)})
 
   # features heatmap tab
