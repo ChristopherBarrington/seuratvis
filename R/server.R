@@ -684,7 +684,7 @@ shinyAppServer <- function(input, output, session) {
              color='purple')})
 
   output$`cell_filtering-subset_conditions` <- renderText({
-    sprintf(fmt='# %s\n# n=%s\nnCount_RNA>=%d & nCount_RNA<=%d &\nnFeatures_RNA>=%d & nFeatures_RNA<=%d &\npercent_mt<=%.1f', seurat@project.name, scales::comma(cell_filtering_data.reactions$n_cells), cell_filtering_data.reactions$min_expression_per_cell, cell_filtering_data.reactions$max_expression_per_cell, cell_filtering_data.reactions$min_genes_per_cell, cell_filtering_data.reactions$max_genes_per_cell, cell_filtering_data.reactions$max_percent_mitochondria)})
+    sprintf(fmt='# %s\n# n=%s\nnCount_RNA>=%d & nCount_RNA<=%d &\nnFeature_RNA>=%d & nFeature_RNA<=%d &\npercent_mt<=%.1f', seurat@project.name, scales::comma(cell_filtering_data.reactions$n_cells), cell_filtering_data.reactions$min_expression_per_cell, cell_filtering_data.reactions$max_expression_per_cell, cell_filtering_data.reactions$min_genes_per_cell, cell_filtering_data.reactions$max_genes_per_cell, cell_filtering_data.reactions$max_percent_mitochondria)})
 
   # features heatmap tab
   renderPlot(features_heatmap.heatmap.plot()) -> output$`features_heatmap-heatmap`
