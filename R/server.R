@@ -113,11 +113,11 @@ shinyAppServer <- function(input, output, session) {
     progress$set(value=0, message='Reacting to threshold parameters')
 
     progress$inc(detail='Extracting input options')
-    min_genes_per_cell <- cell_filtering_data.reactions$min_genes_per_cell
-    max_genes_per_cell <- cell_filtering_data.reactions$max_genes_per_cell
-    min_expression_per_cell <- cell_filtering_data.reactions$min_expression_per_cell
-    max_expression_per_cell <- cell_filtering_data.reactions$max_expression_per_cell
-    max_percent_mitochondria <- cell_filtering_data.reactions$max_percent_mitochondria
+    min_genes_per_cell <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(cell_filtering_data.reference$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
+    max_genes_per_cell <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(cell_filtering_data.reference$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
+    min_expression_per_cell <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), as.numeric(cell_filtering_data.reference$min_reads_per_cell), cell_filtering_data.reactions$min_expression_per_cell)
+    max_expression_per_cell <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), as.numeric(cell_filtering_data.reference$max_reads_per_cell), cell_filtering_data.reactions$max_expression_per_cell)
+    max_percent_mitochondria <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), as.numeric(cell_filtering_data.reference$max_percent_mitochondria), cell_filtering_data.reactions$max_percent_mitochondria)
 
     progress$inc(detail='Filtering @meta.data')
     seurat@meta.data %>%
@@ -126,6 +126,7 @@ shinyAppServer <- function(input, output, session) {
              between(x=nCount_RNA, left=min_expression_per_cell, right=max_expression_per_cell)) -> filtered_cell_set
 
     progress$inc(detail='Saving results to reactiveValues')
+cat(file=stderr(), sprintf('nrow: %s\n', nrow(filtered_cell_set)))
     cell_filtering_data.reactions$filtered_cell_set <- filtered_cell_set
     cell_filtering_data.reactions$n_cells <- nrow(filtered_cell_set)
     cell_filtering_data.reactions$total_reads <- sum(filtered_cell_set$nCount_RNA)
@@ -659,8 +660,6 @@ shinyAppServer <- function(input, output, session) {
 
   output$cell_filtering.n_reads_box <- renderValueBox({
     react_to_cell_filtering()
-cat(file=stderr(), sprintf('cell_filtering_data.reactions$total_reads: %s\n', cell_filtering_data.reactions$total_reads))
-cat(file=stderr(), sprintf('cell_filtering_data.reference$total_reads: %s\n', cell_filtering_data.reference$total_reads))
     valueBox(value=scales::comma(cell_filtering_data.reactions$total_reads),
              subtitle=sprintf(fmt='Total reads remaining (%.1f%%)', cell_filtering_data.reactions$total_reads/cell_filtering_data.reference$total_reads*100),
              icon=icon('old-republic'),
