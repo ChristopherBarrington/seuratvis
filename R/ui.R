@@ -30,16 +30,19 @@ max_expression_per_cell.textinput <- textInput(inputId='max_expression_per_cell.
 percent_mitochondria.textinput <- textInput(inputId='percent_mitochondria.textinput', label='Maximum mitochondrial (%)', placeholder='100')
 
 subset_conditions.textoutput <- verbatimTextOutput(outputId='cell_filtering-subset_conditions')
+subset_conditions.plain.copybutton <- uiOutput(outputId='cell_filtering-subset_conditions.plain', inline=TRUE)
+subset_conditions.tsv.copybutton <- uiOutput(outputId='cell_filtering-subset_conditions.tsv', inline=TRUE)
+subset_conditions.r.copybutton <- uiOutput(outputId='cell_filtering-subset_conditions.r', inline=TRUE)
 
 ### define layout boxes
-cell_filtering.plot_boxes.defaults <- list(solidHeader=TRUE, width=12, collapsible=TRUE)
-cell_filtering.boxes <- list(total_expression=append(cell_filtering.plot_boxes.defaults, 
+cell_filtering.plot_boxes.defaults <- list(solidHeader=TRUE, width=12, collapsible=TRUE, collapsed=TRUE)
+cell_filtering.boxes <- list(total_expression=append(cell_filtering.plot_boxes.defaults,
                                                      list(title='Expression per cell', footer='Total number of reads attributed to a cell', status='success',
                                                           column(width=2, offset=1, plotOutput(outputId='cell_filtering-total_expression_boxplot') %>% withSpinner()),
                                                           column(width=3, offset=0, plotOutput(outputId='cell_filtering-total_expression_knee') %>% withSpinner()),
                                                           column(width=4, offset=1, plotOutput(outputId='cell_filtering-total_expression_density', brush=brushOpts(id='total_expression_density.brush', direction='x')) %>% withSpinner()))) %>%
                                               do.call(what=box),
-                      
+
                              unique_features=append(cell_filtering.plot_boxes.defaults,
                                                     list(title='Genes per cell', footer='Number of distinct genes detected in a cell', status='success',
                                                          column(width=2, offset=1, plotOutput(outputId='cell_filtering-unique_genes_boxplot') %>% withSpinner()),
@@ -59,7 +62,8 @@ cell_filtering.boxes <- list(total_expression=append(cell_filtering.plot_boxes.d
                                                     column(width=2, min_expression_per_cell.textinput, max_expression_per_cell.textinput),
                                                     column(width=2, min_features_per_cell.textinput, max_features_per_cell.textinput),
                                                     column(width=2, percent_mitochondria.textinput),
-                                                    column(width=4, shiny::tags$label('Conditional expression to select cells'), br(), subset_conditions.textoutput))) %>%
+                                                    column(width=4, shiny::tags$label('Conditional expression to select cells'), br(), subset_conditions.textoutput,
+                                                                    shiny::tags$label('Copy subset conditions to clipboard'), br(), subset_conditions.plain.copybutton, subset_conditions.tsv.copybutton, subset_conditions.r.copybutton))) %>%
                                         do.call(what=box),
 
                              project_name=valueBoxOutput(outputId='cell_filtering.project_name_box', width=4),
@@ -253,7 +257,7 @@ list(cell_filtering.content,
      features_heatmap.content,
      load_dataset.content) %>%
   do.call(what=tabItems) %>%
-  dashboardBody() -> dashboard_body
+  dashboardBody(rclipboardSetup()) -> dashboard_body
 
 # sidebar definition
 list(cell_filtering.tab,
@@ -276,4 +280,3 @@ list(header=dashboard_header,
      title='seurat-vis',
      skin='blue') %>%
   do.call(what=dashboardPage) -> shinyAppUI
-

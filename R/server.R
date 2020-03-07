@@ -44,11 +44,11 @@ shinyAppServer <- function(input, output, session) {
              subtitle='Values above 0',
              icon=icon('percent'),
              color="purple")})
-  
+
   output$plot2 <- renderPlot({
     data <- runif(input$slider2)
     hist(data)})
-  
+
   output$menuitem <- renderMenu({
     s <- stringi::stri_rand_strings(n=1, length=5)
     s <- Sys.getenv('USER')
@@ -65,7 +65,7 @@ shinyAppServer <- function(input, output, session) {
   cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
   updateSelectInput(session=session, inputId='seurat_cluster_set.dd', choices=cluster_options)
   updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
-  
+
   progress$inc(detail='Combining UMAP and meta.data')
   if(!is.null(seurat@reductions$umap))
     seurat_metadata_umap <- cbind(seurat@meta.data, seurat@reductions$umap@cell.embeddings)
@@ -92,12 +92,12 @@ shinyAppServer <- function(input, output, session) {
 
   available_assays <- Assays(seurat)
   available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
-  
+
   selected_assay <- 'RNA'
   selected_slot <- 'data'
-  
+
   seurat@active.assay <- selected_assay
-  
+
   # ###############################################################################################
   # cell filtering tab ----------------------------------------------------------------------------
 
@@ -105,9 +105,12 @@ shinyAppServer <- function(input, output, session) {
   reactiveValues(filtered_cell_set=NULL, n_cells=0, total_reads=0, median_reads_per_cell=0, median_genes_per_cell=0,
                  min_genes_per_cell=NULL, max_genes_per_cell=NULL,
                  min_expression_per_cell=NULL, max_expression_per_cell=NULL,
-                 max_percent_mitochondria=NULL) -> cell_filtering_data.reactions
+                 max_percent_mitochondria=NULL,
+                 subset_conditions=list(),
+                 subset_conditions.nCount='', subset_conditions.nFeature='', subset_conditions.percent_mt='') -> cell_filtering_data.reactions
 
   reactive(x={
+    cat('reacting\n', file=stderr())
     progress <- shiny::Progress$new(session=session, min=0, max=4/10)
     on.exit(progress$close())
     progress$set(value=0, message='Reacting to threshold parameters')
@@ -131,6 +134,20 @@ shinyAppServer <- function(input, output, session) {
     cell_filtering_data.reactions$total_reads <- sum(filtered_cell_set$nCount_RNA)
     cell_filtering_data.reactions$median_reads_per_cell <- round(x=median(filtered_cell_set$nCount_RNA), digits=0)
     cell_filtering_data.reactions$median_genes_per_cell <- round(x=median(filtered_cell_set$nFeature_RNA), digits=0)
+
+    # save formatted filters
+    format_subset_conditional <- function(x, fmt) ifelse(is.na(x), NA, sprintf(fmt=fmt, x))
+    group_format_subset_conditional <- function(x) x %>% na.omit() %>% paste(collapse=' & ')
+
+    c(format_subset_conditional(x=min_expression_per_cell, fmt='nCount_RNA>=%d'),
+      format_subset_conditional(x=max_expression_per_cell, fmt='nCount_RNA<=%d')) %>%
+      group_format_subset_conditional() -> cell_filtering_data.reactions$subset_conditions$nCount
+
+    c(format_subset_conditional(x=min_genes_per_cell, fmt='nFeature_RNA>=%d'),
+      format_subset_conditional(x=max_genes_per_cell, fmt='nFeature_RNA<=%d')) %>%
+      group_format_subset_conditional() -> cell_filtering_data.reactions$subset_conditions$nFeature
+
+    format_subset_conditional(x=max_percent_mitochondria, fmt='percent_mt<=%.1f') -> cell_filtering_data.reactions$subset_conditions$percent_mt
 
     progress$inc(detail='Returning')
     NULL}) -> react_to_cell_filtering
@@ -238,7 +255,7 @@ shinyAppServer <- function(input, output, session) {
     progress$set(value=0, message='Making mitochondrial expression knee plot')
 
     max_value <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), cell_filtering_data.reference$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
-  
+
     progress$inc(detail='Making plot')
     FetchData(seurat, 'percent_mt') %>%
       set_names('y') %>%
@@ -260,7 +277,7 @@ shinyAppServer <- function(input, output, session) {
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making total UMIs density plot')
-  
+
     progress$inc(detail='Making plot')
     FetchData(seurat, 'nCount_RNA') %>%
       set_names('y') %>%
@@ -277,7 +294,7 @@ shinyAppServer <- function(input, output, session) {
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making detected features density plot')
-  
+
     progress$inc(detail='Making plot')
     FetchData(seurat, 'nFeature_RNA') %>%
       set_names('y') %>%
@@ -294,7 +311,7 @@ shinyAppServer <- function(input, output, session) {
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria density plot')
-  
+
     progress$inc(detail='Making plot')
     FetchData(seurat, 'percent_mt') %>%
       set_names('y') %>%
@@ -310,7 +327,7 @@ shinyAppServer <- function(input, output, session) {
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
-  
+
     min_y <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), cell_filtering_data.reference$min_reads_per_cell, cell_filtering_data.reactions$min_expression_per_cell)
     max_y <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), cell_filtering_data.reference$max_reads_per_cell, cell_filtering_data.reactions$max_expression_per_cell)
 
@@ -336,7 +353,7 @@ shinyAppServer <- function(input, output, session) {
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
-  
+
     min_y <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(cell_filtering_data.reference$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
     max_y <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(cell_filtering_data.reference$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
 
@@ -362,7 +379,7 @@ shinyAppServer <- function(input, output, session) {
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
-  
+
     max_y <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), cell_filtering_data.reference$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
 
    progress$inc(detail='Making plot')
@@ -383,7 +400,7 @@ shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
   # gene expression tab ---------------------------------------------------------------------------
-  
+
   ## update UI
   ### when gene is selected
   reactive(x={
@@ -393,7 +410,7 @@ shinyAppServer <- function(input, output, session) {
 
     # cat(file=stderr(), sprintf('# reacting to gene selection with: %s\n', input$gene_of_interest.dd))
     updateSliderInput(session=session, inputId='expression_range.slider', max={max(FetchData(object=seurat, vars=input$gene_of_interest.dd)+0.05) %>% round(digits=1)}, value=c(-Inf,Inf))
-    
+
     progress$inc(detail='Done')
     NULL}) -> update_slider
 
@@ -442,7 +459,7 @@ shinyAppServer <- function(input, output, session) {
       seurat_metadata_umap %>%
         group_by_at(vars(cluster_id=input$seurat_cluster_set.dd)) %>%
         summarise(UMAP_1=mean(UMAP_1), UMAP_2=mean(UMAP_2)) -> data_labels
-      
+
       progress$inc(detail='Adding cluster labels')
       output_plot +
         ggrepel::geom_label_repel(data=data_labels,
@@ -453,7 +470,7 @@ shinyAppServer <- function(input, output, session) {
 
     progress$inc(detail='Returning plot')
     output_plot})
-  
+
   ## make map coloured by expression
   genes_highlighting.gene_expression_map.plot <- reactive({
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
@@ -471,7 +488,7 @@ shinyAppServer <- function(input, output, session) {
       scale_colour_gradient(low=input$expression_min.colour, high=input$expression_max.colour, limits=input$expression_range.slider, oob=scales::squish) +
       theme_void() +
       theme(legend.position='none')})
-  
+
   ## plot expression ranges per cluster
   genes_highlighting.expression_per_cluster.plot <- reactive({
     progress <- shiny::Progress$new(session=session, min=0, max=3/10)
@@ -481,7 +498,7 @@ shinyAppServer <- function(input, output, session) {
     update_slider()
     progress$inc(detail='Fetching data')
     FetchData(object=seurat, vars=c(input$seurat_cluster_set.dd,input$gene_of_interest.dd)) %>%
-      set_names(c('cluster_id', 'expression_value')) -> data      
+      set_names(c('cluster_id', 'expression_value')) -> data
 
     progress$inc(detail='Summarising expression in clusters')
     data %>%
@@ -503,7 +520,7 @@ shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
   # features heatmap tab --------------------------------------------------------------------------
-  
+
   features_heatmap.heatmap.plot <- reactive(x={
     progress <- shiny::Progress$new(session=session, min=0, max=4/10)
     on.exit(progress$close())
@@ -511,7 +528,7 @@ shinyAppServer <- function(input, output, session) {
 
     if(FALSE)
       input <- list(features_of_interest.tb={Matrix::rowSums(seurat) %>% (function(x) x[x>100]) %>% names()}, seurat_cluster_set.dd='integrated_snn_res.1.2')
-    
+
     progress$inc(detail='Getting list of feature IDs')
     feature_names <- input$features_of_interest.tb
     if(feature_names[1]=='')
@@ -541,7 +558,7 @@ shinyAppServer <- function(input, output, session) {
     #   dist() %>%
     #   hclust() %>%
     #   (function(x) {x$labels[x$order]}) -> ordered_feature_names
-    
+
     # if(input$cluster_cells.checkbox) {
     # if(FALSE) {
     #   progress$inc(detail='Clustering cells (rows)')
@@ -569,7 +586,7 @@ shinyAppServer <- function(input, output, session) {
     #   theme(axis.ticks=element_blank(),
     #         legend.position='none',
     #         strip.background=element_blank()) -> heatmap_plot
-    # 
+    #
     # if(TRUE)
     #   heatmap_plot <- heatmap_plot + theme(axis.text.y=element_blank())
 
@@ -597,7 +614,7 @@ shinyAppServer <- function(input, output, session) {
                            col=viridis_pal()(30),
                            # height=unit(1, 'npc'),
                            width=unit(1, 'npc')))}) %>% debounce(2500)
-  
+
   # ###############################################################################################
   # return plots to shiny -------------------------------------------------------------------------
   progress$inc(detail='Returning plots to Shiny')
@@ -659,6 +676,7 @@ shinyAppServer <- function(input, output, session) {
   renderPlot(cell_filtering.unique_genes_boxplot.plot()) -> output$`cell_filtering-unique_genes_boxplot`
   renderPlot(cell_filtering.percent_mitochondria_boxplot.plot()) -> output$`cell_filtering-percent_mitochondria_boxplot`
 
+  ### statistics boxes
   output$cell_filtering.n_reads_box <- renderValueBox({
     react_to_cell_filtering()
     valueBox(value=scales::comma(cell_filtering_data.reactions$total_reads),
@@ -684,18 +702,41 @@ shinyAppServer <- function(input, output, session) {
              icon=icon('crow'),
              color='purple')})
 
+  ### formatted text box with filtering parameters
   output$`cell_filtering-subset_conditions` <- renderText({
     react_to_cell_filtering()
-    sprintf(fmt='# %s\n# n=%s\nnCount_RNA>=%d & nCount_RNA<=%d &\nnFeature_RNA>=%d & nFeature_RNA<=%d &\npercent_mt<=%.1f', seurat@project.name, scales::comma(cell_filtering_data.reactions$n_cells), cell_filtering_data.reactions$min_expression_per_cell, cell_filtering_data.reactions$max_expression_per_cell, cell_filtering_data.reactions$min_genes_per_cell, cell_filtering_data.reactions$max_genes_per_cell, cell_filtering_data.reactions$max_percent_mitochondria)})
+    c(sprintf(fmt='# %s', seurat@project.name),
+      sprintf(fmt='# n_cells=%s', comma(cell_filtering_data.reactions$n_cells)),
+      paste(cell_filtering_data.reactions$subset_conditions, collapse=' &\n')) %>%
+      paste(collapse='\n') -> cell_filtering_data.reactions$subset_conditions.text})
+
+  ### copy to clipboard buttons
+  output$`cell_filtering-subset_conditions.plain` <- renderUI({ # copy text as is
+    react_to_cell_filtering()
+    rclipButton(inputId='rclipButton.plain.in', label='', icon('clipboard-check'),
+                clipText=cell_filtering_data.reactions$subset_conditions.text)})
+
+  output$`cell_filtering-subset_conditions.tsv` <- renderUI({ # tab separate elements
+    react_to_cell_filtering()
+    c(seurat@project.name,
+      cell_filtering_data.reactions$n_cells,
+      paste(cell_filtering_data.reactions$subset_conditions, collapse=' & ')) %>%
+      paste(collapse=',') %>%
+      rclipButton(inputId='rclipButton.tsv.in', label='', icon('file-excel'))})
+
+  output$`cell_filtering-subset_conditions.r` <- renderUI({ # copy only the conditional
+    react_to_cell_filtering()
+    paste(cell_filtering_data.reactions$subset_conditions, collapse=' & ') %>%
+      rclipButton(inputId='rclipButton.r.in', label='', icon('r-project'))})
 
   # features heatmap tab
   renderPlot(features_heatmap.heatmap.plot()) -> output$`features_heatmap-heatmap`
-  
+
   # sidebar
   ## dynamic sidebar outputs can be listed here
-  
+
   # shared text boxes
-  
+
   ## project name
   project_name_box_opts <- list(value={seurat@project.name %>% str_replace_all('_', ' ') %>% str_to_upper()}, subtitle='Loaded Seurat object', icon=icon('certificate'), color='purple')
   output$cell_filtering.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
