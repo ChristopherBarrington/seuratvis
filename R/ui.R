@@ -21,62 +21,47 @@ starter_gene <- sample(x=rownames(seurat), size=1)
 cell_filtering.tab <- menuItem(text='Cell filtering', tabName='cell_filtering-tab', icon=icon('filter'))
 
 ### define ui elements
-percent_mitochondria.slider <- sliderInput(inputId='percent_mitochondria.slider', label='Mitochondria fraction',
-                                           min=0,
-                                           max=round(max(FetchData(seurat, 'percent_mt'))+(0.1/2)),
-                                           value=round(max(FetchData(seurat, 'percent_mt'))+(0.1/2)),
-                                           step=0.1)
+min_features_per_cell.textinput <- textInput(inputId='min_features_per_cell.textinput', label='Minimum features per cell', placeholder='500')
+max_features_per_cell.textinput <- textInput(inputId='max_features_per_cell.textinput', label='Maximum features per cell', placeholder='7500')
 
-step_size <- 100
-min_genes_per_cell.slider <- sliderInput(inputId='min_genes_per_cell.slider', label='Minimum number of genes per cell',
-                                         min={FetchData(seurat, 'nFeature_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-                                         max={FetchData(seurat, 'nFeature_RNA') %>% deframe() %>% quantile(p=0.25) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                         value={FetchData(seurat, 'nFeature_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-                                         step=step_size)
+min_expression_per_cell.textinput <- textInput(inputId='min_expression_per_cell.textinput', label='Minimum total UMIs per cell', placeholder='500')
+max_expression_per_cell.textinput <- textInput(inputId='max_expression_per_cell.textinput', label='Maximum total UMIs per cell', placeholder='7500')
 
-max_genes_per_cell.slider <- sliderInput(inputId='max_genes_per_cell.slider', label='Maximum number of genes per cell',
-                                         min={FetchData(seurat, 'nFeature_RNA') %>% deframe() %>% quantile(p=0.85) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                         max={FetchData(seurat, 'nFeature_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                         value={FetchData(seurat, 'nFeature_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                         step=step_size)
+percent_mitochondria.textinput <- textInput(inputId='percent_mitochondria.textinput', label='Maximum mitochondrial (%)', placeholder='100')
 
-min_expression_per_cell.slider <- sliderInput(inputId='min_expression_per_cell.slider', label='Minimum total expression per cell',
-                                              min={FetchData(seurat, 'nCount_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-                                              max={FetchData(seurat, 'nCount_RNA') %>% deframe() %>% quantile(p=0.25) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                              value={FetchData(seurat, 'nCount_RNA') %>% min() %>% divide_by(step_size) %>% floor() %>% multiply_by(step_size)},
-                                              step=step_size)
-
-max_expression_per_cell.slider <- sliderInput(inputId='max_expression_per_cell.slider', label='Maximum total expression per cell',
-                                              min={FetchData(seurat, 'nCount_RNA') %>% deframe() %>% quantile(p=0.85) %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                              max={FetchData(seurat, 'nCount_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                              value={FetchData(seurat, 'nCount_RNA') %>% max() %>% divide_by(step_size) %>% ceiling() %>% multiply_by(step_size)},
-                                              step=step_size)
+subset_conditions.textoutput <- verbatimTextOutput(outputId='cell_filtering-subset_conditions')
 
 ### define layout boxes
-cell_filtering.plot_boxes.defaults <- list(status='success', solidHeader=TRUE, width=4, collapsible=TRUE)
-cell_filtering.plot_boxes.total_expression.defaults <- append(cell_filtering.plot_boxes.defaults, list(title='Expression per cell', footer='Total number of reads attributed to a cell'))
-cell_filtering.plot_boxes.unique_genes.defaults <- append(cell_filtering.plot_boxes.defaults, list(title='Genes per cell', footer='Number of distinct genes detected in a cell'))
-cell_filtering.plot_boxes.percent_mitochondria.defaults <- append(cell_filtering.plot_boxes.defaults, list(title='Mitochondrial expression', footer='Proportion of mitochondrial genes detected in a cell'))
-cell_filtering.boxes <- list(total_expression_knee={append(cell_filtering.plot_boxes.total_expression.defaults, list({plotOutput(outputId='cell_filtering-total_expression_knee') %>% withSpinner()})) %>% do.call(what=box)},
-                             total_expression_density={append(cell_filtering.plot_boxes.total_expression.defaults, list({plotOutput(outputId='cell_filtering-total_expression_density') %>% withSpinner()})) %>% do.call(what=box)},
-                             total_expression_boxplot={append(cell_filtering.plot_boxes.total_expression.defaults, list({plotOutput(outputId='cell_filtering-total_expression_boxplot') %>% withSpinner()})) %>% do.call(what=box)},
+cell_filtering.plot_boxes.defaults <- list(solidHeader=TRUE, width=12, collapsible=TRUE)
+cell_filtering.boxes <- list(total_expression=append(cell_filtering.plot_boxes.defaults, 
+                                                     list(title='Expression per cell', footer='Total number of reads attributed to a cell', status='success',
+                                                          column(width=2, offset=1, plotOutput(outputId='cell_filtering-total_expression_boxplot') %>% withSpinner()),
+                                                          column(width=3, offset=0, plotOutput(outputId='cell_filtering-total_expression_knee') %>% withSpinner()),
+                                                          column(width=4, offset=1, plotOutput(outputId='cell_filtering-total_expression_density', brush=brushOpts(id='total_expression_density.brush', direction='x')) %>% withSpinner()))) %>%
+                                              do.call(what=box),
+                      
+                             unique_features=append(cell_filtering.plot_boxes.defaults,
+                                                    list(title='Genes per cell', footer='Number of distinct genes detected in a cell', status='success',
+                                                         column(width=2, offset=1, plotOutput(outputId='cell_filtering-unique_genes_boxplot') %>% withSpinner()),
+                                                         column(width=3, offset=0,plotOutput(outputId='cell_filtering-unique_genes_knee') %>% withSpinner()),
+                                                         column(width=4, offset=1, plotOutput(outputId='cell_filtering-unique_genes_density', brush=brushOpts(id='unique_genes_density.brush', direction='x')) %>% withSpinner()))) %>%
+                                             do.call(what=box),
 
-                             unique_features_knee={append(cell_filtering.plot_boxes.unique_genes.defaults, list({plotOutput(outputId='cell_filtering-unique_genes_knee') %>% withSpinner()})) %>% do.call(what=box)},
-                             unique_features_density={append(cell_filtering.plot_boxes.unique_genes.defaults, list({plotOutput(outputId='cell_filtering-unique_genes_density') %>% withSpinner()})) %>% do.call(what=box)},
-                             unique_features_boxplot={append(cell_filtering.plot_boxes.unique_genes.defaults, list({plotOutput(outputId='cell_filtering-unique_genes_boxplot') %>% withSpinner()})) %>% do.call(what=box)},
+                             percent_mitochondria=append(cell_filtering.plot_boxes.defaults,
+                                                         list(title='Mitochondrial expression', footer='Proportion of mitochondrial genes detected in a cell', status='success',
+                                                              column(width=2, offset=1, plotOutput(outputId='cell_filtering-percent_mitochondria_boxplot') %>% withSpinner()),
+                                                              column(width=4, plotOutput(outputId='cell_filtering-percent_mitochondria_knee') %>% withSpinner()),
+                                                              column(width=4, plotOutput(outputId='cell_filtering-percent_mitochondria_density', brush=brushOpts(id='percent_mitochondria_density.brush', direction='x')) %>% withSpinner()))) %>%
+                                                  do.call(what=box),
 
-                             percent_mitochondria_knee={append(cell_filtering.plot_boxes.percent_mitochondria.defaults, list({plotOutput(outputId='cell_filtering-percent_mitochondria_knee') %>% withSpinner()})) %>% do.call(what=box)},
-                             percent_mitochondria_density={append(cell_filtering.plot_boxes.percent_mitochondria.defaults, list({plotOutput(outputId='cell_filtering-percent_mitochondria_density') %>% withSpinner()})) %>% do.call(what=box)},
-                             percent_mitochondria_boxplot={append(cell_filtering.plot_boxes.percent_mitochondria.defaults, list({plotOutput(outputId='cell_filtering-percent_mitochondria_boxplot') %>% withSpinner()})) %>% do.call(what=box)},
+                             thresholds=append(cell_filtering.plot_boxes.defaults,
+                                               list(title='Thresholds', status='info',
+                                                    column(width=2, min_expression_per_cell.textinput, max_expression_per_cell.textinput),
+                                                    column(width=2, min_features_per_cell.textinput, max_features_per_cell.textinput),
+                                                    column(width=2, percent_mitochondria.textinput),
+                                                    column(width=4, shiny::tags$label('Conditional expression to select cells'), br(), subset_conditions.textoutput))) %>%
+                                        do.call(what=box),
 
-                             thresholds=box(title='Thresholds',
-                                            status='info',
-                                            solidHeader=TRUE,
-                                            width=12,
-                                            collapsible=TRUE,
-                                            column(width=4, min_expression_per_cell.slider, max_expression_per_cell.slider),
-                                            column(width=4, min_genes_per_cell.slider, max_genes_per_cell.slider),
-                                            column(width=4, percent_mitochondria.slider)),
                              project_name=valueBoxOutput(outputId='cell_filtering.project_name_box', width=4),
                              n_reads=valueBoxOutput(outputId='cell_filtering.n_reads_box', width=2),
                              n_cells=valueBoxOutput(outputId='cell_filtering.n_cells_box', width=2),
@@ -84,13 +69,6 @@ cell_filtering.boxes <- list(total_expression_knee={append(cell_filtering.plot_b
                              n_reads_per_cell=valueBoxOutput(outputId='cell_filtering.n_reads_per_cell_box', width=2))
 
 ### assemble tab content
-# cell_filtering.content <- tabItem(tabName='cell_filtering-tab',
-#                                   h1('Identify cells that can be removed with quality filters'),
-#                                   fluidRow(cell_filtering.boxes$project_name,
-#                                            cell_filtering.boxes$n_reads,
-#                                            cell_filtering.boxes$n_cells,
-#                                            cell_filtering.boxes$n_reads_per_cell,
-#                                            cell_filtering.boxes$n_genes_per_cell))
 cell_filtering.content <- tabItem(tabName='cell_filtering-tab',
                                   h1('Identify cells that can be removed with quality filters'),
                                   fluidRow(cell_filtering.boxes$project_name,
@@ -98,15 +76,9 @@ cell_filtering.content <- tabItem(tabName='cell_filtering-tab',
                                            cell_filtering.boxes$n_cells,
                                            cell_filtering.boxes$n_reads_per_cell,
                                            cell_filtering.boxes$n_genes_per_cell),
-                                  fluidRow(cell_filtering.boxes$total_expression_boxplot,
-                                           cell_filtering.boxes$total_expression_knee,
-                                           cell_filtering.boxes$total_expression_density),
-                                  fluidRow(cell_filtering.boxes$unique_features_boxplot,
-                                           cell_filtering.boxes$unique_features_knee,
-                                           cell_filtering.boxes$unique_features_density),
-                                  fluidRow(cell_filtering.boxes$percent_mitochondria_boxplot,
-                                           cell_filtering.boxes$percent_mitochondria_knee,
-                                           cell_filtering.boxes$percent_mitochondria_density),
+                                  fluidRow(cell_filtering.boxes$total_expression),
+                                  fluidRow(cell_filtering.boxes$unique_features),
+                                  fluidRow(cell_filtering.boxes$percent_mitochondria),
                                   fluidRow(cell_filtering.boxes$thresholds))
 
 
