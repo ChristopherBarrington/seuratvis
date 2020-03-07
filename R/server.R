@@ -81,14 +81,19 @@ shinyAppServer <- function(input, output, session) {
     summarise(N=length(unique(ID))+1) %>%
     deframe() -> seurat_cluster_per_set
 
-
   list(n_cells=nrow(seurat@meta.data),
        total_reads=sum(seurat@meta.data$nCount_RNA),
        median_reads_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
        median_genes_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
        min_reads_per_cell=min(seurat@meta.data$nCount_RNA), max_reads_per_cell=max(seurat@meta.data$nCount_RNA),
        min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
-       max_percent_mitochondria=max(seurat@meta.data$percent_mt)) -> cell_filtering_data.reference
+       max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> cell_filtering_data.reference
+
+  updateTextInput(session=session, inputId='min_features_per_cell.textinput', placeholder=cell_filtering_data.reference$min_genes_per_cell)
+  updateTextInput(session=session, inputId='max_features_per_cell.textinput', placeholder=cell_filtering_data.reference$max_genes_per_cell)
+  updateTextInput(session=session, inputId='min_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$min_reads_per_cell)
+  updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
+  updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
 
   available_assays <- Assays(seurat)
   available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
@@ -110,7 +115,6 @@ shinyAppServer <- function(input, output, session) {
                  subset_conditions.nCount='', subset_conditions.nFeature='', subset_conditions.percent_mt='') -> cell_filtering_data.reactions
 
   reactive(x={
-    cat('reacting\n', file=stderr())
     progress <- shiny::Progress$new(session=session, min=0, max=4/10)
     on.exit(progress$close())
     progress$set(value=0, message='Reacting to threshold parameters')
@@ -147,46 +151,46 @@ shinyAppServer <- function(input, output, session) {
       format_subset_conditional(x=max_genes_per_cell, fmt='nFeature_RNA<=%d')) %>%
       group_format_subset_conditional() -> cell_filtering_data.reactions$subset_conditions$nFeature
 
-    format_subset_conditional(x=max_percent_mitochondria, fmt='percent_mt<=%.1f') -> cell_filtering_data.reactions$subset_conditions$percent_mt
+    format_subset_conditional(x=max_percent_mitochondria, fmt='percent_mt<=%s') -> cell_filtering_data.reactions$subset_conditions$percent_mt
 
     progress$inc(detail='Returning')
     NULL}) -> react_to_cell_filtering
 
   ## react to unique features detected density plot brush
   observeEvent(eventExpr=input$unique_genes_density.brush, handlerExpr={
-    cell_filtering_data.reactions$min_genes_per_cell <- round(input$unique_genes_density.brush$xmin)
-    cell_filtering_data.reactions$max_genes_per_cell <- round(input$unique_genes_density.brush$xmax)
+    cell_filtering_data.reactions$min_genes_per_cell <- floor(input$unique_genes_density.brush$xmin)
+    cell_filtering_data.reactions$max_genes_per_cell <- ceiling(input$unique_genes_density.brush$xmax)
 
     updateTextInput(session=session, inputId='min_features_per_cell.textinput', value=cell_filtering_data.reactions$min_genes_per_cell)
     updateTextInput(session=session, inputId='max_features_per_cell.textinput', value=cell_filtering_data.reactions$max_genes_per_cell)})
 
   observeEvent(eventExpr=input$min_features_per_cell.textinput, handlerExpr={
     # session$resetBrush(brushId='unique_genes_density.brush')
-    cell_filtering_data.reactions$min_genes_per_cell <- round(as.numeric(input$min_features_per_cell.textinput))})
+    cell_filtering_data.reactions$min_genes_per_cell <- floor(as.numeric(input$min_features_per_cell.textinput))})
 
   observeEvent(eventExpr=input$max_features_per_cell.textinput, handlerExpr={
     # session$resetBrush(brushId='unique_genes_density.brush')
-    cell_filtering_data.reactions$max_genes_per_cell <- round(as.numeric(input$max_features_per_cell.textinput))})
+    cell_filtering_data.reactions$max_genes_per_cell <- ceiling(as.numeric(input$max_features_per_cell.textinput))})
 
   ## react to total UMIs density plot brush
   observeEvent(eventExpr=input$total_expression_density.brush, handlerExpr={
-    cell_filtering_data.reactions$min_expression_per_cell <- round(input$total_expression_density.brush$xmin)
-    cell_filtering_data.reactions$max_expression_per_cell <- round(input$total_expression_density.brush$xmax)
+    cell_filtering_data.reactions$min_expression_per_cell <- floor(input$total_expression_density.brush$xmin)
+    cell_filtering_data.reactions$max_expression_per_cell <- ceiling(input$total_expression_density.brush$xmax)
 
     updateTextInput(session=session, inputId='min_expression_per_cell.textinput', value=cell_filtering_data.reactions$min_expression_per_cell)
     updateTextInput(session=session, inputId='max_expression_per_cell.textinput', value=cell_filtering_data.reactions$max_expression_per_cell)})
 
   observeEvent(eventExpr=input$min_expression_per_cell.textinput, handlerExpr={
     # session$resetBrush(brushId='total_expression_density.brush')
-    cell_filtering_data.reactions$min_expression_per_cell <- round(as.numeric(input$min_expression_per_cell.textinput))})
+    cell_filtering_data.reactions$min_expression_per_cell <- floor(as.numeric(input$min_expression_per_cell.textinput))})
 
   observeEvent(eventExpr=input$max_expression_per_cell.textinput, handlerExpr={
     # session$resetBrush(brushId='total_expression_density.brush')
-    cell_filtering_data.reactions$max_expression_per_cell <- round(as.numeric(input$max_expression_per_cell.textinput))})
+    cell_filtering_data.reactions$max_expression_per_cell <- ceiling(as.numeric(input$max_expression_per_cell.textinput))})
 
   ## react to percent mitochondria density plot brush
   observeEvent(eventExpr=input$percent_mitochondria_density.brush, handlerExpr={
-    cell_filtering_data.reactions$max_percent_mitochondria <- round(input$percent_mitochondria_density.brush$xmax, digits=1)
+    cell_filtering_data.reactions$max_percent_mitochondria <- round(input$percent_mitochondria_density.brush$xmax+0.05, digits=1)
 
     updateTextInput(session=session, inputId='percent_mitochondria.textinput', value=cell_filtering_data.reactions$max_percent_mitochondria)})
 

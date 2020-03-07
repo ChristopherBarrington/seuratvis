@@ -21,13 +21,13 @@ starter_gene <- sample(x=rownames(seurat), size=1)
 cell_filtering.tab <- menuItem(text='Cell filtering', tabName='cell_filtering-tab', icon=icon('filter'))
 
 ### define ui elements
-min_features_per_cell.textinput <- textInput(inputId='min_features_per_cell.textinput', label='Minimum features per cell', placeholder='500')
-max_features_per_cell.textinput <- textInput(inputId='max_features_per_cell.textinput', label='Maximum features per cell', placeholder='7500')
+min_features_per_cell.textinput <- textInput(inputId='min_features_per_cell.textinput', label='Minimum features per cell', placeholder='min')
+max_features_per_cell.textinput <- textInput(inputId='max_features_per_cell.textinput', label='Maximum features per cell', placeholder='max')
 
-min_expression_per_cell.textinput <- textInput(inputId='min_expression_per_cell.textinput', label='Minimum total UMIs per cell', placeholder='500')
-max_expression_per_cell.textinput <- textInput(inputId='max_expression_per_cell.textinput', label='Maximum total UMIs per cell', placeholder='7500')
+min_expression_per_cell.textinput <- textInput(inputId='min_expression_per_cell.textinput', label='Minimum total UMIs per cell', placeholder='min')
+max_expression_per_cell.textinput <- textInput(inputId='max_expression_per_cell.textinput', label='Maximum total UMIs per cell', placeholder='max')
 
-percent_mitochondria.textinput <- textInput(inputId='percent_mitochondria.textinput', label='Maximum mitochondrial (%)', placeholder='100')
+percent_mitochondria.textinput <- textInput(inputId='percent_mitochondria.textinput', label='Maximum mitochondrial (%)', placeholder='max')
 
 subset_conditions.textoutput <- verbatimTextOutput(outputId='cell_filtering-subset_conditions')
 subset_conditions.plain.copybutton <- uiOutput(outputId='cell_filtering-subset_conditions.plain', inline=TRUE)
