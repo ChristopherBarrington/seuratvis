@@ -46,15 +46,15 @@ cell_filtering.boxes <- list(total_expression=append(cell_filtering.plot_boxes.d
                              unique_features=append(cell_filtering.plot_boxes.defaults,
                                                     list(title='Genes per cell', footer='Number of distinct genes detected in a cell', status='success',
                                                          column(width=2, offset=1, plotOutput(outputId='cell_filtering-unique_genes_boxplot') %>% withSpinner()),
-                                                         column(width=3, offset=0,plotOutput(outputId='cell_filtering-unique_genes_knee') %>% withSpinner()),
+                                                         column(width=3, offset=0, plotOutput(outputId='cell_filtering-unique_genes_knee') %>% withSpinner()),
                                                          column(width=4, offset=1, plotOutput(outputId='cell_filtering-unique_genes_density', brush=brushOpts(id='unique_genes_density.brush', direction='x')) %>% withSpinner()))) %>%
                                              do.call(what=box),
 
                              percent_mitochondria=append(cell_filtering.plot_boxes.defaults,
                                                          list(title='Mitochondrial expression', footer='Proportion of mitochondrial genes detected in a cell', status='success',
                                                               column(width=2, offset=1, plotOutput(outputId='cell_filtering-percent_mitochondria_boxplot') %>% withSpinner()),
-                                                              column(width=4, plotOutput(outputId='cell_filtering-percent_mitochondria_knee') %>% withSpinner()),
-                                                              column(width=4, plotOutput(outputId='cell_filtering-percent_mitochondria_density', brush=brushOpts(id='percent_mitochondria_density.brush', direction='x')) %>% withSpinner()))) %>%
+                                                              column(width=4, offset=0, plotOutput(outputId='cell_filtering-percent_mitochondria_knee') %>% withSpinner()),
+                                                              column(width=4, offset=1, plotOutput(outputId='cell_filtering-percent_mitochondria_density', brush=brushOpts(id='percent_mitochondria_density.brush', direction='x')) %>% withSpinner()))) %>%
                                                   do.call(what=box),
 
                              thresholds=append(cell_filtering.plot_boxes.defaults,
