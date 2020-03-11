@@ -197,6 +197,14 @@ shinyAppServer <- function(input, output, session) {
     # session$resetBrush(brushId='percent_mitochondria_density.brush')
     cell_filtering_data.reactions$max_percent_mitochondria <- as.numeric(input$percent_mitochondria.textinput)})
 
+  observeEvent(input$sidebarmenu, {
+    if(input$sidebarmenu=='cell_filtering-tab' & (!is.null(seurat_object.reactions$seurat@misc$cells_filtered) && seurat_object.reactions$seurat@misc$cells_filtered))
+      sendSweetAlert(session=session, type='success', html=TRUE,
+                     title='Notice', btn_labels='Great!',
+                     text=tags$span('It looks like low-quality cells have already been removed from this Seurat object:', tags$h5(tags$code('@misc$cells_filtered == TRUE'))),
+                     closeOnClickOutside=TRUE, showCloseButton=FALSE)
+  })
+
   ## make knee plot of total expression
   cell_filtering.total_expression_knee.plot <- reactive(x={
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
