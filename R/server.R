@@ -1,22 +1,4 @@
 
-# library(promises)
-# library(future)
-# plan(multiprocess)
-
-# library(biomaRt) ## move this into the seurat object@results slot
-
-# library(hdf5r)
-# library(shiny)
-# library(ggvis)
-# library(viridis)
-# library(ComplexHeatmap)
-# library(tidyverse)
-# library(magrittr)
-
-# load('int.RData') ######
-# # seurat <- human_CS17_thoracic
-# seurat <- human_CS17_brachial
-
 gene_names_to_description <- c()
 if(file.exists('D:/seurat-vis/temp-gene-info.tsv'))
 read.delim('D:/seurat-vis/temp-gene-info.tsv') %>%
@@ -43,7 +25,7 @@ shinyAppServer <- function(input, output, session) {
     valueBox(value=sprintf('%.1f', sum(plot1.data>0)/input$slider*100),
              subtitle='Values above 0',
              icon=icon('percent'),
-             color="purple")})
+             color='purple')})
 
   output$plot2 <- renderPlot({
     data <- runif(input$slider2)
@@ -52,56 +34,73 @@ shinyAppServer <- function(input, output, session) {
   output$menuitem <- renderMenu({
     s <- stringi::stri_rand_strings(n=1, length=5)
     s <- Sys.getenv('USER')
-    menuItem(text=s, icon=icon("file-code-o"), href="https://github.com/rstudio/shinydashboard")})
+    menuItem(text=s, icon=icon('file-code-o'), href='https://github.com/rstudio/shinydashboard')})
 # this was just placeholder stuff
 #####################################################################################################################
 
-  progress <- shiny::Progress$new(session=session, min=0, max=4/10)
-  on.exit(progress$close())
-  progress$set(value=0, message='Loading environment')
+ progress <- shiny::Progress$new(session=session, min=0, max=4/10)
+ on.exit(progress$close())
+ progress$set(value=0, message='Loading environment')
 
-  # load Seurat object from user
-  progress$inc(detail='Updating UI with cluster options')
-  cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
-  updateSelectInput(session=session, inputId='seurat_cluster_set.dd', choices=cluster_options)
-  updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
+#  # load Seurat object from user
+  seurat_object.reactions <- reactiveValues()
+  observeEvent(eventExpr=input$seurat_select.input, handlerExpr={
 
-  progress$inc(detail='Combining UMAP and meta.data')
-  if(!is.null(seurat@reductions$umap))
-    seurat_metadata_umap <- cbind(seurat@meta.data, seurat@reductions$umap@cell.embeddings)
+    progress <- shiny::Progress$new(session=session, min=0, max=4/10)
+    on.exit(progress$close())
+    progress$set(value=0, message='Loading environment')
 
-  if(is.null(seurat@meta.data$seurat_clusters))
-    seurat@meta.data$seurat_clusters <- 0
+    # load Seurat object from user
+    progress$inc(detail='Updating UI with cluster options')
+    seurat <- parse(text=input$seurat_select.input) %>% eval()
+    seurat <- subset(seurat, subset=nFeature_RNA>0 & nCount_RNA>0)
+    cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
+    updateSelectInput(session=session, inputId='seurat_cluster_set.dd', choices=cluster_options)
+    updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
 
-  progress$inc(detail='Counting clusters identified in each set')
-  select_at(seurat@meta.data, vars(contains('_snn_res.'), 'seurat_clusters')) %>%
-    mutate_all(function(x) {as.character(x) %>% as.numeric()}) %>%
-    gather(key='cluster_set', value='ID') %>%
-    group_by(cluster_set) %>%
-    summarise(N=length(unique(ID))+1) %>%
-    deframe() -> seurat_cluster_per_set
+    progress$inc(detail='Combining UMAP and meta.data')
+    if(!is.null(seurat@reductions$umap))
+      seurat_metadata_umap <- cbind(seurat@meta.data, seurat@reductions$umap@cell.embeddings)
 
-  list(n_cells=nrow(seurat@meta.data),
-       total_reads=sum(seurat@meta.data$nCount_RNA),
-       median_reads_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
-       median_genes_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
-       min_reads_per_cell=min(seurat@meta.data$nCount_RNA), max_reads_per_cell=max(seurat@meta.data$nCount_RNA),
-       min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
-       max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> cell_filtering_data.reference
+    if(is.null(seurat@meta.data$seurat_clusters))
+      seurat@meta.data$seurat_clusters <- 0
 
-  updateTextInput(session=session, inputId='min_features_per_cell.textinput', placeholder=cell_filtering_data.reference$min_genes_per_cell)
-  updateTextInput(session=session, inputId='max_features_per_cell.textinput', placeholder=cell_filtering_data.reference$max_genes_per_cell)
-  updateTextInput(session=session, inputId='min_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$min_reads_per_cell)
-  updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
-  updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
+    progress$inc(detail='Counting clusters identified in each set')
+    select_at(seurat@meta.data, vars(contains('_snn_res.'), 'seurat_clusters')) %>%
+      mutate_all(function(x) {as.character(x) %>% as.numeric()}) %>%
+      gather(key='cluster_set', value='ID') %>%
+      group_by(cluster_set) %>%
+      summarise(N=length(unique(ID))+1) %>%
+      deframe() -> seurat_cluster_per_set
 
-  available_assays <- Assays(seurat)
-  available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
+    list(n_cells=nrow(seurat@meta.data),
+         total_reads=sum(seurat@meta.data$nCount_RNA),
+         median_reads_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
+         median_genes_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
+         min_reads_per_cell=min(seurat@meta.data$nCount_RNA), max_reads_per_cell=max(seurat@meta.data$nCount_RNA),
+         min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
+         max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> cell_filtering_data.reference
 
-  selected_assay <- 'RNA'
-  selected_slot <- 'data'
+    updateTextInput(session=session, inputId='min_features_per_cell.textinput', placeholder=cell_filtering_data.reference$min_genes_per_cell)
+    updateTextInput(session=session, inputId='max_features_per_cell.textinput', placeholder=cell_filtering_data.reference$max_genes_per_cell)
+    updateTextInput(session=session, inputId='min_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$min_reads_per_cell)
+    updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
+    updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
 
-  seurat@active.assay <- selected_assay
+    available_assays <- Assays(seurat)
+    available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
+
+    selected_assay <- 'RNA'
+    selected_slot <- 'data'
+
+    seurat@active.assay <- selected_assay
+
+
+    seurat_object.reactions$seurat <- seurat
+    seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
+    seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
+
+  })
 
   # ###############################################################################################
   # cell filtering tab ----------------------------------------------------------------------------
@@ -120,14 +119,14 @@ shinyAppServer <- function(input, output, session) {
     progress$set(value=0, message='Reacting to threshold parameters')
 
     progress$inc(detail='Extracting input options')
-    min_genes_per_cell <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(cell_filtering_data.reference$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
-    max_genes_per_cell <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(cell_filtering_data.reference$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
-    min_expression_per_cell <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), as.numeric(cell_filtering_data.reference$min_reads_per_cell), cell_filtering_data.reactions$min_expression_per_cell)
-    max_expression_per_cell <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), as.numeric(cell_filtering_data.reference$max_reads_per_cell), cell_filtering_data.reactions$max_expression_per_cell)
-    max_percent_mitochondria <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), as.numeric(cell_filtering_data.reference$max_percent_mitochondria), cell_filtering_data.reactions$max_percent_mitochondria)
+    min_genes_per_cell <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(seurat_object.reactions$reference_metrics$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
+    max_genes_per_cell <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(seurat_object.reactions$reference_metrics$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
+    min_expression_per_cell <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), as.numeric(seurat_object.reactions$reference_metrics$min_reads_per_cell), cell_filtering_data.reactions$min_expression_per_cell)
+    max_expression_per_cell <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), as.numeric(seurat_object.reactions$reference_metrics$max_reads_per_cell), cell_filtering_data.reactions$max_expression_per_cell)
+    max_percent_mitochondria <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), as.numeric(seurat_object.reactions$reference_metrics$max_percent_mitochondria), cell_filtering_data.reactions$max_percent_mitochondria)
 
     progress$inc(detail='Filtering @meta.data')
-    seurat@meta.data %>%
+    seurat_object.reactions$seurat@meta.data %>%
       filter(percent_mt <= max_percent_mitochondria &
              between(x=nFeature_RNA, left=min_genes_per_cell, right=max_genes_per_cell) &
              between(x=nCount_RNA, left=min_expression_per_cell, right=max_expression_per_cell)) -> filtered_cell_set
@@ -204,11 +203,11 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making total expression knee plot')
 
-    min_value <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), cell_filtering_data.reference$min_reads_per_cell, cell_filtering_data.reactions$min_expression_per_cell)
-    max_value <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), cell_filtering_data.reference$max_reads_per_cell, cell_filtering_data.reactions$max_expression_per_cell)
+    min_value <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), seurat_object.reactions$reference_metrics$min_reads_per_cell, cell_filtering_data.reactions$min_expression_per_cell)
+    max_value <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), seurat_object.reactions$reference_metrics$max_reads_per_cell, cell_filtering_data.reactions$max_expression_per_cell)
 
     progress$inc(detail='Making plot')
-    FetchData(seurat, 'nCount_RNA') %>%
+    FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
       set_names('y') %>%
       arrange(desc(y)) %>%
       mutate(x=seq(n()),
@@ -231,11 +230,11 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making unique genes detected knee plot')
 
-    min_value <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(cell_filtering_data.reference$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
-    max_value <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(cell_filtering_data.reference$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
+    min_value <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(seurat_object.reactions$reference_metrics$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
+    max_value <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(seurat_object.reactions$reference_metrics$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
 
     progress$inc(detail='Making plot')
-    FetchData(seurat, 'nFeature_RNA') %>%
+    FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
       set_names('y') %>%
       arrange(desc(y)) %>%
       mutate(x=seq(n()),
@@ -258,10 +257,10 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making mitochondrial expression knee plot')
 
-    max_value <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), cell_filtering_data.reference$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
+    max_value <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), seurat_object.reactions$reference_metrics$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
 
     progress$inc(detail='Making plot')
-    FetchData(seurat, 'percent_mt') %>%
+    FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
       set_names('y') %>%
       arrange(desc(y)) %>%
       mutate(x=seq(n()),
@@ -283,7 +282,7 @@ shinyAppServer <- function(input, output, session) {
     progress$set(value=0, message='Making total UMIs density plot')
 
     progress$inc(detail='Making plot')
-    FetchData(seurat, 'nCount_RNA') %>%
+    FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
       set_names('y') %>%
       ggplot() +
       aes(x=y) +
@@ -300,7 +299,7 @@ shinyAppServer <- function(input, output, session) {
     progress$set(value=0, message='Making detected features density plot')
 
     progress$inc(detail='Making plot')
-    FetchData(seurat, 'nFeature_RNA') %>%
+    FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
       set_names('y') %>%
       ggplot() +
       aes(x=y) +
@@ -317,7 +316,7 @@ shinyAppServer <- function(input, output, session) {
     progress$set(value=0, message='Making percentage mitochondria density plot')
 
     progress$inc(detail='Making plot')
-    FetchData(seurat, 'percent_mt') %>%
+    FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
       set_names('y') %>%
       ggplot() +
       aes(x=y) +
@@ -332,11 +331,11 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
 
-    min_y <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), cell_filtering_data.reference$min_reads_per_cell, cell_filtering_data.reactions$min_expression_per_cell)
-    max_y <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), cell_filtering_data.reference$max_reads_per_cell, cell_filtering_data.reactions$max_expression_per_cell)
+    min_y <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), seurat_object.reactions$reference_metrics$min_reads_per_cell, cell_filtering_data.reactions$min_expression_per_cell)
+    max_y <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), seurat_object.reactions$reference_metrics$max_reads_per_cell, cell_filtering_data.reactions$max_expression_per_cell)
 
     progress$inc(detail='Making plot')
-    FetchData(seurat, 'nCount_RNA') %>%
+    FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
       set_names('y') %>%
       ggplot() +
       aes(x=0, y=y) +
@@ -358,11 +357,11 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
 
-    min_y <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(cell_filtering_data.reference$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
-    max_y <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(cell_filtering_data.reference$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
+    min_y <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(seurat_object.reactions$reference_metrics$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
+    max_y <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(seurat_object.reactions$reference_metrics$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
 
     progress$inc(detail='Making plot')
-    FetchData(seurat, 'nFeature_RNA') %>%
+    FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
       set_names('y') %>%
       ggplot() +
       aes(x=0, y=y) +
@@ -384,10 +383,10 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
 
-    max_y <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), cell_filtering_data.reference$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
+    max_y <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), seurat_object.reactions$reference_metrics$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
 
    progress$inc(detail='Making plot')
-    FetchData(seurat, 'percent_mt') %>%
+    FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
       set_names('y') %>%
       ggplot() +
       aes(x=0, y=y) +
@@ -530,23 +529,26 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making heatmap of normalised feature values')
 
+    if(is.null(seurat_object.reactions$seurat))
+      return(NULL)
+
     if(FALSE)
-      input <- list(features_of_interest.tb={Matrix::rowSums(seurat) %>% (function(x) x[x>100]) %>% names()}, seurat_cluster_set.dd='integrated_snn_res.1.2')
+      input <- list(features_of_interest.tb={Matrix::rowSums(seurat_object.reactions$seurat) %>% (function(x) x[x>100]) %>% names()}, seurat_cluster_set.dd='integrated_snn_res.1.2')
 
     progress$inc(detail='Getting list of feature IDs')
     feature_names <- input$features_of_interest.tb
     if(feature_names[1]=='')
-      Matrix::rowSums(seurat) %>%
+      Matrix::rowSums(seurat_object.reactions$seurat) %>%
         sort() %>%
         head(2000) %>%
         sample(size=200) %>%
         names() -> feature_names
-    feature_names %<>% str_split(pattern='\\s|;|,') %>% unlist() %>% (function(x) x[x %in% rownames(seurat)])
+    feature_names %<>% str_split(pattern='\\s|;|,') %>% unlist() %>% (function(x) x[x %in% rownames(seurat_object.reactions$seurat)])
 
     progress$inc(detail='Collecting feature values matrix')
-    FetchData(object=seurat, vars=feature_names) %>%
+    FetchData(object=seurat_object.reactions$seurat, vars=feature_names) %>%
       rownames_to_column('cell_id') -> feature_values_matrix
-    FetchData(object=seurat, vars=input$features_heatmap.seurat_cluster_set.dd) %>%
+    FetchData(object=seurat_object.reactions$seurat, vars=input$features_heatmap.seurat_cluster_set.dd) %>%
       set_names('cluster_id') %>%
       rownames_to_column('cell_id') %>%
       arrange(cluster_id) %>%
@@ -629,7 +631,7 @@ shinyAppServer <- function(input, output, session) {
   renderPlot(genes_highlighting.expression_per_cluster.plot()) -> output$`genes_highlighting-expression_per_cluster`
 
   output$genes_highlighting.n_cells_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(ncol(seurat)),
+    valueBox(value=scales::comma(ncol(seurat_object.reactions$seurat)),
              subtitle='Cells in map',
              icon=icon('galactic-republic'),
              color='purple')})
@@ -644,22 +646,22 @@ shinyAppServer <- function(input, output, session) {
              icon=icon('jedi-order'),
              color='purple')})
   output$genes_highlighting.n_genes_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(sapply(seurat@assays, function(x) nrow(x@data)) %>% max()),
+    valueBox(value=scales::comma(sapply(seurat_object.reactions$seurat@assays, function(x) nrow(x@data)) %>% max()),
              subtitle='Unique genes detected (max)',
              icon=icon('galactic-senate'),
              color='purple')})
   output$genes_highlighting.n_reads_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(sum(seurat$nCount_RNA)),
+    valueBox(value=scales::comma(sum(seurat_object.reactions$seurat$nCount_RNA)),
              subtitle='Total reads in cells',
              icon=icon('old-republic'),
              color='purple')})
   output$genes_highlighting.n_reads_per_cell_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(round(median(seurat$nCount_RNA), digits=1)),
+    valueBox(value=scales::comma(round(median(seurat_object.reactions$seurat$nCount_RNA), digits=1)),
              subtitle='Median reads per cell',
              icon=icon('frog'),
              color='purple')})
   output$genes_highlighting.n_genes_per_cell_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(round(median(seurat$nFeature_RNA), digits=1)),
+    valueBox(value=scales::comma(round(median(seurat_object.reactions$seurat$nFeature_RNA), digits=1)),
              subtitle='Median genes per cell',
              icon=icon('crow'),
              color='purple')})
@@ -684,32 +686,32 @@ shinyAppServer <- function(input, output, session) {
   output$cell_filtering.n_reads_box <- renderValueBox({
     react_to_cell_filtering()
     valueBox(value=scales::comma(cell_filtering_data.reactions$total_reads),
-             subtitle=sprintf(fmt='Total reads remaining (%.1f%%)', cell_filtering_data.reactions$total_reads/cell_filtering_data.reference$total_reads*100),
+             subtitle=sprintf(fmt='Total reads remaining (%.1f%%)', cell_filtering_data.reactions$total_reads/seurat_object.reactions$reference_metrics$total_reads*100),
              icon=icon('old-republic'),
              color='purple')})
   output$cell_filtering.n_cells_box <- renderValueBox({
     react_to_cell_filtering()
     valueBox(value=scales::comma(cell_filtering_data.reactions$n_cells),
-             subtitle=sprintf(fmt='Cells remaining (%.1f%%)', cell_filtering_data.reactions$n_cells/cell_filtering_data.reference$n_cells*100),
+             subtitle=sprintf(fmt='Cells remaining (%.1f%%)', cell_filtering_data.reactions$n_cells/seurat_object.reactions$reference_metrics$n_cells*100),
              icon=icon('galactic-republic'),
              color='purple')})
   output$cell_filtering.n_reads_per_cell_box <- renderValueBox({
     react_to_cell_filtering()
     valueBox(value=scales::comma(cell_filtering_data.reactions$median_reads_per_cell),
-             subtitle=sprintf(fmt='Median reads per cell (%+d)', cell_filtering_data.reactions$median_reads_per_cell-cell_filtering_data.reference$median_reads_per_cell),
+             subtitle=sprintf(fmt='Median reads per cell (%+d)', cell_filtering_data.reactions$median_reads_per_cell-seurat_object.reactions$reference_metrics$median_reads_per_cell),
              icon=icon('frog'),
              color='purple')})
   output$cell_filtering.n_genes_per_cell_box <- renderValueBox({
     react_to_cell_filtering()
     valueBox(value=scales::comma(cell_filtering_data.reactions$median_genes_per_cell),
-             subtitle=sprintf(fmt='Median genes per cell (%+d)', cell_filtering_data.reactions$median_genes_per_cell-cell_filtering_data.reference$median_genes_per_cell),
+             subtitle=sprintf(fmt='Median genes per cell (%+d)', cell_filtering_data.reactions$median_genes_per_cell-seurat_object.reactions$reference_metrics$median_genes_per_cell),
              icon=icon('crow'),
              color='purple')})
 
   ### formatted text box with filtering parameters
   output$`cell_filtering-subset_conditions` <- renderText({
     react_to_cell_filtering()
-    c(sprintf(fmt='# %s', seurat@project.name),
+    c(sprintf(fmt='# %s', seurat_object.reactions$seurat@project.name),
       sprintf(fmt='# n_cells=%s', comma(cell_filtering_data.reactions$n_cells)),
       paste(cell_filtering_data.reactions$subset_conditions, collapse=' &\n')) %>%
       paste(collapse='\n') -> cell_filtering_data.reactions$subset_conditions.text})
@@ -722,7 +724,7 @@ shinyAppServer <- function(input, output, session) {
 
   output$`cell_filtering-subset_conditions.tsv` <- renderUI({ # tab separate elements
     react_to_cell_filtering()
-    c(seurat@project.name,
+    c(seurat_object.reactions$seurat@project.name,
       cell_filtering_data.reactions$n_cells,
       paste(cell_filtering_data.reactions$subset_conditions, collapse=' & ')) %>%
       paste(collapse=',') %>%
@@ -742,10 +744,10 @@ shinyAppServer <- function(input, output, session) {
   # shared text boxes
 
   ## project name
-  project_name_box_opts <- list(value={seurat@project.name %>% str_replace_all('_', ' ') %>% str_to_upper()}, subtitle='Loaded Seurat object', icon=icon('certificate'), color='purple')
-  output$cell_filtering.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
-  output$genes_highlighting.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
-  output$features_heatmap.project_name_box <- renderValueBox(expr={do.call(what=valueBox, args=project_name_box_opts)})
+  project_name_box_opts <- list(subtitle='Loaded Seurat object', icon=icon('certificate'), color='purple')
+  output$cell_filtering.project_name_box <- renderValueBox(expr={append(project_name_box_opts, list(value=seurat_object.reactions$formatted.project.name)) %>% do.call(what=valueBox)})
+  output$genes_highlighting.project_name_box <- renderValueBox(expr={append(project_name_box_opts, list(value=seurat_object.reactions$formatted.project.name)) %>% do.call(what=valueBox)})
+  output$features_heatmap.project_name_box <- renderValueBox(expr={append(project_name_box_opts, list(value=seurat_object.reactions$formatted.project.name)) %>% do.call(what=valueBox)})
 
   # any code to exectue when the session ends
   session$onSessionEnded(function() {

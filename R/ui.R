@@ -10,10 +10,9 @@
 # load('int.RData') ######
 # # seurat <- human_CS17_thoracic
 # seurat <- human_CS17_brachial
-starter_gene <- sample(x=rownames(seurat), size=1)
-
+# starter_gene <- sample(x=rownames(seurat), size=1)
+starter_gene <- 'SOX2'
 # ################
-
 
 # tab definitions
 
@@ -91,7 +90,8 @@ gene_highlighting.tab <- menuItem(text='Highlight genes', tabName='gene_highligh
 
 ### define ui elements
 gene_name.dropdown <- autocomplete_input(id = 'gene_of_interest.dd', label = 'Gene name',
-                                         options = sort(rownames(seurat)),
+                                         # options = sort(rownames(seurat)),
+                                         options = NULL,
                                          placeholder = 'Gene name', value = starter_gene)
 
 seurat_cluster_set.dropdown <- selectInput(inputId = 'seurat_cluster_set.dd', label = 'Seurat cluster definitions',
@@ -104,7 +104,8 @@ append(colourInput.defaults, list(inputId='expression_max.colour', label='High',
 materialSwitch(inputId='expression_palette_full', label='Show full palette?', value=FALSE, right=TRUE, status='success') -> expression_paletette_type_selector
 
 expression_range.slider <- sliderInput(inputId='expression_range.slider', label='Expression limits',
-                                       min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))
+                                       # min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))
+                                       min=0, max=1, step=0.1, value=c(-Inf,Inf))
 
 opacity.slider <- sliderInput(inputId='opacity.slider', label='Opacity', min=0.1, max=1, step=0.1, value=1)
 
@@ -197,7 +198,7 @@ discover_markers.content <- tabItem(tabName = 'discover_markers-tab',
                                     h1('Find gene markers for clusters'))
 
 ## features of interest heatmap tab
-features_heatmap.tab <- menuItem(text='Features heatmap', tabName='features_heatmap-tab', icon=icon('crosshairs'))
+features_heatmap.tab <- menuItem(text='Features heatmap', tabName='features_heatmap-tab', icon=icon('crosshairs'), badgeLabel='!', badgeColor='red')
 
 ### define ui elements
 features_heatmap.features_of_interest.tb <- textAreaInput(inputId='features_of_interest.tb', label='Feature names', value='', width='100%', height='100%', placeholder='A list of gene names separated by whitespace, semicolon or comma')
@@ -232,15 +233,35 @@ features_heatmap.content <-tabItem(tabName='features_heatmap-tab',
                                            features_heatmap.boxes$features_selector))
 
 ## submit/configure data tab
-submit_data.tab <- menuItem(text='Submit data', tabName='submit_data_tab', icon=icon('cloud-upload'), badgeLabel='!', badgeColor='yellow', selected=TRUE)
+submit_data.tab <- menuItem(text='Configure', tabName='submit_data_tab', icon=icon('cloud-upload'), badgeLabel='!', badgeColor='yellow', selected=TRUE)
 
 ### define ui elements
+
+ls(envir=globalenv()) %>%
+  sapply(function(O) get(x=O, envir=globalenv()) %>% class()) %>%
+  enframe() %>%
+  plyr::dlply(~value, pluck, 'name') %>%
+  pluck('environment') %>%
+  rev() %>%
+  sapply(get, envir=globalenv()) %>%
+  append(list(`globalenv()`=globalenv())) %>%
+  rev() %>%
+  lapply(function(E) {ls(envir=E) %>% sapply(function(O) get(x=O, envir=E) %>% class()) %>% enframe() %>% plyr::dlply(~value, pluck, 'name') %>% pluck('Seurat')}) %>%
+  plyr::ldply(.id='env', enframe) %>%
+  unite(col='choiceValue', sep='$', env, value, remove=FALSE) %>%
+  mutate(choiceName=value) %>%
+  arrange(choiceName) -> available_seurat_objects
+
+prettyRadioButtons(inputId='seurat_select.input', label='Select a Seurat object', 
+                   choiceNames=available_seurat_objects$choiceName, choiceValues=available_seurat_objects$choiceValue,
+                   icon=icon('check'), shape='curve', outline=TRUE, bigger=TRUE, status='primary', animation='smooth') -> seurat_select.checkbox
 
 ### define layout boxes
 
 ### assemble tab content
 load_dataset.content <- tabItem(tabName='submit_data_tab',
-                                h1('Load a Seurat object'))
+                                h1('Select a Seurat object'),
+                                seurat_select.checkbox)
 
 ## menu tab hyperlinks
 email_me.tab <- menuItem(text='mail me', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] Hello there', icon=icon('comment-dots'))
@@ -270,13 +291,13 @@ list(cell_filtering.tab,
      feature_request.tab,
      bug_report.tab,
      github_link.tab) %>%
-  sidebarMenu() %>%
+  sidebarMenu(id='sidebarmenu') %>%
   dashboardSidebar() -> dashboard_sidebar
 
 # assemble the final UI
 list(header=dashboard_header,
      sidebar=dashboard_sidebar,
      body=dashboard_body,
-     title='seurat-vis',
+     title='seuratvis',
      skin='blue') %>%
   do.call(what=dashboardPage) -> shinyAppUI
