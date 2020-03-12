@@ -27,9 +27,10 @@ shinyAppServer <- function(input, output, session) {
     updateSelectInput(session=session, inputId='seurat_cluster_set.dd', choices=cluster_options)
     updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
 
-    progress$inc(detail='Combining UMAP and meta.data')
-    if(!is.null(seurat@reductions$umap))
-      umap <- cbind(seurat@meta.data, seurat@reductions$umap@cell.embeddings)
+    progress$inc(detail='Combining reduced dimension map and meta.data')
+    dimred_method <- 'tsne'
+    if(!is.null(seurat@reductions[[dimred_method]]))
+      dimred_map <- cbind(seurat@meta.data, {seurat@reductions[[dimred_method]]@cell.embeddings %>% as.data.frame() %>% set_names(c('DIMRED_1','DIMRED_2'))})
 
     if(is.null(seurat@meta.data$seurat_clusters))
       seurat@meta.data$seurat_clusters <- 0
@@ -57,7 +58,7 @@ shinyAppServer <- function(input, output, session) {
     updateTextInput(session=session, inputId='min_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$min_reads_per_cell)
     updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
     updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
-    update_autocomplete_input(session=session, id='gene_of_interest.dd', options=sort(rownames(seurat)))
+    update_autocomplete_input(session=session, id='gene_of_interest.dd', options=c(sort(rownames(seurat)), 'nFeature_RNA', 'nCount_RNA', 'percent_mt', 'orig.ident', 'orig.species','orig.timepoint','orig.tissue','orig.replicate'))
 
     progress$inc(detail='Saving variables')
     available_assays <- Assays(seurat)
@@ -73,7 +74,7 @@ shinyAppServer <- function(input, output, session) {
     seurat_object.reactions$mart <- seurat@misc$mart
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
-    seurat_object.reactions$umap <- umap
+    seurat_object.reactions$dimred <- dimred_map
     seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
   })
 
@@ -394,8 +395,8 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message=sprintf('Updating UI for %s', input$gene_of_interest.dd))
 
-    # cat(file=stderr(), sprintf('# reacting to gene selection with: %s\n', input$gene_of_interest.dd))
-    updateSliderInput(session=session, inputId='expression_range.slider', max={max(FetchData(object=seurat_object.reactions$seurat, vars=input$gene_of_interest.dd)+0.05) %>% round(digits=1)}, value=c(-Inf,Inf))
+    if(! startsWith(x=input$gene_of_interest.dd, prefix='orig.'))
+      updateSliderInput(session=session, inputId='expression_range.slider', max={max(FetchData(object=seurat_object.reactions$seurat, vars=input$gene_of_interest.dd)+0.05) %>% round(digits=1)}, value=c(-Inf,Inf))
 
     progress$inc(detail='Done')
     NULL}) -> update_slider
@@ -432,9 +433,9 @@ shinyAppServer <- function(input, output, session) {
     cluster_set <- sprintf('~%s', input$seurat_cluster_set.dd)
 
     progress$inc(detail='Making plot')
-    seurat_object.reactions$umap %>%
+    seurat_object.reactions$dimred %>%
       ggplot() +
-      aes(x=UMAP_1, y=UMAP_2) +
+      aes(x=DIMRED_1, y=DIMRED_2) +
       aes_string(colour=input$seurat_cluster_set.dd) +
       geom_point(size=input$gene_highlighting.point_size.slider, alpha=input$opacity.slider) +
       theme_void() +
@@ -442,9 +443,9 @@ shinyAppServer <- function(input, output, session) {
 
     if(input$gene_highlighting.label_clusters.checkbox) {
       progress$inc(detail='Getting cluster label positions')
-      seurat_object.reactions$umap %>%
+      seurat_object.reactions$dimred %>%
         group_by_at(vars(cluster_id=input$seurat_cluster_set.dd)) %>%
-        summarise(UMAP_1=mean(UMAP_1), UMAP_2=mean(UMAP_2)) -> data_labels
+        summarise(DIMRED_1=mean(DIMRED_1), DIMRED_2=mean(DIMRED_2)) -> data_labels
 
       progress$inc(detail='Adding cluster labels')
       output_plot +
@@ -465,15 +466,32 @@ shinyAppServer <- function(input, output, session) {
 
     update_slider()
     progress$inc(detail='Making plot')
-    FetchData(object=seurat_object.reactions$seurat, vars=c('UMAP_1','UMAP_2',input$gene_of_interest.dd)) %>%
-      set_names(c('UMAP_1','UMAP_2', 'expression_value')) %>%
+    seurat_object.reactions$dimred %>%
+      cbind({FetchData(object=seurat_object.reactions$seurat, vars=input$gene_of_interest.dd) %>% set_names('expression_value')}) -> data
+
+    if(is.numeric(data$expression_value)) {
+    data %>%
       arrange(expression_value) %>%
       ggplot() +
-      aes(x=UMAP_1, y=UMAP_2, colour=expression_value) +
+      aes(x=DIMRED_1, y=DIMRED_2, colour=expression_value) +
       geom_point(size=input$gene_highlighting.point_size.slider, alpha=input$opacity.slider) +
       scale_colour_gradient(low=input$expression_min.colour, high=input$expression_max.colour, limits=input$expression_range.slider, oob=scales::squish) +
       theme_void() +
-      theme(legend.position='none')})
+      theme(legend.position='none')
+    } else {
+    data %>%
+      arrange(expression_value) %>%
+      ggplot() +
+      aes(x=DIMRED_1, y=DIMRED_2, colour=expression_value) +
+      geom_point(size=input$gene_highlighting.point_size.slider, alpha=input$opacity.slider) +
+      # scale_colour_gradient(low=input$expression_min.colour, high=input$expression_max.colour, limits=input$expression_range.slider, oob=scales::squish) +
+      facet_wrap(~expression_value, scales='free') +
+      guides(colour=guide_legend(override.aes=list(size=3, shape=15))) +
+      theme_void() +
+      theme(legend.position='bottom', legend.title=element_blank())
+    }
+
+    })
 
   ## plot expression ranges per cluster
   genes_highlighting.expression_per_cluster.plot <- reactive({
