@@ -2,7 +2,7 @@
 #'
 #' @return shiny application object
 #'
-#' @example \dontrun {launchApp()}
+#' @example \dontrun{launchApp()}
 #'
 #' @import shiny
 #'
