@@ -24,7 +24,7 @@ find_seurat_objects <- function() {
       if(length(unique(x$env))==1) {
         x %>% mutate(choiceName=value)
       } else {
-        x %>% mutate(choiceName=str_c(str_remove_all(string=env, pattern='\\(\\)$'), value, sep=':'))
+        x %>% mutate(choiceName=str_c(str_remove_all(string=env, pattern='\\(\\)$'), value, sep=' : '))
       }}) %>%
     arrange(choiceName)
 }
