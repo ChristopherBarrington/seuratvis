@@ -1,13 +1,4 @@
 
-# gene_names_to_description <- c()
-# if(file.exists('D:/seurat-vis/temp-gene-info.tsv'))
-# read.delim('D:/seurat-vis/temp-gene-info.tsv') %>%
-#   filter(description!='') %>%
-#   mutate(description=str_remove_all(description, pattern=' \\[Source.+$')) %>%
-#   dplyr::select(external_gene_name, description) %>%
-#   unique() %>%
-#   deframe() -> gene_names_to_description
-
 10^(0:9) -> major_breaks_log10
 (2:9) * rep(major_breaks_log10, each=8) -> minor_breaks_log10
 
@@ -19,6 +10,8 @@ shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
   # load Seurat object from user ------------------------------------------------------------------
+
+  ## react to Seurat object selection
   seurat_object.reactions <- reactiveValues()
   observeEvent(eventExpr=input$seurat_select.input, handlerExpr={
 
