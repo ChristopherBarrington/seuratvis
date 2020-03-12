@@ -1,52 +1,28 @@
 
-gene_names_to_description <- c()
-if(file.exists('D:/seurat-vis/temp-gene-info.tsv'))
-read.delim('D:/seurat-vis/temp-gene-info.tsv') %>%
-  filter(description!='') %>%
-  mutate(description=str_remove_all(description, pattern=' \\[Source.+$')) %>%
-  dplyr::select(external_gene_name, description) %>%
-  unique() %>%
-  deframe() -> gene_names_to_description
+# gene_names_to_description <- c()
+# if(file.exists('D:/seurat-vis/temp-gene-info.tsv'))
+# read.delim('D:/seurat-vis/temp-gene-info.tsv') %>%
+#   filter(description!='') %>%
+#   mutate(description=str_remove_all(description, pattern=' \\[Source.+$')) %>%
+#   dplyr::select(external_gene_name, description) %>%
+#   unique() %>%
+#   deframe() -> gene_names_to_description
 
 10^(0:9) -> major_breaks_log10
 (2:9) * rep(major_breaks_log10, each=8) -> minor_breaks_log10
 
 shinyAppServer <- function(input, output, session) {
 
-#####################################################################################################################
-# this is just placeholder stuff
-  output$plot1 <- renderPlot({
+  progress <- shiny::Progress$new(session=session, min=0, max=4/10)
+  on.exit(progress$close())
+  progress$set(value=0, message='Loading environment')
 
-    plot1.data <<- rnorm(input$slider)
-    hist(plot1.data)
-  })
-
-  output$progressBox <- renderValueBox({
-    valueBox(value=sprintf('%.1f', sum(plot1.data>0)/input$slider*100),
-             subtitle='Values above 0',
-             icon=icon('percent'),
-             color='purple')})
-
-  output$plot2 <- renderPlot({
-    data <- runif(input$slider2)
-    hist(data)})
-
-  output$menuitem <- renderMenu({
-    s <- stringi::stri_rand_strings(n=1, length=5)
-    s <- Sys.getenv('USER')
-    menuItem(text=s, icon=icon('file-code-o'), href='https://github.com/rstudio/shinydashboard')})
-# this was just placeholder stuff
-#####################################################################################################################
-
- progress <- shiny::Progress$new(session=session, min=0, max=4/10)
- on.exit(progress$close())
- progress$set(value=0, message='Loading environment')
-
-#  # load Seurat object from user
+  # ###############################################################################################
+  # load Seurat object from user ------------------------------------------------------------------
   seurat_object.reactions <- reactiveValues()
   observeEvent(eventExpr=input$seurat_select.input, handlerExpr={
 
-    progress <- shiny::Progress$new(session=session, min=0, max=4/10)
+    progress <- shiny::Progress$new(session=session, min=0, max=7/10)
     on.exit(progress$close())
     progress$set(value=0, message='Loading environment')
 
@@ -60,7 +36,7 @@ shinyAppServer <- function(input, output, session) {
 
     progress$inc(detail='Combining UMAP and meta.data')
     if(!is.null(seurat@reductions$umap))
-      seurat_metadata_umap <- cbind(seurat@meta.data, seurat@reductions$umap@cell.embeddings)
+      umap <- cbind(seurat@meta.data, seurat@reductions$umap@cell.embeddings)
 
     if(is.null(seurat@meta.data$seurat_clusters))
       seurat@meta.data$seurat_clusters <- 0
@@ -71,8 +47,9 @@ shinyAppServer <- function(input, output, session) {
       gather(key='cluster_set', value='ID') %>%
       group_by(cluster_set) %>%
       summarise(N=length(unique(ID))+1) %>%
-      deframe() -> seurat_cluster_per_set
+      deframe() -> clusters_per_resolution
 
+    progress$inc(detail='Getting summary statistics')
     list(n_cells=nrow(seurat@meta.data),
          total_reads=sum(seurat@meta.data$nCount_RNA),
          median_reads_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
@@ -81,12 +58,15 @@ shinyAppServer <- function(input, output, session) {
          min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
          max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> cell_filtering_data.reference
 
+    progress$inc(detail='Updating UI elements')
     updateTextInput(session=session, inputId='min_features_per_cell.textinput', placeholder=cell_filtering_data.reference$min_genes_per_cell)
     updateTextInput(session=session, inputId='max_features_per_cell.textinput', placeholder=cell_filtering_data.reference$max_genes_per_cell)
     updateTextInput(session=session, inputId='min_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$min_reads_per_cell)
     updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
     updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
+    update_autocomplete_input(session=session, id='gene_of_interest.dd', options=sort(rownames(seurat)))
 
+    progress$inc(detail='Saving variables')
     available_assays <- Assays(seurat)
     available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
 
@@ -95,11 +75,13 @@ shinyAppServer <- function(input, output, session) {
 
     seurat@active.assay <- selected_assay
 
-
+    # copy the important stuff into the reaction values
     seurat_object.reactions$seurat <- seurat
+    seurat_object.reactions$mart <- seurat@misc$mart
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
-
+    seurat_object.reactions$umap <- umap
+    seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
   })
 
   # ###############################################################################################
@@ -420,7 +402,7 @@ shinyAppServer <- function(input, output, session) {
     progress$set(value=0, message=sprintf('Updating UI for %s', input$gene_of_interest.dd))
 
     # cat(file=stderr(), sprintf('# reacting to gene selection with: %s\n', input$gene_of_interest.dd))
-    updateSliderInput(session=session, inputId='expression_range.slider', max={max(FetchData(object=seurat, vars=input$gene_of_interest.dd)+0.05) %>% round(digits=1)}, value=c(-Inf,Inf))
+    updateSliderInput(session=session, inputId='expression_range.slider', max={max(FetchData(object=seurat_object.reactions$seurat, vars=input$gene_of_interest.dd)+0.05) %>% round(digits=1)}, value=c(-Inf,Inf))
 
     progress$inc(detail='Done')
     NULL}) -> update_slider
@@ -457,7 +439,7 @@ shinyAppServer <- function(input, output, session) {
     cluster_set <- sprintf('~%s', input$seurat_cluster_set.dd)
 
     progress$inc(detail='Making plot')
-    seurat_metadata_umap %>%
+    seurat_object.reactions$umap %>%
       ggplot() +
       aes(x=UMAP_1, y=UMAP_2) +
       aes_string(colour=input$seurat_cluster_set.dd) +
@@ -467,7 +449,7 @@ shinyAppServer <- function(input, output, session) {
 
     if(input$gene_highlighting.label_clusters.checkbox) {
       progress$inc(detail='Getting cluster label positions')
-      seurat_metadata_umap %>%
+      seurat_object.reactions$umap %>%
         group_by_at(vars(cluster_id=input$seurat_cluster_set.dd)) %>%
         summarise(UMAP_1=mean(UMAP_1), UMAP_2=mean(UMAP_2)) -> data_labels
 
@@ -490,7 +472,7 @@ shinyAppServer <- function(input, output, session) {
 
     update_slider()
     progress$inc(detail='Making plot')
-    FetchData(object=seurat, vars=c('UMAP_1','UMAP_2',input$gene_of_interest.dd)) %>%
+    FetchData(object=seurat_object.reactions$seurat, vars=c('UMAP_1','UMAP_2',input$gene_of_interest.dd)) %>%
       set_names(c('UMAP_1','UMAP_2', 'expression_value')) %>%
       arrange(expression_value) %>%
       ggplot() +
@@ -508,7 +490,7 @@ shinyAppServer <- function(input, output, session) {
 
     update_slider()
     progress$inc(detail='Fetching data')
-    FetchData(object=seurat, vars=c(input$seurat_cluster_set.dd,input$gene_of_interest.dd)) %>%
+    FetchData(object=seurat_object.reactions$seurat, vars=c(input$seurat_cluster_set.dd,input$gene_of_interest.dd)) %>%
       set_names(c('cluster_id', 'expression_value')) -> data
 
     progress$inc(detail='Summarising expression in clusters')
@@ -537,7 +519,7 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making heatmap of normalised feature values')
 
-    if(is.null(seurat_object.reactions$seurat))
+    # if(is.null(seurat_object.reactions$seurat))
       return(NULL)
 
     if(FALSE)
@@ -644,13 +626,13 @@ shinyAppServer <- function(input, output, session) {
              icon=icon('galactic-republic'),
              color='purple')})
   output$genes_highlighting.n_clusters_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(seurat_cluster_per_set[input$seurat_cluster_set.dd]),
+    valueBox(value=scales::comma(seurat_object.reactions$clusters_per_resolution[input$seurat_cluster_set.dd]),
              subtitle='Cell clusters',
              icon=icon('first-order'),
              color='purple')})
   output$genes_highlighting.selected_gene_box <- renderValueBox(expr={
     valueBox(value=input$gene_of_interest.dd,
-             subtitle={gene_names_to_description[input$gene_of_interest.dd] %>% (function(x) ifelse(is.null(x), 'Selected gene', x)) %>% str_trunc(width=100)},
+             subtitle=get_formatted_gene_description(mart=seurat_object.reactions$mart, external_gene_name=input$gene_of_interest.dd),
              icon=icon('jedi-order'),
              color='purple')})
   output$genes_highlighting.n_genes_box <- renderValueBox(expr={

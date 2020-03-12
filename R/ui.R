@@ -89,20 +89,14 @@ cell_filtering.content <- tabItem(tabName='cell_filtering-tab',
 gene_highlighting.tab <- menuItem(text='Highlight genes', tabName='gene_highlighting-tab', icon=icon('search'))
 
 ### define ui elements
-gene_name.dropdown <- autocomplete_input(id = 'gene_of_interest.dd', label = 'Gene name',
-                                         # options = sort(rownames(seurat)),
-                                         options = NULL,
+gene_name.dropdown <- autocomplete_input(id='gene_of_interest.dd', label='Gene name',
+                                         # options=sort(rownames(seurat)),
+                                         options=NULL,
                                          placeholder = 'Gene name', value = starter_gene)
 
-seurat_cluster_set.dropdown <- selectInput(inputId = 'seurat_cluster_set.dd', label = 'Seurat cluster definitions',
-                                           choices = 'seurat_clusters', selected = 'seurat_clusters',
-                                           multiple = FALSE)
-#### colour selector palette box
-colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=colour_palette, allowTransparent=FALSE, returnName=TRUE)
-append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
-append(colourInput.defaults, list(inputId='expression_max.colour', label='High', value='darkviolet')) %>% do.call(what=colourInput) -> expression_max.colour.selector
-materialSwitch(inputId='expression_palette_full', label='Show full palette?', value=FALSE, right=TRUE, status='success') -> expression_paletette_type_selector
-
+seurat_cluster_set.dropdown <- selectInput(inputId='seurat_cluster_set.dd', label='Seurat cluster definitions',
+                                           choices='seurat_clusters', selected='seurat_clusters',
+                                           multiple=FALSE)
 expression_range.slider <- sliderInput(inputId='expression_range.slider', label='Expression limits',
                                        # min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))
                                        min=0, max=1, step=0.1, value=c(-Inf,Inf))
@@ -114,6 +108,13 @@ gene_highlighting.point_size <- sliderInput(inputId='gene_highlighting.point_siz
                                             # min=1, max=15, step=1, value=3)
 
 gene_highlighting.label_clusters <- checkboxInput(inputId='gene_highlighting.label_clusters.checkbox', label='Label clusters', value=TRUE)
+gene_highlighting.label_clusters <- materialSwitch(inputId='gene_highlighting.label_clusters.checkbox', label='Cluster labels', value=TRUE, right=TRUE, status='success')
+
+#### colour selector palette box
+colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=colour_palette, allowTransparent=FALSE, returnName=TRUE)
+append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
+append(colourInput.defaults, list(inputId='expression_max.colour', label='High', value='darkviolet')) %>% do.call(what=colourInput) -> expression_max.colour.selector
+materialSwitch(inputId='expression_palette_full', label='Show full palette?', value=FALSE, right=TRUE, status='success') -> expression_paletette_type_selector
 
 ### define layout boxes
 gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
