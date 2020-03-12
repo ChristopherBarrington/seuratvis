@@ -233,25 +233,10 @@ features_heatmap.content <-tabItem(tabName='features_heatmap-tab',
                                            features_heatmap.boxes$features_selector))
 
 ## submit/configure data tab
-submit_data.tab <- menuItem(text='Configure', tabName='submit_data_tab', icon=icon('cloud-upload'), badgeLabel='!', badgeColor='yellow', selected=TRUE)
+submit_data.tab <- menuItem(text='Configure', tabName='submit_data_tab', icon=icon('cogs'), badgeLabel='!', badgeColor='yellow', selected=TRUE)
 
 ### define ui elements
-
-ls(envir=globalenv()) %>%
-  sapply(function(O) get(x=O, envir=globalenv()) %>% class()) %>%
-  enframe() %>%
-  plyr::dlply(~value, pluck, 'name') %>%
-  pluck('environment') %>%
-  rev() %>%
-  sapply(get, envir=globalenv()) %>%
-  append(list(`globalenv()`=globalenv())) %>%
-  rev() %>%
-  lapply(function(E) {ls(envir=E) %>% sapply(function(O) get(x=O, envir=E) %>% class()) %>% enframe() %>% plyr::dlply(~value, pluck, 'name') %>% pluck('Seurat')}) %>%
-  plyr::ldply(.id='env', enframe) %>%
-  unite(col='choiceValue', sep='$', env, value, remove=FALSE) %>%
-  mutate(choiceName=value) %>%
-  arrange(choiceName) -> available_seurat_objects
-
+available_seurat_objects <- find_seurat_objects()
 prettyRadioButtons(inputId='seurat_select.input', label='Select a Seurat object', 
                    choiceNames=available_seurat_objects$choiceName, choiceValues=available_seurat_objects$choiceValue,
                    icon=icon('check'), shape='curve', outline=TRUE, bigger=TRUE, status='primary', animation='smooth') -> seurat_select.checkbox
