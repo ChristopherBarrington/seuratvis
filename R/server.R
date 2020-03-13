@@ -28,7 +28,7 @@ shinyAppServer <- function(input, output, session) {
     updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
 
     progress$inc(detail='Combining reduced dimension map and meta.data')
-    dimred_method <- 'tsne'
+    dimred_method <- 'umap'
     if(!is.null(seurat@reductions[[dimred_method]]))
       dimred_map <- cbind(seurat@meta.data, {seurat@reductions[[dimred_method]]@cell.embeddings %>% as.data.frame() %>% set_names(c('DIMRED_1','DIMRED_2'))})
 
@@ -64,7 +64,7 @@ shinyAppServer <- function(input, output, session) {
     available_assays <- Assays(seurat)
     available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
 
-    selected_assay <- 'RNA'
+    selected_assay <- 'SCT'
     selected_slot <- 'data'
 
     seurat@active.assay <- selected_assay
