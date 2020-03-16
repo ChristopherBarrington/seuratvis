@@ -3,8 +3,8 @@
 #' 
 #' Use biomaRt to get formatted description of a gene from gene name
 #' 
-#' @param external_gene_name
-#' @param mart
+#' @param external_gene_name name of gene to query
+#' @param mart a \code{biomaRt} object
 #' 
 #' @return a character string of the \code{attribute} from the \code{mart} for the \code{external_gene_name}.
 #' 

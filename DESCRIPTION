@@ -27,5 +27,6 @@ Depends:
   ComplexHeatmap,
   Seurat,
   tidyverse,
-  magrittr
+  magrittr,
+  biomaRt
 RoxygenNote: 7.0.2

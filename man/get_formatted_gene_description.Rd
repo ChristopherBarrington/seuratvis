@@ -7,7 +7,9 @@
 get_formatted_gene_description(external_gene_name, mart)
 }
 \arguments{
-\item{mart}{}
+\item{external_gene_name}{name of gene to query}
+
+\item{mart}{a \code{biomaRt} object}
 }
 \value{
 a character string of the \code{attribute} from the \code{mart} for the \code{external_gene_name}.

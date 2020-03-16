@@ -2,8 +2,6 @@
 #'
 #' @return shiny application object
 #'
-#' @example \dontrun{launchApp()}
-#'
 #' @import shiny
 #'
 #' @export
