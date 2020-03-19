@@ -6,10 +6,9 @@ This package is very early stages and under development. Bug reports and feature
 
 # run package
 
-At the moment this is not very strightforward and needs to be (dramatically) improved. The package expects the current workspace to contain:
+The package expects the current workspace to contain:
 
-* a `Seurat` object named `seurat`
-* (optionally) a named `character` vector called `gene_names_to_description`, where names are gene IDs (ie the row names of `seurat`) and the values are a description of the gene
+* at least one `Seurat` object in the global- or a sub-environment. The global environment and any environments within global are searched for Seurat object which can be selected from the configure tab.
 
 ## clone this repository
 
@@ -17,11 +16,19 @@ Make a local copy of the `master` branch using `git clone ChristopherBarrington/
 
 ## load the package in `R`
 
-Now use `R` to load the package and run the `shiny` app
+Now use `R` to load the package and run the `shiny` app (you will need to install all of the dependencies manually, sorry!).
 
 ```
 setwd('/path/to/seuratvis/containing/directory')
 devtools::load_all('seuratvis', export_all=FALSE)
+launchApp()
+```
+## install the package
+
+Could use `devtools` to install the master branch as a package. (untested)
+
+```
+devtools::install_github('ChristopherBarrington/seuratvis')
 launchApp()
 ```
 
@@ -30,4 +37,4 @@ The app should now open a window using the gene names provided by the vector and
 # developments
 
 * loading seurat objects by uploading a dataset (maybe)
-* check for `seurat` object before continuing installation etc or remove dependence for the object to be in workspace for installation
+* all the stuff in the Issues
