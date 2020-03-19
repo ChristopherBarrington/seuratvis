@@ -489,9 +489,7 @@ shinyAppServer <- function(input, output, session) {
       guides(colour=guide_legend(override.aes=list(size=3, shape=15))) +
       theme_void() +
       theme(legend.position='bottom', legend.title=element_blank())
-    }
-
-    })
+    }})
 
   ## plot expression ranges per cluster
   genes_highlighting.expression_per_cluster.plot <- reactive({
