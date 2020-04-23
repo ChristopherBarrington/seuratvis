@@ -633,6 +633,8 @@ shinyAppServer <- function(input, output, session) {
   renderPlot(genes_highlighting.gene_expression_map.plot()) -> output$`genes_highlighting-gene_expression_map`
   renderPlot(genes_highlighting.expression_per_cluster.plot()) -> output$`genes_highlighting-expression_per_cluster`
 
+  # renderPlotly({plot_ly(z=~volcano) %>% add_surface()}) -> output$`genes_highlighting-expression_per_cluster`
+
   output$genes_highlighting.n_cells_box <- renderValueBox(expr={
     valueBox(value={ncol(seurat_object.reactions$seurat) %>% comma()},
              subtitle='Cells in map',
