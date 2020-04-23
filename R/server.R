@@ -67,6 +67,7 @@ shinyAppServer <- function(input, output, session) {
     seurat@active.assay <- selected_assay
 
     # copy the important stuff into the reaction values
+   # copy the important stuff into the reaction values
     seurat_object.reactions$seurat <- seurat
     seurat_object.reactions$mart <- seurat@misc$mart
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
@@ -169,8 +170,9 @@ shinyAppServer <- function(input, output, session) {
     # session$resetBrush(brushId='percent_mitochondria_density.brush')
     cell_filtering_data.reactions$max_percent_mitochondria <- as.numeric(input$percent_mitochondria.textinput)})
 
+  ## react to opening tab with a filtered object loaded
   observeEvent(input$sidebarmenu, {
-    if(input$sidebarmenu=='cell_filtering-tab' & (!is.null(seurat_object.reactions$seurat@misc$cells_filtered) && seurat_object.reactions$seurat@misc$cells_filtered))
+    if(!is.null(seurat_object.reactions$seurat) & input$sidebarmenu=='cell_filtering-tab' & (!is.null(seurat_object.reactions$seurat@misc$cells_filtered) && seurat_object.reactions$seurat@misc$cells_filtered))
       sendSweetAlert(session=session, type='success', html=TRUE,
                      title='Notice', btn_labels='Great!',
                      text=tags$span('It looks like low-quality cells have already been removed from this Seurat object:', tags$h5(tags$code('@misc$cells_filtered == TRUE'))),
