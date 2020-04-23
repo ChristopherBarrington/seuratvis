@@ -408,7 +408,7 @@ shinyAppServer <- function(input, output, session) {
     palette_type <- ifelse(input$expression_palette_full, 'square', 'limited')
 
     for(inputId in c('expression_min.colour','expression_max.colour'))
-      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette)
+      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=get_colour_palette())
 
     progress$inc(detail='Done')}) -> update_palette_type
 
