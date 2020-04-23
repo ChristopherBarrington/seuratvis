@@ -71,7 +71,6 @@ shinyAppServer <- function(input, output, session) {
     seurat_object.reactions$mart <- seurat@misc$mart
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
-    # seurat_object.reactions$dimred <- dimred_map
     seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
   })
 
@@ -398,7 +397,7 @@ shinyAppServer <- function(input, output, session) {
     progress$inc(detail='Done')
     NULL}) -> update_slider
 
-  ### when palette full palette type is selected
+  ### when full palette type is selected
   observeEvent(eventExpr=input$expression_palette_full, handlerExpr={
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
@@ -504,7 +503,7 @@ shinyAppServer <- function(input, output, session) {
 
     update_slider()
     progress$inc(detail='Fetching data')
-    FetchData(object=seurat_object.reactions$seurat, vars=c(input$seurat_cluster_set.dd,input$gene_of_interest.dd)) %>%
+    FetchData(object=seurat_object.reactions$seurat, vars=c(input$seurat_cluster_set.dd, input$gene_of_interest.dd)) %>%
       set_names(c('cluster_id', 'expression_value')) -> data
 
     progress$inc(detail='Summarising expression in clusters')
@@ -635,12 +634,12 @@ shinyAppServer <- function(input, output, session) {
   renderPlot(genes_highlighting.expression_per_cluster.plot()) -> output$`genes_highlighting-expression_per_cluster`
 
   output$genes_highlighting.n_cells_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(ncol(seurat_object.reactions$seurat)),
+    valueBox(value={ncol(seurat_object.reactions$seurat) %>% comma()},
              subtitle='Cells in map',
              icon=icon('galactic-republic'),
              color='purple')})
   output$genes_highlighting.n_clusters_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(seurat_object.reactions$clusters_per_resolution[input$seurat_cluster_set.dd]),
+    valueBox(value={seurat_object.reactions$clusters_per_resolution[input$seurat_cluster_set.dd] %>% comma()},
              subtitle='Cell clusters',
              icon=icon('first-order'),
              color='purple')})
@@ -650,22 +649,22 @@ shinyAppServer <- function(input, output, session) {
              icon=icon('jedi-order'),
              color='purple')})
   output$genes_highlighting.n_genes_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(sapply(seurat_object.reactions$seurat@assays, function(x) nrow(x@data)) %>% max()),
-             subtitle='Unique genes detected (max)',
+    valueBox(value={nrow(seurat_object.reactions$seurat) %>% comma()},
+             subtitle='Unique genes in assay',
              icon=icon('galactic-senate'),
              color='purple')})
   output$genes_highlighting.n_reads_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(sum(seurat_object.reactions$seurat$nCount_RNA)),
+    valueBox(value={sum(seurat_object.reactions$seurat$nCount_RNA) %>% comma()},
              subtitle='Total reads in cells',
              icon=icon('old-republic'),
              color='purple')})
   output$genes_highlighting.n_reads_per_cell_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(round(median(seurat_object.reactions$seurat$nCount_RNA), digits=1)),
+    valueBox(value={round(median(seurat_object.reactions$seurat$nCount_RNA), digits=1) %>% comma()},
              subtitle='Median reads per cell',
              icon=icon('frog'),
              color='purple')})
   output$genes_highlighting.n_genes_per_cell_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(round(median(seurat_object.reactions$seurat$nFeature_RNA), digits=1)),
+    valueBox(value={round(median(seurat_object.reactions$seurat$nFeature_RNA), digits=1)  %>% comma()},
              subtitle='Median genes per cell',
              icon=icon('crow'),
              color='purple')})
