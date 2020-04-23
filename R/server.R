@@ -445,6 +445,7 @@ shinyAppServer <- function(input, output, session) {
       ggplot() +
       aes(x=DIMRED_1, y=DIMRED_2) +
       aes_string(colour=input$seurat_cluster_set.dd) +
+      geom_hline(yintercept=0) + geom_vline(xintercept=0) +
       geom_point(size=input$gene_highlighting.point_size.slider, alpha=input$opacity.slider) +
       theme_void() +
       theme(legend.position='none') -> output_plot
