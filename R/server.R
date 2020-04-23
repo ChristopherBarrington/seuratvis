@@ -15,7 +15,10 @@ shinyAppServer <- function(input, output, session) {
   seurat_object.reactions <- reactiveValues()
   observeEvent(eventExpr=input$seurat_select.input, handlerExpr={
 
-    progress <- shiny::Progress$new(session=session, min=0, max=7/10)
+    if(input$seurat_select.input=='')
+      return(NULL)
+
+    progress <- shiny::Progress$new(session=session, min=0, max=8/10)
     on.exit(progress$close())
     progress$set(value=0, message='Loading environment')
 
@@ -48,6 +51,11 @@ shinyAppServer <- function(input, output, session) {
          min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
          max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> cell_filtering_data.reference
 
+    progress$inc(detail='Setting default assay')
+    selected_assay <- 'RNA'
+    DefaultAssay(seurat) <- selected_assay
+    seurat <- NormalizeData(seurat)
+
     progress$inc(detail='Updating UI elements')
     updateTextInput(session=session, inputId='min_features_per_cell.textinput', placeholder=cell_filtering_data.reference$min_genes_per_cell)
     updateTextInput(session=session, inputId='max_features_per_cell.textinput', placeholder=cell_filtering_data.reference$max_genes_per_cell)
@@ -61,12 +69,6 @@ shinyAppServer <- function(input, output, session) {
     available_assays <- Assays(seurat)
     available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
 
-    selected_assay <- 'SCT'
-    selected_slot <- 'data'
-
-    seurat@active.assay <- selected_assay
-
-    # copy the important stuff into the reaction values
    # copy the important stuff into the reaction values
     seurat_object.reactions$seurat <- seurat
     seurat_object.reactions$mart <- seurat@misc$mart
