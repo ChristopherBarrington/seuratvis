@@ -27,11 +27,7 @@ shinyAppServer <- function(input, output, session) {
     updateSelectInput(session=session, inputId='seurat_cluster_set.dd', choices=cluster_options)
     updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
 
-    progress$inc(detail='Combining reduced dimension map and meta.data')
-    dimred_method <- 'umap'
-    if(!is.null(seurat@reductions[[dimred_method]]))
-      dimred_map <- cbind(seurat@meta.data, {seurat@reductions[[dimred_method]]@cell.embeddings %>% as.data.frame() %>% set_names(c('DIMRED_1','DIMRED_2'))})
-
+    progress$inc(detail='Checking meta.data')
     if(is.null(seurat@meta.data$seurat_clusters))
       seurat@meta.data$seurat_clusters <- 0
 
@@ -59,6 +55,7 @@ shinyAppServer <- function(input, output, session) {
     updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
     updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
     update_autocomplete_input(session=session, id='gene_of_interest.dd', options=c(sort(rownames(seurat)), 'nFeature_RNA', 'nCount_RNA', 'percent_mt', 'orig.ident', 'orig.species','orig.timepoint','orig.tissue','orig.replicate'))
+    updateSelectInput(session=session, inputId='reduction_selection.dd', choices=names(seurat@reductions), selected={names(seurat@reductions) %>% tail(n=1)})
 
     progress$inc(detail='Saving variables')
     available_assays <- Assays(seurat)
@@ -74,7 +71,7 @@ shinyAppServer <- function(input, output, session) {
     seurat_object.reactions$mart <- seurat@misc$mart
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
-    seurat_object.reactions$dimred <- dimred_map
+    # seurat_object.reactions$dimred <- dimred_map
     seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
   })
 
@@ -420,6 +417,14 @@ shinyAppServer <- function(input, output, session) {
 
   observeEvent(eventExpr=input$expression_max.colour, handlerExpr={
     add_to_colour_palette(input$expression_max.colour)})
+
+  ## react to reduction method selection
+  observeEvent(eventExpr=input$reduction_selection.dd, handlerExpr={
+    if(input$reduction_selection.dd != '')
+      seurat_object.reactions$seurat@reductions[[input$reduction_selection.dd]]@cell.embeddings[,1:2] %>%
+        as.data.frame() %>%
+        set_names(c('DIMRED_1','DIMRED_2')) %>%
+        cbind(seurat_object.reactions$seurat@meta.data) -> seurat_object.reactions$dimred})
 
   ## gene highlighting
   # genes_highlighting.reactions <- reactiveValues(data=NULL, expression_map=NULL, cluster_expression=NULL, expression_map.running=0, cluster_expression.running=0)
