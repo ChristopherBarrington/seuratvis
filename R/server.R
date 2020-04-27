@@ -15,7 +15,10 @@ shinyAppServer <- function(input, output, session) {
   seurat_object.reactions <- reactiveValues()
   observeEvent(eventExpr=input$seurat_select.input, handlerExpr={
 
-    progress <- shiny::Progress$new(session=session, min=0, max=7/10)
+    if(input$seurat_select.input=='')
+      return(NULL)
+
+    progress <- shiny::Progress$new(session=session, min=0, max=9/10)
     on.exit(progress$close())
     progress$set(value=0, message='Loading environment')
 
@@ -27,13 +30,16 @@ shinyAppServer <- function(input, output, session) {
     updateSelectInput(session=session, inputId='seurat_cluster_set.dd', choices=cluster_options)
     updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
 
-    progress$inc(detail='Combining reduced dimension map and meta.data')
-    dimred_method <- 'umap'
-    if(!is.null(seurat@reductions[[dimred_method]]))
-      dimred_map <- cbind(seurat@meta.data, {seurat@reductions[[dimred_method]]@cell.embeddings %>% as.data.frame() %>% set_names(c('DIMRED_1','DIMRED_2'))})
-
+    progress$inc(detail='Checking meta.data')
     if(is.null(seurat@meta.data$seurat_clusters))
       seurat@meta.data$seurat_clusters <- 0
+
+    progress$inc(detail='Initialising reduced dimension plot')
+    if(input$reduction_selection.dd != '')
+      seurat@reductions[[input$reduction_selection.dd]]@cell.embeddings[,1:2] %>%
+        as.data.frame() %>%
+        set_names(c('DIMRED_1','DIMRED_2')) %>%
+        cbind(seurat@meta.data) -> seurat_object.reactions$dimred
 
     progress$inc(detail='Counting clusters identified in each set')
     select_at(seurat@meta.data, vars(contains('_snn_res.'), 'seurat_clusters')) %>%
@@ -52,6 +58,12 @@ shinyAppServer <- function(input, output, session) {
          min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
          max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> cell_filtering_data.reference
 
+    progress$inc(detail='Setting default assay')
+    selected_assay <- 'RNA'
+    DefaultAssay(seurat) <- selected_assay
+    if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
+      seurat <- NormalizeData(seurat)
+
     progress$inc(detail='Updating UI elements')
     updateTextInput(session=session, inputId='min_features_per_cell.textinput', placeholder=cell_filtering_data.reference$min_genes_per_cell)
     updateTextInput(session=session, inputId='max_features_per_cell.textinput', placeholder=cell_filtering_data.reference$max_genes_per_cell)
@@ -59,22 +71,17 @@ shinyAppServer <- function(input, output, session) {
     updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
     updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
     update_autocomplete_input(session=session, id='gene_of_interest.dd', options=c(sort(rownames(seurat)), 'nFeature_RNA', 'nCount_RNA', 'percent_mt', 'orig.ident', 'orig.species','orig.timepoint','orig.tissue','orig.replicate'))
+    updateSelectInput(session=session, inputId='reduction_selection.dd', choices=names(seurat@reductions), selected={names(seurat@reductions) %>% tail(n=1)})
 
     progress$inc(detail='Saving variables')
     available_assays <- Assays(seurat)
     available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
 
-    selected_assay <- 'SCT'
-    selected_slot <- 'data'
-
-    seurat@active.assay <- selected_assay
-
-    # copy the important stuff into the reaction values
+   # copy the important stuff into the reaction values
     seurat_object.reactions$seurat <- seurat
     seurat_object.reactions$mart <- seurat@misc$mart
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
-    seurat_object.reactions$dimred <- dimred_map
     seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
   })
 
@@ -173,8 +180,9 @@ shinyAppServer <- function(input, output, session) {
     # session$resetBrush(brushId='percent_mitochondria_density.brush')
     cell_filtering_data.reactions$max_percent_mitochondria <- as.numeric(input$percent_mitochondria.textinput)})
 
+  ## react to opening tab with a filtered object loaded
   observeEvent(input$sidebarmenu, {
-    if(input$sidebarmenu=='cell_filtering-tab' & (!is.null(seurat_object.reactions$seurat@misc$cells_filtered) && seurat_object.reactions$seurat@misc$cells_filtered))
+    if(!is.null(seurat_object.reactions$seurat) & input$sidebarmenu=='cell_filtering-tab' & (!is.null(seurat_object.reactions$seurat@misc$cells_filtered) && seurat_object.reactions$seurat@misc$cells_filtered))
       sendSweetAlert(session=session, type='success', html=TRUE,
                      title='Notice', btn_labels='Great!',
                      text=tags$span('It looks like low-quality cells have already been removed from this Seurat object:', tags$h5(tags$code('@misc$cells_filtered == TRUE'))),
@@ -401,7 +409,7 @@ shinyAppServer <- function(input, output, session) {
     progress$inc(detail='Done')
     NULL}) -> update_slider
 
-  ### when palette full palette type is selected
+  ### when full palette type is selected
   observeEvent(eventExpr=input$expression_palette_full, handlerExpr={
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
@@ -410,7 +418,7 @@ shinyAppServer <- function(input, output, session) {
     palette_type <- ifelse(input$expression_palette_full, 'square', 'limited')
 
     for(inputId in c('expression_min.colour','expression_max.colour'))
-      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette)
+      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=get_colour_palette())
 
     progress$inc(detail='Done')}) -> update_palette_type
 
@@ -420,6 +428,14 @@ shinyAppServer <- function(input, output, session) {
 
   observeEvent(eventExpr=input$expression_max.colour, handlerExpr={
     add_to_colour_palette(input$expression_max.colour)})
+
+  ## react to reduction method selection
+  observeEvent(eventExpr=input$reduction_selection.dd, handlerExpr={
+    if(input$reduction_selection.dd != '')
+      seurat_object.reactions$seurat@reductions[[input$reduction_selection.dd]]@cell.embeddings[,1:2] %>%
+        as.data.frame() %>%
+        set_names(c('DIMRED_1','DIMRED_2')) %>%
+        cbind(seurat_object.reactions$seurat@meta.data) -> seurat_object.reactions$dimred})
 
   ## gene highlighting
   # genes_highlighting.reactions <- reactiveValues(data=NULL, expression_map=NULL, cluster_expression=NULL, expression_map.running=0, cluster_expression.running=0)
@@ -437,6 +453,7 @@ shinyAppServer <- function(input, output, session) {
       ggplot() +
       aes(x=DIMRED_1, y=DIMRED_2) +
       aes_string(colour=input$seurat_cluster_set.dd) +
+      geom_hline(yintercept=0) + geom_vline(xintercept=0) +
       geom_point(size=input$gene_highlighting.point_size.slider, alpha=input$opacity.slider) +
       theme_void() +
       theme(legend.position='none') -> output_plot
@@ -499,26 +516,38 @@ shinyAppServer <- function(input, output, session) {
 
     update_slider()
     progress$inc(detail='Fetching data')
-    FetchData(object=seurat_object.reactions$seurat, vars=c(input$seurat_cluster_set.dd,input$gene_of_interest.dd)) %>%
+    FetchData(object=seurat_object.reactions$seurat, vars=c(input$seurat_cluster_set.dd, input$gene_of_interest.dd)) %>%
       set_names(c('cluster_id', 'expression_value')) -> data
 
-    progress$inc(detail='Summarising expression in clusters')
-    data %>%
-      group_by(cluster_id) %>%
-      summarise(q25=quantile(expression_value, 0.25), q75=quantile(expression_value, 0.75), median=median(expression_value)) %>%
-      mutate(iqr=q75-q25, lower=q25-1.5*iqr, upper=q75+1.5*iqr) -> cluster_data_summary
+    if(is.numeric(data$expression_value)) {
+      progress$inc(detail='Summarising expression in clusters')
+      data %>%
+        # filter(expression_value>0) %>%
+        group_by(cluster_id) %>%
+        summarise(q25=quantile(expression_value, 0.25), q75=quantile(expression_value, 0.75), median=median(expression_value)) %>%
+        mutate(iqr=q75-q25, lower=q25-1.5*iqr, upper=q75+1.5*iqr) -> cluster_data_summary
 
-    progress$inc(detail='Making plot')
-    cluster_data_summary %>%
-      gather(key='key', value='y', lower, upper) %>%
-      mutate(x={as.character(cluster_id) %>% as.numeric()}) %>%
-      ggplot() +
-      aes(x=x, y=y, colour=cluster_id) +
-      labs(x='Cluster identifier', y='Normalised expression') +
-      geom_line(size=1) +
-      geom_point(mapping=aes(y=median), colour='black', shape=20, size=3) +
-      theme_bw() +
-      theme(legend.position='none', panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())})
+      progress$inc(detail='Making plot')
+      cluster_data_summary %>%
+        gather(key='key', value='y', lower, upper) %>%
+        mutate(x={as.character(cluster_id) %>% as.numeric()}) %>%
+        ggplot() +
+        aes(x=x, y=y, colour=cluster_id) +
+        labs(x='Cluster identifier', y='Normalised expression') +
+        geom_line(size=1) +
+        geom_point(mapping=aes(y=median), colour='black', shape=20, size=3) +
+        theme_bw() +
+        theme(legend.position='none', panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())
+    } else {
+      data %>%
+        mutate(x={as.character(cluster_id) %>% as.numeric()}) %>%
+        ggplot() +
+        aes(x=x, fill=expression_value) +
+        labs(x='Cluster identifier', y='Frequency') +
+        geom_bar(position='dodge') +
+        theme_bw() +
+        theme(legend.position='none', panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())
+    }})
 
   # ###############################################################################################
   # features heatmap tab --------------------------------------------------------------------------
@@ -629,13 +658,15 @@ shinyAppServer <- function(input, output, session) {
   renderPlot(genes_highlighting.gene_expression_map.plot()) -> output$`genes_highlighting-gene_expression_map`
   renderPlot(genes_highlighting.expression_per_cluster.plot()) -> output$`genes_highlighting-expression_per_cluster`
 
+  # renderPlotly({plot_ly(z=~volcano) %>% add_surface()}) -> output$`genes_highlighting-expression_per_cluster`
+
   output$genes_highlighting.n_cells_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(ncol(seurat_object.reactions$seurat)),
+    valueBox(value={ncol(seurat_object.reactions$seurat) %>% comma()},
              subtitle='Cells in map',
              icon=icon('galactic-republic'),
              color='purple')})
   output$genes_highlighting.n_clusters_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(seurat_object.reactions$clusters_per_resolution[input$seurat_cluster_set.dd]),
+    valueBox(value={seurat_object.reactions$clusters_per_resolution[input$seurat_cluster_set.dd] %>% comma()},
              subtitle='Cell clusters',
              icon=icon('first-order'),
              color='purple')})
@@ -645,22 +676,22 @@ shinyAppServer <- function(input, output, session) {
              icon=icon('jedi-order'),
              color='purple')})
   output$genes_highlighting.n_genes_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(sapply(seurat_object.reactions$seurat@assays, function(x) nrow(x@data)) %>% max()),
-             subtitle='Unique genes detected (max)',
+    valueBox(value={nrow(seurat_object.reactions$seurat) %>% comma()},
+             subtitle='Unique genes in assay',
              icon=icon('galactic-senate'),
              color='purple')})
   output$genes_highlighting.n_reads_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(sum(seurat_object.reactions$seurat$nCount_RNA)),
+    valueBox(value={sum(seurat_object.reactions$seurat$nCount_RNA) %>% comma()},
              subtitle='Total reads in cells',
              icon=icon('old-republic'),
              color='purple')})
   output$genes_highlighting.n_reads_per_cell_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(round(median(seurat_object.reactions$seurat$nCount_RNA), digits=1)),
+    valueBox(value={round(median(seurat_object.reactions$seurat$nCount_RNA), digits=1) %>% comma()},
              subtitle='Median reads per cell',
              icon=icon('frog'),
              color='purple')})
   output$genes_highlighting.n_genes_per_cell_box <- renderValueBox(expr={
-    valueBox(value=scales::comma(round(median(seurat_object.reactions$seurat$nFeature_RNA), digits=1)),
+    valueBox(value={round(median(seurat_object.reactions$seurat$nFeature_RNA), digits=1)  %>% comma()},
              subtitle='Median genes per cell',
              icon=icon('crow'),
              color='purple')})

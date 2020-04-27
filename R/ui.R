@@ -97,6 +97,9 @@ gene_name.dropdown <- autocomplete_input(id='gene_of_interest.dd', label='Gene n
 seurat_cluster_set.dropdown <- selectInput(inputId='seurat_cluster_set.dd', label='Seurat cluster definitions',
                                            choices='seurat_clusters', selected='seurat_clusters',
                                            multiple=FALSE)
+gene_highlighting.reduction_selection.dd <- selectInput(inputId='reduction_selection.dd', label='Reduction method',
+                                                        choices=NULL, selected=NULL,
+                                                        multiple=FALSE)
 expression_range.slider <- sliderInput(inputId='expression_range.slider', label='Expression limits',
                                        # min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))
                                        min=0, max=1, step=0.1, value=c(-Inf,Inf))
@@ -109,7 +112,6 @@ gene_highlighting.point_size <- sliderInput(inputId='gene_highlighting.point_siz
 
 gene_highlighting.label_clusters <- checkboxInput(inputId='gene_highlighting.label_clusters.checkbox', label='Label clusters', value=TRUE)
 gene_highlighting.label_clusters <- materialSwitch(inputId='gene_highlighting.label_clusters.checkbox', label='Cluster labels', value=TRUE, right=TRUE, status='success')
-
 #### colour selector palette box
 colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=colour_palette, allowTransparent=FALSE, returnName=TRUE)
 append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
@@ -123,7 +125,6 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                      solidHeader=TRUE,
                                                      width=4,
                                                      collapsible=TRUE,
-                                                     # ggvisOutput('genes_highlighting-clustered_map'),
                                                      {plotOutput('genes_highlighting-clustered_map') %>% withSpinner()}),
                                 gene_expression_map=box(title='Marker gene on map',
                                                         footer='Cells coloured by expression',
@@ -131,7 +132,6 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                         solidHeader=TRUE,
                                                         width=4,
                                                         collapsible=TRUE,
-                                                        # ggvisOutput('genes_highlighting-gene_expression_map'),
                                                         {plotOutput('genes_highlighting-gene_expression_map') %>% withSpinner()}),
                                 expression_per_cluster=box(title='Marker gene in clusters',
                                                            footer='Expression of gene in clusters',
@@ -139,8 +139,8 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                            solidHeader=TRUE,
                                                            width=4,
                                                            collapsible=TRUE,
-                                                           # ggvisOutput('genes_highlighting-expression_per_cluster')),
                                                            {plotOutput('genes_highlighting-expression_per_cluster') %>% withSpinner()}),
+                                                           # {plotlyOutput('genes_highlighting-expression_per_cluster') %>% withSpinner()}),
                                 gene_selector=box(title='Select gene',
                                                   status='primary',
                                                   solidHeader=TRUE,
@@ -149,7 +149,8 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                   gene_name.dropdown,
                                                   expression_range.slider,
                                                   seurat_cluster_set.dropdown,
-                                                  gene_highlighting.label_clusters),
+                                                  gene_highlighting.label_clusters,
+                                                  gene_highlighting.reduction_selection.dd),
                                 plot_options=box(title='Plot options',
                                                  status='primary',
                                                  solidHeader=TRUE,

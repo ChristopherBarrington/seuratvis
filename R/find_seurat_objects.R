@@ -11,12 +11,12 @@ find_seurat_objects <- function() {
     sapply(function(O) get(x=O, envir=globalenv()) %>% class()) %>%
     enframe() %>%
     plyr::dlply(~value, pluck, 'name') %>%
-    pluck('environment') %>%
+    pluck('environment') %>% # select the environments from the RGlobalEnv
     rev() %>%
     sapply(get, envir=globalenv()) %>%
-    append(list(`globalenv()`=globalenv())) %>%
+    append(list(`globalenv()`=globalenv())) %>% # make a list of all environments and RGlobalEnv
     rev() %>%
-    lapply(function(E) {ls(envir=E) %>% sapply(function(O) get(x=O, envir=E) %>% class()) %>% enframe() %>% plyr::dlply(~value, pluck, 'name') %>% pluck('Seurat')}) %>%
+    lapply(function(E) {ls(envir=E) %>% sapply(function(O) get(x=O, envir=E) %>% class()) %>% enframe() %>% plyr::dlply(~value, pluck, 'name') %>% pluck('Seurat')}) %>% # get the class of objects in the environments and select out the Seurat objects
     plyr::ldply(.id='env', enframe) %>%
     dplyr::select(-name) %>%
     unite(col='choiceValue', sep='$', env, value, remove=FALSE) %>%
@@ -26,5 +26,10 @@ find_seurat_objects <- function() {
       } else {
         x %>% mutate(choiceName=str_c(str_remove_all(string=env, pattern='\\(\\)$'), value, sep=' : '))
       }}) %>%
-    arrange(choiceName)
+    arrange(choiceName) -> available_objects # add varaibles for where to find the objects and what to call them
+
+  if(nrow(available_objects)==0)
+    available_objects <- rbind(available_objects, data.frame(choiceValue=NA, env=NA, value=NA, choiceName='No Seurat objects found!'))
+
+  available_objects
 }
