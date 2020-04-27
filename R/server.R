@@ -18,7 +18,7 @@ shinyAppServer <- function(input, output, session) {
     if(input$seurat_select.input=='')
       return(NULL)
 
-    progress <- shiny::Progress$new(session=session, min=0, max=8/10)
+    progress <- shiny::Progress$new(session=session, min=0, max=9/10)
     on.exit(progress$close())
     progress$set(value=0, message='Loading environment')
 
@@ -33,6 +33,13 @@ shinyAppServer <- function(input, output, session) {
     progress$inc(detail='Checking meta.data')
     if(is.null(seurat@meta.data$seurat_clusters))
       seurat@meta.data$seurat_clusters <- 0
+
+    progress$inc(detail='Initialising reduced dimension plot')
+    if(input$reduction_selection.dd != '')
+      seurat@reductions[[input$reduction_selection.dd]]@cell.embeddings[,1:2] %>%
+        as.data.frame() %>%
+        set_names(c('DIMRED_1','DIMRED_2')) %>%
+        cbind(seurat@meta.data) -> seurat_object.reactions$dimred
 
     progress$inc(detail='Counting clusters identified in each set')
     select_at(seurat@meta.data, vars(contains('_snn_res.'), 'seurat_clusters')) %>%
