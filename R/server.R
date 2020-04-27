@@ -61,7 +61,8 @@ shinyAppServer <- function(input, output, session) {
     progress$inc(detail='Setting default assay')
     selected_assay <- 'RNA'
     DefaultAssay(seurat) <- selected_assay
-    seurat <- NormalizeData(seurat)
+    if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
+      seurat <- NormalizeData(seurat)
 
     progress$inc(detail='Updating UI elements')
     updateTextInput(session=session, inputId='min_features_per_cell.textinput', placeholder=cell_filtering_data.reference$min_genes_per_cell)
