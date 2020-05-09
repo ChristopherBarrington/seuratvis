@@ -100,6 +100,9 @@ seurat_cluster_set.dropdown <- selectInput(inputId='seurat_cluster_set.dd', labe
 gene_highlighting.reduction_selection.dd <- selectInput(inputId='reduction_selection.dd', label='Reduction method',
                                                         choices=NULL, selected=NULL,
                                                         multiple=FALSE)
+gene_highlighting.assay_selection.dd <- selectInput(inputId='assay_selection.dd', label='Assay',
+                                                    choices=NULL, selected=NULL,
+                                                    multiple=FALSE)
 expression_range.slider <- sliderInput(inputId='expression_range.slider', label='Expression limits',
                                        # min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))
                                        min=0, max=1, step=0.1, value=c(-Inf,Inf))
@@ -112,6 +115,7 @@ gene_highlighting.point_size <- sliderInput(inputId='gene_highlighting.point_siz
 
 gene_highlighting.label_clusters <- checkboxInput(inputId='gene_highlighting.label_clusters.checkbox', label='Label clusters', value=TRUE)
 gene_highlighting.label_clusters <- materialSwitch(inputId='gene_highlighting.label_clusters.checkbox', label='Cluster labels', value=TRUE, right=TRUE, status='success')
+
 #### colour selector palette box
 colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=colour_palette, allowTransparent=FALSE, returnName=TRUE)
 append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
@@ -150,7 +154,8 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                   expression_range.slider,
                                                   seurat_cluster_set.dropdown,
                                                   gene_highlighting.label_clusters,
-                                                  gene_highlighting.reduction_selection.dd),
+                                                  gene_highlighting.reduction_selection.dd,
+                                                  gene_highlighting.assay_selection.dd),
                                 plot_options=box(title='Plot options',
                                                  status='primary',
                                                  solidHeader=TRUE,
