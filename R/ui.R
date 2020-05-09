@@ -11,7 +11,7 @@
 # # seurat <- human_CS17_thoracic
 # seurat <- human_CS17_brachial
 # starter_gene <- sample(x=rownames(seurat), size=1)
-starter_gene <- 'SOX2'
+# starter_gene <- 'SOX2'
 # ################
 
 # tab definitions

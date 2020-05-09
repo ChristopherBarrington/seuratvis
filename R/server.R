@@ -70,9 +70,9 @@ shinyAppServer <- function(input, output, session) {
     updateTextInput(session=session, inputId='min_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$min_reads_per_cell)
     updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
     updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
+    updateSelectInput(session=session, inputId='reduction_selection.dd', choices=names(seurat@reductions), selected=Seurat:::DefaultDimReduc(seurat))
     updateSelectInput(session=session, inputId='assay_selection.dd', choices=Assays(seurat), selected=DefaultAssay(seurat))
     update_autocomplete_input(session=session, id='gene_of_interest.dd', options=c(sort(rownames(seurat)), 'nFeature_RNA', 'nCount_RNA', 'percent_mt', 'orig.ident', 'orig.species','orig.timepoint','orig.tissue','orig.replicate'))
-    updateSelectInput(session=session, inputId='reduction_selection.dd', choices=names(seurat@reductions), selected={names(seurat@reductions) %>% tail(n=1)})
 
     progress$inc(detail='Saving variables')
     available_assays <- Assays(seurat)
