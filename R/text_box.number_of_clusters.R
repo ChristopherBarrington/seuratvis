@@ -4,8 +4,7 @@
 #' 
 #' @param id unique name of the element
 #' @param width integer value for width (rows sum to 12)
-#' @param input,oputput,session used internally
-#' @param subtitle type of subtitle to display; one of: \code{default}
+#' @param input,output,session used internally
 #' 
 #' @examples
 #' 
@@ -15,7 +14,7 @@
 #' 
 #' @rdname number_of_clusters_text_box
 #' 
-number_of_clusters_text_box.ui <- function(id, width=12, subtitle='default') {
+number_of_clusters_text_box.ui <- function(id, width=12) {
   module <- 'number_of_clusters'
 
   # make unique id for this object
@@ -24,7 +23,7 @@ number_of_clusters_text_box.ui <- function(id, width=12, subtitle='default') {
 
   # create an environment in the seuratvis namespace
   e <- new.env()
-  e$subtitle <- subtitle
+  e$id <- id
   assign(x=module_env, val=e, envir=parent.frame(n=1))
   
   # return ui element(s)
@@ -39,10 +38,11 @@ number_of_clusters_text_box.server <- function(input, output, session) {
 
   # make the text box
   renderValueBox(expr={
-    switch(module_env$subtitle,
-           default='Cell clusters',
-           'Check the `subtitle` argument of your UI function!') -> subtitle
+    # get the box subtitle
+    switch(module_env$id,
+           'Cell clusters') -> subtitle
 
+    # create output object
     list(value={seuratvis_env$seurat_object.reactions$selected_clusters_per_resolution %>% comma()},
          subtitle=subtitle,
          icon=icon('first-order')) %>%

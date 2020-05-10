@@ -4,7 +4,7 @@
 #' 
 #' @param id unique name of the element
 #' @param width integer value for width (rows sum to 12)
-#' @param input,oputput,session used internally
+#' @param input,output,session used internally
 #' 
 #' @examples
 #' 

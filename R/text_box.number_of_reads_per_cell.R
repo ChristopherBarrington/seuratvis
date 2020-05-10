@@ -5,7 +5,6 @@
 #' @param id unique name of the element
 #' @param width integer value for width (rows sum to 12)
 #' @param input,output,session used internally
-#' @param subtitle type of subtitle to display; one of: \code{default}
 #' @param f,f_name summary function taking one vector and returning a value and a name used to make the subtitle
 #' 
 #' @examples

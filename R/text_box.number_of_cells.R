@@ -4,8 +4,7 @@
 #' 
 #' @param id unique name of the element
 #' @param width integer value for width (rows sum to 12)
-#' @param input,oputput,session used internally
-#' @param subtitle type of subtitle to display; one of: \code{default}, \code{proportion}
+#' @param input,output,session used internally
 #' 
 #' @examples
 #' 
@@ -15,7 +14,7 @@
 #' 
 #' @rdname number_of_cells_text_box
 #' 
-number_of_cells_text_box.ui <- function(id, width=12, subtitle='default') {
+number_of_cells_text_box.ui <- function(id, width=12) {
   module <- 'number_of_cells'
 
   # make unique id for this object
@@ -24,7 +23,7 @@ number_of_cells_text_box.ui <- function(id, width=12, subtitle='default') {
 
   # create an environment in the seuratvis namespace
   e <- new.env()
-  e$subtitle <- subtitle
+  e$id <- id
   assign(x=module_env, val=e, envir=parent.frame(n=1))
   
   # return ui element(s)
@@ -40,11 +39,13 @@ number_of_cells_text_box.server <- function(input, output, session) {
   # make the text box
   renderValueBox(expr={
     seuratvis_env$react_to_cell_filtering() # not sure about this line, is it necessary?
-    switch(module_env$subtitle,
-           proportion=sprintf(fmt='Cells remaining (%.1f%%)', seuratvis_env$cell_filtering_data.reactions$n_cells/seuratvis_env$seurat_object.reactions$reference_metrics$n_cells*100),
-           default='Cells in map',
-           'Check the `subtitle` argument of your UI function!') -> subtitle
 
+    # get the box subtitle
+    switch(module_env$id,
+           cell_filtering=sprintf(fmt='Cells remaining (%.1f%%)', seuratvis_env$cell_filtering_data.reactions$n_cells/seuratvis_env$seurat_object.reactions$reference_metrics$n_cells*100),
+           'Cells in map') -> subtitle
+
+    # create output object
     list(value={seuratvis_env$cell_filtering_data.reactions$n_cells %>% scales::comma()}, # not the best, should not depend on this object, may not be filtered
          subtitle=subtitle,
          icon=icon('galactic-republic')) %>%

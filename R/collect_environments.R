@@ -16,7 +16,6 @@ collect_environments <- function(module) {
     NS(id=module) %>%
     sprintf(fmt='%s.env') %>%
     getFromNamespace(ns='seuratvis') -> module_env
-  module_env$id <- callmodule_env$id
 
   # assign environments back to the calling server function
   assign(x='seuratvis_env', value=parent.frame(n=3), envir=parent.frame(n=1))

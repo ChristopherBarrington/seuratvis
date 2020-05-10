@@ -4,7 +4,7 @@
 #' 
 #' @param id unique name of the element
 #' @param width integer value for width (rows sum to 12)
-#' @param input,oputput,session used internally
+#' @param input,output,session used internally
 #' 
 #' @examples
 #' 
@@ -21,9 +21,11 @@ gene_name_and_description_text_box.ui <- function(id, width=12)
 #' 
 gene_name_and_description_text_box.server <- function(input, output, session) {
   renderValueBox(env=parent.frame(n=2), quoted=FALSE, expr={
+    # get gene description from biomaRt
     Misc(seurat_object.reactions$seurat, slot='mart') %>%
       get_formatted_gene_description(external_gene_name=input$gene_of_interest.dd) -> subtitle
 
+    # create output object
     list(value=input$gene_of_interest.dd,
          subtitle=subtitle,
          icon=icon('jedi-order')) %>%
