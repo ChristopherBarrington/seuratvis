@@ -11,6 +11,7 @@ License: license to thrill
 Encoding: UTF-8
 LazyData: true
 Imports:
+  biomaRt,
   gplots
 Depends:
   shiny,
@@ -27,6 +28,5 @@ Depends:
   ComplexHeatmap,
   Seurat,
   tidyverse,
-  magrittr,
-  biomaRt
+  magrittr
 RoxygenNote: 7.0.2

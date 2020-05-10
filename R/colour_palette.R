@@ -1,4 +1,3 @@
-
 #' Define default colour palette
 #' 
 default_colour_palette <- function()
