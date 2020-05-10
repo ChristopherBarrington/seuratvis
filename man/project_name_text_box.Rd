@@ -14,7 +14,7 @@ project_name_text_box.server(input, output, session)
 
 \item{width}{integer value for width (rows sum to 12)}
 
-\item{input, oputput, session}{used internally}
+\item{input, output, session}{used internally}
 }
 \description{
 Create a formatted project name text box

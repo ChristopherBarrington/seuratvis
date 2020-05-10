@@ -14,7 +14,7 @@ gene_name_and_description_text_box.server(input, output, session)
 
 \item{width}{integer value for width (rows sum to 12)}
 
-\item{input, oputput, session}{used internally}
+\item{input, output, session}{used internally}
 }
 \description{
 Displays gene of interest and biomaRt description

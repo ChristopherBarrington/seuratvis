@@ -5,7 +5,7 @@
 \alias{number_of_genes_in_assay_text_box.server}
 \title{Display number of genes reported in a dataset assay}
 \usage{
-number_of_genes_in_assay_text_box.ui(id, width = 12, subtitle = "default")
+number_of_genes_in_assay_text_box.ui(id, width = 12)
 
 number_of_genes_in_assay_text_box.server(input, output, session)
 }
@@ -14,9 +14,7 @@ number_of_genes_in_assay_text_box.server(input, output, session)
 
 \item{width}{integer value for width (rows sum to 12)}
 
-\item{subtitle}{type of subtitle to display; one of: \code{default}}
-
-\item{input, oputput, session}{used internally}
+\item{input, output, session}{used internally}
 }
 \description{
 Show the total number of genes (rows) in the matrix of the active assay

@@ -5,7 +5,7 @@
 \alias{number_of_clusters_text_box.server}
 \title{Display number of clusters in a dataset}
 \usage{
-number_of_clusters_text_box.ui(id, width = 12, subtitle = "default")
+number_of_clusters_text_box.ui(id, width = 12)
 
 number_of_clusters_text_box.server(input, output, session)
 }
@@ -14,9 +14,7 @@ number_of_clusters_text_box.server(input, output, session)
 
 \item{width}{integer value for width (rows sum to 12)}
 
-\item{subtitle}{type of subtitle to display; one of: \code{default}}
-
-\item{input, oputput, session}{used internally}
+\item{input, output, session}{used internally}
 }
 \description{
 Show the total number of clusters in a map
