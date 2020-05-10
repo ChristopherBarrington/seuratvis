@@ -93,6 +93,7 @@ shinyAppServer <- function(input, output, session) {
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
     seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
+    seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution[input$seurat_cluster_set.dd]
   })
 
   # ###############################################################################################
@@ -452,6 +453,10 @@ shinyAppServer <- function(input, output, session) {
     if(input$assay_selection.dd != '')
       DefaultAssay(seurat_object.reactions$seurat) <- input$assay_selection.dd})
 
+  ## react to cluster set selection
+  observeEvent(eventExpr=input$seurat_cluster_set.dd, handlerExpr={
+    seurat_object.reactions$selected_clusters_per_resolution <- seurat_object.reactions$clusters_per_resolution[input$seurat_cluster_set.dd]})
+
   ## gene highlighting
   # genes_highlighting.reactions <- reactiveValues(data=NULL, expression_map=NULL, cluster_expression=NULL, expression_map.running=0, cluster_expression.running=0)
 
@@ -676,11 +681,7 @@ shinyAppServer <- function(input, output, session) {
              subtitle='Cells in map',
              icon=icon('galactic-republic'),
              color='purple')})
-  output$genes_highlighting.n_clusters_box <- renderValueBox(expr={
-    valueBox(value={seurat_object.reactions$clusters_per_resolution[input$seurat_cluster_set.dd] %>% comma()},
-             subtitle='Cell clusters',
-             icon=icon('first-order'),
-             color='purple')})
+  callModule(module=number_of_clusters_text_box.server, id='gene_highlighting')
   callModule(module=gene_name_and_description_text_box.server, id='gene_highlighting')
   output$genes_highlighting.n_genes_box <- renderValueBox(expr={
     valueBox(value={nrow(seurat_object.reactions$seurat) %>% comma()},
