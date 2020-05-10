@@ -23,6 +23,6 @@ Create a formatted project name text box
 
 \dontrun{
 ui <- fluidPage(project_name_text_box.ui(id='page_name'))
-server <- function(input, output, session) callModule(project_name_text_box.server(id='page_name'))}
+server <- function(input, output, session) callModule(project_name_text_box.server, id='page_name')}
 
 }

@@ -25,6 +25,6 @@ Show the total number of reads in cells
 
 \dontrun{
 ui <- fluidPage(number_of_reads_text_box.ui(id='page_name'))
-server <- function(input, output, session) callModule(number_of_reads_text_box.server(id='page_name'))}
+server <- function(input, output, session) callModule(number_of_reads_text_box.server, id='page_name')}
 
 }

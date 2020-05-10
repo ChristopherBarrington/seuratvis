@@ -164,7 +164,7 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                  column(width=12, expression_paletette_type_selector),
                                                  gene_highlighting.point_size,
                                                  opacity.slider),
-                                n_genes_per_cell=valueBoxOutput(outputId='genes_highlighting.n_genes_per_cell_box', width=2)))
+                                n_genes_per_cell=valueBoxOutput(outputId='genes_highlighting.n_genes_per_cell_box', width=2))
 
 ### assemble tab content
 gene_highlighting.content <- tabItem(tabName='gene_highlighting-tab',

@@ -23,6 +23,6 @@ Displays gene of interest and biomaRt description
 
 \dontrun{
 ui <- fluidPage(gene_name_and_description_text_box.ui(id='page_name'))
-server <- function(input, output, session) callModule(gene_name_and_description_text_box.server(id='page_name'))}
+server <- function(input, output, session) callModule(gene_name_and_description_text_box.server, id='page_name')}
 
 }
