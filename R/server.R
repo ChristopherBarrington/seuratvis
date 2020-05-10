@@ -682,12 +682,7 @@ shinyAppServer <- function(input, output, session) {
   callModule(module=number_of_reads_text_box.server, id='gene_highlighting')
   callModule(module=number_of_genes_in_assay_text_box.server, id='gene_highlighting')
   callModule(module=number_of_reads_per_cell_text_box.server, id='gene_highlighting')
-
-  output$genes_highlighting.n_genes_per_cell_box <- renderValueBox(expr={
-    valueBox(value={round(median(seurat_object.reactions$seurat$nFeature_RNA), digits=1)  %>% comma()},
-             subtitle='Median genes per cell',
-             icon=icon('crow'),
-             color='purple')})
+  callModule(module=number_of_genes_per_cell_text_box.server, id='gene_highlighting')
 
   renderPlot(genes_highlighting.clustered_map.plot()) -> output$`genes_highlighting-clustered_map`
   renderPlot(genes_highlighting.gene_expression_map.plot()) -> output$`genes_highlighting-gene_expression_map`
@@ -709,6 +704,7 @@ shinyAppServer <- function(input, output, session) {
              subtitle=sprintf(fmt='Median genes per cell (%s)', comma(cell_filtering_data.reactions$median_genes_per_cell-seurat_object.reactions$reference_metrics$median_genes_per_cell) %>% ifelse(str_detect(., '^-'), ., str_c('+', .))),
              icon=icon('crow'),
              color='purple')})
+  callModule(module=number_of_genes_per_cell_text_box.server, id='cell_filtering')
 
   ### formatted text box with filtering parameters
   output$`cell_filtering-subset_conditions` <- renderText({
