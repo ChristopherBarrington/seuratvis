@@ -676,21 +676,13 @@ shinyAppServer <- function(input, output, session) {
              subtitle='Cell clusters',
              icon=icon('first-order'),
              color='purple')})
-  output$genes_highlighting.selected_gene_box <- renderValueBox(expr={
-    valueBox(value=input$gene_of_interest.dd,
-             subtitle=get_formatted_gene_description(mart=seurat_object.reactions$mart, external_gene_name=input$gene_of_interest.dd),
-             icon=icon('jedi-order'),
-             color='purple')})
+  callModule(module=gene_name_and_description_text_box.server, id='gene_highlighting')
   output$genes_highlighting.n_genes_box <- renderValueBox(expr={
     valueBox(value={nrow(seurat_object.reactions$seurat) %>% comma()},
              subtitle='Unique genes in assay',
              icon=icon('galactic-senate'),
              color='purple')})
-  output$genes_highlighting.n_reads_box <- renderValueBox(expr={
-    valueBox(value={sum(seurat_object.reactions$seurat$nCount_RNA) %>% comma()},
-             subtitle='Total reads in cells',
-             icon=icon('old-republic'),
-             color='purple')})
+  callModule(module=number_of_reads_text_box.server, id='gene_highlighting')
   output$genes_highlighting.n_reads_per_cell_box <- renderValueBox(expr={
     valueBox(value={round(median(seurat_object.reactions$seurat$nCount_RNA), digits=1) %>% comma()},
              subtitle='Median reads per cell',
@@ -719,12 +711,7 @@ shinyAppServer <- function(input, output, session) {
   renderPlot(cell_filtering.percent_mitochondria_boxplot.plot()) -> output$`cell_filtering-percent_mitochondria_boxplot`
 
   ### statistics boxes
-  output$cell_filtering.n_reads_box <- renderValueBox({
-    react_to_cell_filtering()
-    valueBox(value=scales::comma(cell_filtering_data.reactions$total_reads),
-             subtitle=sprintf(fmt='Total reads remaining (%.1f%%)', cell_filtering_data.reactions$total_reads/seurat_object.reactions$reference_metrics$total_reads*100),
-             icon=icon('old-republic'),
-             color='purple')})
+  callModule(module=number_of_reads_text_box.server, id='cell_filtering')
   output$cell_filtering.n_cells_box <- renderValueBox({
     react_to_cell_filtering()
     valueBox(value=scales::comma(cell_filtering_data.reactions$n_cells),
@@ -780,10 +767,9 @@ shinyAppServer <- function(input, output, session) {
   # shared text boxes
 
   ## project name
-  project_name_box_opts <- list(subtitle='Loaded Seurat object', icon=icon('certificate'), color='purple')
-  output$cell_filtering.project_name_box <- renderValueBox(expr={append(project_name_box_opts, list(value=seurat_object.reactions$formatted.project.name)) %>% do.call(what=valueBox)})
-  output$genes_highlighting.project_name_box <- renderValueBox(expr={append(project_name_box_opts, list(value=seurat_object.reactions$formatted.project.name)) %>% do.call(what=valueBox)})
-  output$features_heatmap.project_name_box <- renderValueBox(expr={append(project_name_box_opts, list(value=seurat_object.reactions$formatted.project.name)) %>% do.call(what=valueBox)})
+  callModule(project_name_text_box.server, id='cell_filtering')
+  callModule(project_name_text_box.server, id='gene_highlighting')
+  callModule(project_name_text_box.server, id='features_heatmap')
 
   # any code to exectue when the session ends
   session$onSessionEnded(function() {

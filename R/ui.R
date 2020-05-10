@@ -65,8 +65,6 @@ cell_filtering.boxes <- list(total_expression=append(cell_filtering.plot_boxes.d
                                                                     shiny::tags$label('Copy subset conditions to clipboard'), br(), subset_conditions.plain.copybutton, subset_conditions.tsv.copybutton, subset_conditions.r.copybutton))) %>%
                                         do.call(what=box),
 
-                             project_name=valueBoxOutput(outputId='cell_filtering.project_name_box', width=4),
-                             n_reads=valueBoxOutput(outputId='cell_filtering.n_reads_box', width=2),
                              n_cells=valueBoxOutput(outputId='cell_filtering.n_cells_box', width=2),
                              n_genes_per_cell=valueBoxOutput(outputId='cell_filtering.n_genes_per_cell_box', width=2),
                              n_reads_per_cell=valueBoxOutput(outputId='cell_filtering.n_reads_per_cell_box', width=2))
@@ -74,8 +72,8 @@ cell_filtering.boxes <- list(total_expression=append(cell_filtering.plot_boxes.d
 ### assemble tab content
 cell_filtering.content <- tabItem(tabName='cell_filtering-tab',
                                   h1('Identify cells that can be removed with quality filters'),
-                                  fluidRow(cell_filtering.boxes$project_name,
-                                           cell_filtering.boxes$n_reads,
+                                  fluidRow(project_name_text_box.ui(id='cell_filtering', width=4),
+                                           number_of_reads_text_box.ui(id='cell_filtering', width=2, subtitle='proportion'),
                                            cell_filtering.boxes$n_cells,
                                            cell_filtering.boxes$n_reads_per_cell,
                                            cell_filtering.boxes$n_genes_per_cell),
@@ -172,16 +170,14 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                 n_reads=valueBoxOutput(outputId='genes_highlighting.n_reads_box', width=2),
                                 n_genes_per_cell=valueBoxOutput(outputId='genes_highlighting.n_genes_per_cell_box', width=2),
                                 n_reads_per_cell=valueBoxOutput(outputId='genes_highlighting.n_reads_per_cell_box', width=2),
-                                n_clusters=valueBoxOutput(outputId='genes_highlighting.n_clusters_box', width=2),
-                                project_name=valueBoxOutput(outputId='genes_highlighting.project_name_box', width=5),
-                                selected_gene=valueBoxOutput(outputId='genes_highlighting.selected_gene_box', width=7))
+                                n_clusters=valueBoxOutput(outputId='genes_highlighting.n_clusters_box', width=2))
 
 ### assemble tab content
 gene_highlighting.content <- tabItem(tabName='gene_highlighting-tab',
                                      h1('Highlight expression of interesting genes on the map'),
-                                     fluidRow(gene_highlighting.boxes$project_name,
-                                              gene_highlighting.boxes$selected_gene),
-                                     fluidRow(gene_highlighting.boxes$n_reads,
+                                     fluidRow(project_name_text_box.ui(id='gene_highlighting', width=5),
+                                              gene_name_and_description_text_box.ui(id='gene_highlighting', width=7)),
+                                     fluidRow(number_of_reads_text_box.ui(id='gene_highlighting', width=2, subtitle='default'),
                                               gene_highlighting.boxes$n_clusters,
                                               gene_highlighting.boxes$n_cells,
                                               gene_highlighting.boxes$n_genes,
@@ -229,13 +225,12 @@ features_heatmap.boxes <- list(heatmap_plot=box(title='Heatmap of selected featu
                                                      features_heatmap.features_of_interest.tb,
                                                      features_heatmap.show_feature_names.checkbox,
                                                      features_heatmap.seurat_cluster_set.dropdown,
-                                                     features_heatmap.use_average_value.checkbox),
-                               project_name=valueBoxOutput(outputId='features_heatmap.project_name_box', width=12))
+                                                     features_heatmap.use_average_value.checkbox))
 
 ### assemble tab content
 features_heatmap.content <-tabItem(tabName='features_heatmap-tab',
                                   h1('Visualise expression of multiple features in clusters'),
-                                  fluidRow(features_heatmap.boxes$project_name),
+                                  fluidRow(project_name_text_box.ui(id='features_heatmap', width=12)),
                                   fluidRow(features_heatmap.boxes$heatmap_plot,
                                            features_heatmap.boxes$features_selector))
 
