@@ -692,12 +692,8 @@ shinyAppServer <- function(input, output, session) {
   ### statistics boxes
   callModule(module=number_of_reads_text_box.server, id='cell_filtering')
   callModule(module=number_of_cells_text_box.server, id='cell_filtering')
-  output$cell_filtering.n_reads_per_cell_box <- renderValueBox({
-    react_to_cell_filtering()
-    valueBox(value=scales::comma(cell_filtering_data.reactions$median_reads_per_cell),
-             subtitle=sprintf(fmt='Median reads per cell (%s)', comma(cell_filtering_data.reactions$median_reads_per_cell-seurat_object.reactions$reference_metrics$median_reads_per_cell) %>% ifelse(str_detect(., '^-'), ., str_c('+', .))),
-             icon=icon('frog'),
-             color='purple')})
+  callModule(module=number_of_reads_per_cell_text_box.server, id='cell_filtering')
+
   output$cell_filtering.n_genes_per_cell_box <- renderValueBox({
     react_to_cell_filtering()
     valueBox(value=scales::comma(cell_filtering_data.reactions$median_genes_per_cell),
