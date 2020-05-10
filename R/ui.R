@@ -63,10 +63,7 @@ cell_filtering.boxes <- list(total_expression=append(cell_filtering.plot_boxes.d
                                                     column(width=2, percent_mitochondria.textinput),
                                                     column(width=4, shiny::tags$label('Conditional expression to select cells'), br(), subset_conditions.textoutput,
                                                                     shiny::tags$label('Copy subset conditions to clipboard'), br(), subset_conditions.plain.copybutton, subset_conditions.tsv.copybutton, subset_conditions.r.copybutton))) %>%
-                                        do.call(what=box),
-
-                             n_genes_per_cell=valueBoxOutput(outputId='cell_filtering.n_genes_per_cell_box', width=2),
-                             n_reads_per_cell=valueBoxOutput(outputId='cell_filtering.n_reads_per_cell_box', width=2))
+                                        do.call(what=box))
 
 ### assemble tab content
 cell_filtering.content <- tabItem(tabName='cell_filtering-tab',
@@ -163,8 +160,7 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                  column(width=6, expression_max.colour.selector),
                                                  column(width=12, expression_paletette_type_selector),
                                                  gene_highlighting.point_size,
-                                                 opacity.slider),
-                                n_genes_per_cell=valueBoxOutput(outputId='genes_highlighting.n_genes_per_cell_box', width=2))
+                                                 opacity.slider))
 
 ### assemble tab content
 gene_highlighting.content <- tabItem(tabName='gene_highlighting-tab',
