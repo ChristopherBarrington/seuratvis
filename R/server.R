@@ -676,11 +676,7 @@ shinyAppServer <- function(input, output, session) {
   ## highlighting genes tab
   # renderPlotly({plot_ly(z=~volcano) %>% add_surface()}) -> output$`genes_highlighting-expression_per_cluster`
 
-  output$genes_highlighting.n_cells_box <- renderValueBox(expr={
-    valueBox(value={ncol(seurat_object.reactions$seurat) %>% comma()},
-             subtitle='Cells in map',
-             icon=icon('galactic-republic'),
-             color='purple')})
+  callModule(module=number_of_cells_text_box.server, id='gene_highlighting')
   callModule(module=number_of_clusters_text_box.server, id='gene_highlighting')
   callModule(module=gene_name_and_description_text_box.server, id='gene_highlighting')
   output$genes_highlighting.n_genes_box <- renderValueBox(expr={
@@ -707,12 +703,7 @@ shinyAppServer <- function(input, output, session) {
   ## cell filtering tab
   ### statistics boxes
   callModule(module=number_of_reads_text_box.server, id='cell_filtering')
-  output$cell_filtering.n_cells_box <- renderValueBox({
-    react_to_cell_filtering()
-    valueBox(value=scales::comma(cell_filtering_data.reactions$n_cells),
-             subtitle=sprintf(fmt='Cells remaining (%.1f%%)', cell_filtering_data.reactions$n_cells/seurat_object.reactions$reference_metrics$n_cells*100),
-             icon=icon('galactic-republic'),
-             color='purple')})
+  callModule(module=number_of_cells_text_box.server, id='cell_filtering')
   output$cell_filtering.n_reads_per_cell_box <- renderValueBox({
     react_to_cell_filtering()
     valueBox(value=scales::comma(cell_filtering_data.reactions$median_reads_per_cell),
