@@ -3,3 +3,4 @@
 export(launchApp)
 import(gplots)
 import(shiny)
+importFrom(biomaRt,getBM)
