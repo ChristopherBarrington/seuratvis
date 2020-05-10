@@ -676,6 +676,7 @@ shinyAppServer <- function(input, output, session) {
   ## highlighting genes tab
   # renderPlotly({plot_ly(z=~volcano) %>% add_surface()}) -> output$`genes_highlighting-expression_per_cluster`
 
+  callModule(module=project_name_text_box.server, id='gene_highlighting')
   callModule(module=number_of_cells_text_box.server, id='gene_highlighting')
   callModule(module=number_of_clusters_text_box.server, id='gene_highlighting')
   callModule(module=gene_name_and_description_text_box.server, id='gene_highlighting')
@@ -690,6 +691,7 @@ shinyAppServer <- function(input, output, session) {
 
   ## cell filtering tab
   ### statistics boxes
+  callModule(module=project_name_text_box.server, id='cell_filtering')
   callModule(module=number_of_reads_text_box.server, id='cell_filtering')
   callModule(module=number_of_cells_text_box.server, id='cell_filtering')
   callModule(module=number_of_reads_per_cell_text_box.server, id='cell_filtering')
@@ -745,17 +747,11 @@ shinyAppServer <- function(input, output, session) {
   renderPlot(cell_filtering.percent_mitochondria_boxplot.plot()) -> output$`cell_filtering-percent_mitochondria_boxplot`
 
   # features heatmap tab
+  callModule(project_name_text_box.server, id='features_heatmap')
   renderPlot(features_heatmap.heatmap.plot()) -> output$`features_heatmap-heatmap`
 
   # sidebar
   ## dynamic sidebar outputs can be listed here
-
-  # shared text boxes
-
-  ## project name
-  callModule(project_name_text_box.server, id='cell_filtering')
-  callModule(project_name_text_box.server, id='gene_highlighting')
-  callModule(project_name_text_box.server, id='features_heatmap')
 
   # any code to exectue when the session ends
   session$onSessionEnded(function() {
