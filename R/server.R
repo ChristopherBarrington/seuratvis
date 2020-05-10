@@ -9,6 +9,12 @@ shinyAppServer <- function(input, output, session) {
   progress$set(value=0, message='Loading environment')
 
   # ###############################################################################################
+  # scour the session for Seurat objects and populate the UI --------------------------------------
+  available_seurat_objects <- find_seurat_objects()
+  updatePrettyRadioButtons(inputId='seurat_select.input', session=session,
+                           choiceNames=available_seurat_objects$choiceName, choiceValues=available_seurat_objects$choiceValue)
+  
+  # ###############################################################################################
   # load Seurat object from user ------------------------------------------------------------------
 
   ## react to Seurat object selection
@@ -183,7 +189,7 @@ shinyAppServer <- function(input, output, session) {
 
   ## react to opening tab with a filtered object loaded
   observeEvent(input$sidebarmenu, {
-    if(!is.null(seurat_object.reactions$seurat) & input$sidebarmenu=='cell_filtering-tab' & (!is.null(seurat_object.reactions$seurat@misc$cells_filtered) && seurat_object.reactions$seurat@misc$cells_filtered))
+    if(!is.null(seurat_object.reactions$seurat) & input$sidebarmenu=='cell_filtering-tab' && (!is.null(seurat_object.reactions$seurat@misc$cells_filtered) && seurat_object.reactions$seurat@misc$cells_filtered))
       sendSweetAlert(session=session, type='success', html=TRUE,
                      title='Notice', btn_labels='Great!',
                      text=tags$span('It looks like low-quality cells have already been removed from this Seurat object:', tags$h5(tags$code('@misc$cells_filtered == TRUE'))),

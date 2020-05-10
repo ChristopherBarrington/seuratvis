@@ -243,9 +243,8 @@ features_heatmap.content <-tabItem(tabName='features_heatmap-tab',
 submit_data.tab <- menuItem(text='Configure', tabName='submit_data_tab', icon=icon('cogs'), badgeLabel='!', badgeColor='yellow', selected=TRUE)
 
 ### define ui elements
-available_seurat_objects <- find_seurat_objects()
 prettyRadioButtons(inputId='seurat_select.input', label='Select a Seurat object', 
-                   choiceNames=available_seurat_objects$choiceName, choiceValues=available_seurat_objects$choiceValue,
+                   choiceNames='', choiceValues='',
                    icon=icon('check'), shape='curve', outline=TRUE, bigger=TRUE, status='primary', animation='smooth') -> seurat_select.checkbox
 
 ### define layout boxes
