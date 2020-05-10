@@ -18,6 +18,9 @@ shinyAppServer <- function(input, output, session) {
     if(input$seurat_select.input=='')
       return(NULL)
 
+    ### If no file is selected, don't do anything
+    ### validate(need(input$file, message = FALSE))
+
     progress <- shiny::Progress$new(session=session, min=0, max=9/10)
     on.exit(progress$close())
     progress$set(value=0, message='Loading environment')
