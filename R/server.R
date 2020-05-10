@@ -679,12 +679,9 @@ shinyAppServer <- function(input, output, session) {
   callModule(module=number_of_cells_text_box.server, id='gene_highlighting')
   callModule(module=number_of_clusters_text_box.server, id='gene_highlighting')
   callModule(module=gene_name_and_description_text_box.server, id='gene_highlighting')
-  output$genes_highlighting.n_genes_box <- renderValueBox(expr={
-    valueBox(value={nrow(seurat_object.reactions$seurat) %>% comma()},
-             subtitle='Unique genes in assay',
-             icon=icon('galactic-senate'),
-             color='purple')})
   callModule(module=number_of_reads_text_box.server, id='gene_highlighting')
+  callModule(module=number_of_genes_in_assay_text_box.server, id='gene_highlighting')
+
   output$genes_highlighting.n_reads_per_cell_box <- renderValueBox(expr={
     valueBox(value={round(median(seurat_object.reactions$seurat$nCount_RNA), digits=1) %>% comma()},
              subtitle='Median reads per cell',
