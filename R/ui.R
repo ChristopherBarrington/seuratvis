@@ -164,9 +164,7 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                  column(width=12, expression_paletette_type_selector),
                                                  gene_highlighting.point_size,
                                                  opacity.slider),
-                                n_genes_per_cell=valueBoxOutput(outputId='genes_highlighting.n_genes_per_cell_box', width=2),
-                                n_reads_per_cell=valueBoxOutput(outputId='genes_highlighting.n_reads_per_cell_box', width=2),
-                                n_clusters=valueBoxOutput(outputId='genes_highlighting.n_clusters_box', width=2))
+                                n_genes_per_cell=valueBoxOutput(outputId='genes_highlighting.n_genes_per_cell_box', width=2)))
 
 ### assemble tab content
 gene_highlighting.content <- tabItem(tabName='gene_highlighting-tab',
@@ -177,7 +175,7 @@ gene_highlighting.content <- tabItem(tabName='gene_highlighting-tab',
                                               number_of_clusters_text_box.ui(id='gene_highlighting', width=2, subtitle='default'),
                                               number_of_cells_text_box.ui(id='gene_highlighting', width=2, subtitle='default'),
                                               number_of_genes_in_assay_text_box.ui(id='gene_highlighting', width=2, subtitle='default'),
-                                              gene_highlighting.boxes$n_reads_per_cell,
+                                              number_of_reads_per_cell_text_box.ui(id='gene_highlighting', width=2, subtitle='default', f=median),
                                               gene_highlighting.boxes$n_genes_per_cell),
                                      fluidRow(gene_highlighting.boxes$cluster_dim_plot,
                                               gene_highlighting.boxes$gene_expression_map,
