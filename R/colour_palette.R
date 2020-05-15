@@ -10,22 +10,3 @@ default_colour_palette <- function()
     '#8B4500', '#8B0000', '#FF0000', '#FF6A6A', '#FF7F00',
     '#FFFF00', '#FFF68F', '#F4A460', '#551A8B', '#8B008B',
     '#8B0A50', '#9400D3', '#FF00FF', '#FF1493', '#E066FF')
-
-#' Get the current colour palette
-#' 
-get_colour_palette <- function()
-  colour_palette
-
-#' Add a colour to the current palette
-#' 
-#' @import gplots
-#' 
-add_to_colour_palette <- function(x) {
-  if(!startsWith(x=x, prefix='#')) # if x is not in hex format
-    x %<>% col2hex()
-  colour_palette <<- unique(c(colour_palette, x))
-}
-
-#' Initialise the colour palette in the namespace
-#' 
-colour_palette <- default_colour_palette()
