@@ -111,10 +111,10 @@ gene_highlighting.label_clusters <- checkboxInput(inputId='gene_highlighting.lab
 gene_highlighting.label_clusters <- materialSwitch(inputId='gene_highlighting.label_clusters.checkbox', label='Cluster labels', value=TRUE, right=TRUE, status='success')
 
 #### colour selector palette box
-colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=default_colour_palette(), allowTransparent=FALSE, returnName=TRUE)
-append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
-append(colourInput.defaults, list(inputId='expression_max.colour', label='High', value='darkviolet')) %>% do.call(what=colourInput) -> expression_max.colour.selector
-materialSwitch(inputId='expression_palette_full', label='Show full palette?', value=FALSE, right=TRUE, status='success') -> expression_paletette_type_selector
+# colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=default_colour_palette(), allowTransparent=FALSE, returnName=TRUE)
+# append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
+# append(colourInput.defaults, list(inputId='expression_max.colour', label='High', value='darkviolet')) %>% do.call(what=colourInput) -> expression_max.colour.selector
+# materialSwitch(inputId='expression_palette_full', label='Show full palette?', value=FALSE, right=TRUE, status='success') -> expression_paletette_type_selector
 
 ### define layout boxes
 gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
@@ -156,9 +156,9 @@ gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                  width=4,
                                                  collapsible=TRUE,
                                                  shiny::tags$label('Feature value colours'), br(),
-                                                 column(width=6, expression_min.colour.selector),
-                                                 column(width=6, expression_max.colour.selector),
-                                                 column(width=12, expression_paletette_type_selector),
+                                                 colour_palette.ui(id='gene_highlighting', include_full=TRUE,
+                                                                   selectors=list(list(inputId='low', label='Low', value='linen'),
+                                                                                  list(inputId='high', label='High', value='darkviolet'))),
                                                  gene_highlighting.point_size,
                                                  opacity.slider))
 
