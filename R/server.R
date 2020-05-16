@@ -439,7 +439,7 @@ shinyAppServer <- function(input, output, session) {
 
   ### add new colours to palette
   add_to_colour_palette <- function(x) {
-    if(!startsWith(x=x, prefix='#')) # if x is not in hex format
+    if(x!='' && !startsWith(x=x, prefix='#')) # if x is not in hex format
       x %<>% gplots::col2hex()
     unique(c(colour_palette(), x)) %>% colour_palette()
   }
@@ -449,18 +449,6 @@ shinyAppServer <- function(input, output, session) {
 
   observeEvent(eventExpr=input$expression_max.colour, handlerExpr={
     add_to_colour_palette(input$expression_max.colour)})
-
-  # observeEvent(eventExpr=input$expression_min.colour, handlerExpr={
-  #   chosen_colour <- input$expression_min.colour
-  #   if(!startsWith(x=chosen_colour, prefix='#')) # if x is not in hex format
-  #     chosen_colour %<>% col2hex()
-  #   unique(c(colour_palette(), chosen_colour)) %>% colour_palette()})
-
-  # observeEvent(eventExpr=input$expression_max.colour, handlerExpr={
-  #   chosen_colour <- input$expression_max.colour
-  #   if(!startsWith(x=chosen_colour, prefix='#')) # if x is not in hex format
-  #     chosen_colour %<>% col2hex()
-  #   unique(c(colour_palette(), chosen_colour)) %>% colour_palette()})
 
   ## react to reduction method selection
   observeEvent(eventExpr=input$reduction_selection.dd, handlerExpr={
