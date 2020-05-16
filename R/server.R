@@ -10,7 +10,7 @@ shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
   # define the colour palette
-  colour_palette <- reactiveVal(default_colour_palette())
+  # colour_palette <- reactiveVal(default_colour_palette())
 
   # ###############################################################################################
   # scour the session for Seurat objects and populate the UI --------------------------------------
@@ -425,30 +425,8 @@ shinyAppServer <- function(input, output, session) {
     NULL}) -> update_slider
 
   ### when full palette type is selected
-  observeEvent(eventExpr=input$expression_palette_full, handlerExpr={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Updating colour palette UI')
-
-    palette_type <- ifelse(input$expression_palette_full, 'square', 'limited')
-
-    for(inputId in c('expression_min.colour','expression_max.colour'))
-      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette())
-
-    progress$inc(detail='Done')}) -> update_palette_type
-
-  ### add new colours to palette
-  add_to_colour_palette <- function(x) {
-    if(x!='' && !startsWith(x=x, prefix='#')) # if x is not in hex format
-      x %<>% gplots::col2hex()
-    unique(c(colour_palette(), x)) %>% colour_palette()
-  }
-
-  observeEvent(eventExpr=input$expression_min.colour, handlerExpr={
-    add_to_colour_palette(input$expression_min.colour)})
-
-  observeEvent(eventExpr=input$expression_max.colour, handlerExpr={
-    add_to_colour_palette(input$expression_max.colour)})
+  callModule(module=update_palette_type.server, id='gene_highlighting')
+  callModule(module=add_to_colour_palette.server, id='gene_highlighting')
 
   ## react to reduction method selection
   observeEvent(eventExpr=input$reduction_selection.dd, handlerExpr={
@@ -522,7 +500,7 @@ shinyAppServer <- function(input, output, session) {
       ggplot() +
       aes(x=DIMRED_1, y=DIMRED_2, colour=expression_value) +
       geom_point(size=input$gene_highlighting.point_size.slider, alpha=input$opacity.slider) +
-      scale_colour_gradient(low=input$expression_min.colour, high=input$expression_max.colour, limits=input$expression_range.slider, oob=scales::squish) +
+      scale_colour_gradient(low=input$`gene_highlighting-colour_palette-low`, high=input$`gene_highlighting-colour_palette-high`, limits=input$expression_range.slider, oob=scales::squish) +
       theme_void() +
       theme(legend.position='none')
     } else {
