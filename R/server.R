@@ -9,6 +9,10 @@ shinyAppServer <- function(input, output, session) {
   progress$set(value=0, message='Loading environment')
 
   # ###############################################################################################
+  # define the colour palette
+  colour_palette <- reactiveVal(default_colour_palette())
+
+  # ###############################################################################################
   # scour the session for Seurat objects and populate the UI --------------------------------------
   available_seurat_objects <- find_seurat_objects()
   updatePrettyRadioButtons(inputId='seurat_select.input', session=session,
@@ -429,16 +433,34 @@ shinyAppServer <- function(input, output, session) {
     palette_type <- ifelse(input$expression_palette_full, 'square', 'limited')
 
     for(inputId in c('expression_min.colour','expression_max.colour'))
-      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=get_colour_palette())
+      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette())
 
     progress$inc(detail='Done')}) -> update_palette_type
 
   ### add new colours to palette
+  add_to_colour_palette <- function(x) {
+    if(!startsWith(x=x, prefix='#')) # if x is not in hex format
+      x %<>% gplots::col2hex()
+    unique(c(colour_palette(), x)) %>% colour_palette()
+  }
+
   observeEvent(eventExpr=input$expression_min.colour, handlerExpr={
     add_to_colour_palette(input$expression_min.colour)})
 
   observeEvent(eventExpr=input$expression_max.colour, handlerExpr={
     add_to_colour_palette(input$expression_max.colour)})
+
+  # observeEvent(eventExpr=input$expression_min.colour, handlerExpr={
+  #   chosen_colour <- input$expression_min.colour
+  #   if(!startsWith(x=chosen_colour, prefix='#')) # if x is not in hex format
+  #     chosen_colour %<>% col2hex()
+  #   unique(c(colour_palette(), chosen_colour)) %>% colour_palette()})
+
+  # observeEvent(eventExpr=input$expression_max.colour, handlerExpr={
+  #   chosen_colour <- input$expression_max.colour
+  #   if(!startsWith(x=chosen_colour, prefix='#')) # if x is not in hex format
+  #     chosen_colour %<>% col2hex()
+  #   unique(c(colour_palette(), chosen_colour)) %>% colour_palette()})
 
   ## react to reduction method selection
   observeEvent(eventExpr=input$reduction_selection.dd, handlerExpr={
@@ -747,7 +769,5 @@ shinyAppServer <- function(input, output, session) {
   ## dynamic sidebar outputs can be listed here
 
   # any code to exectue when the session ends
-  session$onSessionEnded(function() {
-    colour_palette <<- default_colour_palette() # do not carry custom palettes between sessions
-  })
+  session$onSessionEnded(function() {})
 }

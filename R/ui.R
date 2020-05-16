@@ -111,7 +111,7 @@ gene_highlighting.label_clusters <- checkboxInput(inputId='gene_highlighting.lab
 gene_highlighting.label_clusters <- materialSwitch(inputId='gene_highlighting.label_clusters.checkbox', label='Cluster labels', value=TRUE, right=TRUE, status='success')
 
 #### colour selector palette box
-colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=colour_palette, allowTransparent=FALSE, returnName=TRUE)
+colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=default_colour_palette(), allowTransparent=FALSE, returnName=TRUE)
 append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
 append(colourInput.defaults, list(inputId='expression_max.colour', label='High', value='darkviolet')) %>% do.call(what=colourInput) -> expression_max.colour.selector
 materialSwitch(inputId='expression_palette_full', label='Show full palette?', value=FALSE, right=TRUE, status='success') -> expression_paletette_type_selector
