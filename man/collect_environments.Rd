@@ -4,7 +4,7 @@
 \alias{collect_environments}
 \title{Collect environments for modules}
 \usage{
-collect_environments(module)
+collect_environments(module, n = 3)
 }
 \arguments{
 \item{module}{name of the module used to determine module-specific environment to load}
