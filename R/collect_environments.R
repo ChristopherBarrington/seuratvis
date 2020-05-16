@@ -8,7 +8,7 @@
 #' 
 #' @details assigns a \code{seuratvis_env} and \code{module_env} environment in the calling function, including copying the \code{id} variable that is passed to \code{callModule()}
 #' 
-collect_environments <- function(module) {
+collect_environments <- function(module, n=3) {
   # get the environment using the shiny object identifiers (namespace and id)
   callmodule_env <- parent.frame(n=2)
   callmodule_env %>%
@@ -18,7 +18,7 @@ collect_environments <- function(module) {
     getFromNamespace(ns='seuratvis') -> module_env
 
   # assign environments back to the calling server function
-  assign(x='seuratvis_env', value=parent.frame(n=3), envir=parent.frame(n=1))
+  assign(x='seuratvis_env', value=parent.frame(n=n), envir=parent.frame(n=1))
   assign(x='module_env', value=module_env, envir=parent.frame(n=1))
 
   invisible('done')
