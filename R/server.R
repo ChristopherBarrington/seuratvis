@@ -1,16 +1,13 @@
 
 10^(0:9) -> major_breaks_log10
 (2:9) * rep(major_breaks_log10, each=8) -> minor_breaks_log10
+module_environments <- new.env()
 
 shinyAppServer <- function(input, output, session) {
 
   progress <- shiny::Progress$new(session=session, min=0, max=4/10)
   on.exit(progress$close())
   progress$set(value=0, message='Loading environment')
-
-  # ###############################################################################################
-  # define the colour palette
-  # colour_palette <- reactiveVal(default_colour_palette())
 
   # ###############################################################################################
   # scour the session for Seurat objects and populate the UI --------------------------------------

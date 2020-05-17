@@ -28,8 +28,7 @@ colour_palette.ui <- function(id, selectors=list(), include_full=FALSE) {
   module <- 'colour_palette'
 
   # make unique id for this object
-  ns <- NS(namespace=id, id=module)
-  module_env <- str_c(ns, 'env', sep='.')
+  module_ns <- ns <- NS(namespace=id, id=module)
   ns %<>% NS() # now namespace will be eg: `id-module-selector_label`
 
   # for each selector, make a list UI element arguments
@@ -56,7 +55,7 @@ colour_palette.ui <- function(id, selectors=list(), include_full=FALSE) {
   e$selector_inputIds <- selector_inputIds
   e$full_palette_inputId <- ns(id='full')
   e$include_full_palette_switch <- include_full
-  assign(x=module_env, val=e, envir=parent.frame(n=1))
+  assign(x=module_ns, val=e, envir=module_environments)
 
   # return ui element(s)
   selectors %>% tagList()
@@ -70,9 +69,11 @@ update_palette_type.server <- function(input, output, session) {
   message('### update_palette_type.server')
 
   # get environments containing variables to run/configure this object
-  collect_environments(module='colour_palette', n=2) # provides `seuratvis_env` and `module_env`
-  input <- get(x='input', env=parent.frame(n=2))
+  collect_environments(id=parent.frame()$id, module='colour_palette') # provides `seuratvis_env`, `server_env` and `module_env`
+  input <- get(x='input', env=server_env)
+  session <- get(x='session', env=server_env)
 
+  # react to the palette switch
   observe({
     if(!module_env$include_full_palette_switch) # limited palette doesn't work without this ... ?
       return(NULL)
@@ -80,7 +81,7 @@ update_palette_type.server <- function(input, output, session) {
     palette_type <- ifelse(input[[module_env$full_palette_inputId]], 'square', 'limited')
 
     for(inputId in module_env$selector_inputIds)
-      updateColourInput(session=seuratvis_env$session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette())
+      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette())
   })
 }
 
@@ -92,8 +93,8 @@ add_to_colour_palette.server <- function(input, output, session) {
   message('### add_to_colour_palette.server')
 
   # get environments containing variables to run/configure this object
-  collect_environments(module='colour_palette', n=2) # provides `seuratvis_env` and `module_env`
-  input <- get(x='input', env=parent.frame(n=2))
+  collect_environments(id=parent.frame()$id, module='colour_palette') # provides `seuratvis_env`, `server_env` and `module_env`
+  input <- get(x='input', env=server_env)
 
   # react to the chosen colour by adding it to the colour palette reactive values
   observe({

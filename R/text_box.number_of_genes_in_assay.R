@@ -19,12 +19,11 @@ number_of_genes_in_assay_text_box.ui <- function(id, width=12) {
 
   # make unique id for this object
   ns <- NS(namespace=id, id=module)
-  module_env <- str_c(ns, 'env', sep='.')
 
   # create an environment in the seuratvis namespace
   e <- new.env()
   e$id <- id
-  assign(x=module_env, val=e, envir=parent.frame(n=1))
+  assign(x=ns, val=e, envir=module_environments)
   
   # return ui element(s)
   valueBoxOutput(outputId=ns, width=width)
@@ -34,7 +33,7 @@ number_of_genes_in_assay_text_box.ui <- function(id, width=12) {
 #' 
 number_of_genes_in_assay_text_box.server <- function(input, output, session) {
   # get environments containing variables to run/configure this object
-  collect_environments(module='number_of_genes_in_assay') # provides `seuratvis_env` and `module_env`
+  collect_environments(id=parent.frame()$id, module='number_of_genes_in_assay') # provides `seuratvis_env`, `server_env` and `module_env`
 
   # make the text box
   renderValueBox(expr={
@@ -43,7 +42,7 @@ number_of_genes_in_assay_text_box.server <- function(input, output, session) {
            'Unique genes in assay') -> subtitle
 
     # create output object
-    list(value={nrow(seuratvis_env$seurat_object.reactions$seurat) %>% comma()},
+    list(value={nrow(server_env$seurat_object.reactions$seurat) %>% comma()},
          subtitle=subtitle,
          icon=icon('galactic-senate')) %>%
       modifyList(x=seuratvis:::text_box_defaults()) %>%

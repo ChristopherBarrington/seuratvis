@@ -19,12 +19,11 @@ number_of_reads_text_box.ui <- function(id, width=12) {
 
   # make unique id for this object
   ns <- NS(namespace=id, id=module)
-  module_env <- str_c(ns, 'env', sep='.')
 
   # create an environment in the seuratvis namespace
   e <- new.env()
   e$id <- id
-  assign(x=module_env, val=e, envir=parent.frame(n=1)) # don't like using parent.frame, can use anything better?
+  assign(x=ns, val=e, envir=module_environments)
   
   # return ui element(s)
   valueBoxOutput(outputId=ns, width=width)
@@ -34,19 +33,19 @@ number_of_reads_text_box.ui <- function(id, width=12) {
 #' 
 number_of_reads_text_box.server <- function(input, output, session) {
   # get environemtns containing variables to run/configure this object
-  collect_environments(module='number_of_reads') # provides `seuratvis_env` and `module_env`
+  collect_environments(id=parent.frame()$id, module='number_of_reads') # provides `seuratvis_env`, `server_env` and `module_env`
 
   # make the text box
   renderValueBox(expr={
-    seuratvis_env$react_to_cell_filtering() # not sure about this line, is it necessary?
+    server_env$react_to_cell_filtering() # not sure about this line, is it necessary?
 
     # get the box subtitle
     switch(module_env$id,
-           cell_filtering=sprintf(fmt='Total reads remaining (%.1f%%)', seuratvis_env$cell_filtering_data.reactions$total_reads/seuratvis_env$seurat_object.reactions$reference_metrics$total_reads*100), # neaten this up
+           cell_filtering=sprintf(fmt='Total reads remaining (%.1f%%)', server_env$cell_filtering_data.reactions$total_reads/server_env$seurat_object.reactions$reference_metrics$total_reads*100), # neaten this up
            'Total reads in cells') -> subtitle
 
     # create output object
-    list(value={seuratvis_env$cell_filtering_data.reactions$total_reads %>% comma()}, # not the best, should not depend on this object, may not be filtered
+    list(value={server_env$cell_filtering_data.reactions$total_reads %>% comma()}, # not the best, should not depend on this object, may not be filtered
          subtitle=subtitle,
          icon=icon('old-republic')) %>%
       modifyList(x=seuratvis:::text_box_defaults()) %>%
