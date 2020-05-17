@@ -8,6 +8,8 @@ collect_environments(module, id)
 }
 \arguments{
 \item{module}{name of the module used to determine module-specific environment to load}
+
+\item{id}{name of the UI element}
 }
 \value{
 none
