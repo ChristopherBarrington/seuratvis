@@ -238,8 +238,7 @@ shinyAppUI <- function(...) {
   ### assemble tab content
   load_dataset.content <- tabItem(tabName='submit_data_tab',
                                   h1('Select a Seurat object'),
-                                  seurat_select.checkbox,
-                                  colourpicker::colourInput("col", "Select colours", "green"))
+                                  seurat_select.checkbox)
 
   ## menu tab hyperlinks
   email_me.tab <- menuItem(text='mail me', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] Hello there', icon=icon('comment-dots'))
