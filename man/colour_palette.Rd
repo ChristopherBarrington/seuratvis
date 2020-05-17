@@ -27,6 +27,9 @@ Create UI elements for colours and a palette type switch
 
 This is probably not a good place to keep this
 }
+\details{
+For every selctor in the list, a new element is created in the same order as provided. If a palette type switch is required, it is created after the selectors.
+}
 \examples{
 
 \dontrun{
