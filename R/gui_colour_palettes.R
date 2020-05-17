@@ -6,7 +6,7 @@
 #' @param selectors list of lists with arguments to \code{colourInput}; requires \code{inputId}, \code{label} and best include \code{value} too
 #' @param include_full boolean whether to create a square/limited palette switch
 #' 
-#' @detail
+#' @details
 #' For every selctor in the list, a new element is created in the same order as provided. If a palette type switch is required, it is created after the selectors.
 #' 
 #' @examples
@@ -17,6 +17,8 @@
 #'   callModule(module=update_palette_type.server, id='page_name', input_reactive=reactive({input %>% reactiveValuesToList()}))
 #'   callModule(module=add_to_colour_palette.server, id='page_name', input_reactive=reactive({input %>% reactiveValuesToList()}))
 #' }}
+#' 
+#' @import colourpicker
 #' 
 #' @rdname colour_palette
 #' 
