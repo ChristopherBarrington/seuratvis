@@ -435,7 +435,7 @@ shinyAppServer <- function(input, output, session) {
 
   ### add new colours to palette
   add_to_colour_palette <- function(x) {
-    if(!startsWith(x=x, prefix='#')) # if x is not in hex format
+    if(x!='' && !startsWith(x=x, prefix='#')) # if x is not in hex format
       x %<>% gplots::col2hex()
     unique(c(colour_palette(), x)) %>% colour_palette()
   }
