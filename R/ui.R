@@ -1,19 +1,4 @@
 
-# library(shiny)
-# library(shinydashboard)
-# library(dqshiny)
-# library(shinycssloaders)
-# library(ggvis)
-# library(tidyverse)
-# library(magrittr)
-
-# load('int.RData') ######
-# # seurat <- human_CS17_thoracic
-# seurat <- human_CS17_brachial
-# starter_gene <- sample(x=rownames(seurat), size=1)
-# starter_gene <- 'SOX2'
-# ################
-
 shinyAppUI <- function(...) {
   # tab definitions
 
@@ -260,8 +245,8 @@ shinyAppUI <- function(...) {
   # sidebar definition
   list(cell_filtering.tab,
        gene_highlighting.tab,
-       discover_markers.tab,
-       features_heatmap.tab,
+       # discover_markers.tab,
+       # features_heatmap.tab,
        submit_data.tab,
        hr(),
        email_me.tab,
