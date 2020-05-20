@@ -7,15 +7,15 @@
 #' @param include_full boolean whether to create a square/limited palette switch
 #' 
 #' @details
-#' For every selctor in the list, a new element is created in the same order as provided. If a palette type switch is required, it is created after the selectors.
+#' For every selector in the list, a new element is created in the same order as provided. If a palette type switch is required, it is created after the selectors.
 #' 
 #' @examples
 #' 
 #' \dontrun{
 #' ui <- fluidPage(number_of_clusters_text_box.ui(id='page_name'))
 #' server <- function(input, output, session) {
-#'   callModule(module=update_palette_type.server, id='page_name', input_reactive=reactive({input %>% reactiveValuesToList()}))
-#'   callModule(module=add_to_colour_palette.server, id='page_name', input_reactive=reactive({input %>% reactiveValuesToList()}))
+#'   callModule(module=update_palette_type.server, id='page_name')
+#'   callModule(module=add_to_colour_palette.server, id='page_name')
 #' }}
 #' 
 #' @import colourpicker
