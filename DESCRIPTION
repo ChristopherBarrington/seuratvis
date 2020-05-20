@@ -24,7 +24,6 @@ Depends:
   ggvis,
   hdf5r,
   viridis,
-  ComplexHeatmap,
   Seurat,
   tidyverse,
   magrittr,
