@@ -1,12 +1,12 @@
 # seuratvis
 
-visualise data contained in a Seurat object
+Visualise data contained in a Seurat object
 
 This package is very early stages and under development. Bug reports and feature suggestions are welcome!
 
 # install package
 
-either install the package or clone a version for development
+Either install the package or clone a version for development
 
 ## install the package
 
@@ -34,6 +34,7 @@ The package expects the current workspace to contain:
   * it will not be happy if there is not at least one!
 
 ```r
+library(seuratvis)
 launchApp()
 ```
 
