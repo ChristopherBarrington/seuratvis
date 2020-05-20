@@ -274,8 +274,8 @@ shinyAppUI <- function() {
   # sidebar definition
   list(cell_filtering.tab,
        gene_highlighting.tab,
-       discover_markers.tab,
-       features_heatmap.tab,
+       #discover_markers.tab,
+       #features_heatmap.tab,
        submit_data.tab,
        hr(),
        email_me.tab,
