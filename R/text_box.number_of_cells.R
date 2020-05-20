@@ -43,7 +43,7 @@ number_of_cells_text_box.server <- function(input, output, session) {
 
     # get the box subtitle
     switch(module_env$id,
-           cell_filtering=sprintf(fmt='Cells remaining (%.1f%%)', server_env$cell_filtering_data.reactions$n_cells/server_env$seurat_object.reactions$reference_metrics$n_cells*100),
+           cell_filtering=sprintf(fmt='Cells remaining (%.1f%%)', server_env$cell_filtering_data.reactions$n_cells/seurat_object.reactions$reference_metrics$n_cells*100),
            'Cells in map') -> subtitle
 
     # create output object
