@@ -1,7 +1,9 @@
 
 10^(0:9) -> major_breaks_log10
 (2:9) * rep(major_breaks_log10, each=8) -> minor_breaks_log10
+
 module_environments <- new.env()
+seurat_object.reactions <- reactiveValues()
 
 shinyAppServer <- function(input, output, session) {
 
@@ -11,91 +13,9 @@ shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
   # scour the session for Seurat objects and populate the UI --------------------------------------
-  available_seurat_objects <- find_seurat_objects()
-  updatePrettyRadioButtons(inputId='seurat_select.input', session=session,
-                           choiceNames=available_seurat_objects$choiceName, choiceValues=available_seurat_objects$choiceValue)
-  
-  # ###############################################################################################
-  # load Seurat object from user ------------------------------------------------------------------
-
-  ## react to Seurat object selection
-  seurat_object.reactions <- reactiveValues()
-  observeEvent(eventExpr=input$seurat_select.input, handlerExpr={
-
-    if(input$seurat_select.input=='')
-      return(NULL)
-
-    ### If no file is selected, don't do anything
-    ### validate(need(input$file, message = FALSE))
-
-    progress <- shiny::Progress$new(session=session, min=0, max=9/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Loading environment')
-
-    # load Seurat object from user
-    progress$inc(detail='Updating UI with cluster options')
-    seurat <- parse(text=input$seurat_select.input) %>% eval()
-    seurat <- subset(seurat, subset=nFeature_RNA>0 & nCount_RNA>0)
-    cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
-    updateSelectInput(session=session, inputId='seurat_cluster_set.dd', choices=cluster_options)
-    updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
-
-    progress$inc(detail='Checking meta.data')
-    if(is.null(seurat@meta.data$seurat_clusters))
-      seurat@meta.data$seurat_clusters <- 0
-
-    progress$inc(detail='Initialising reduced dimension plot')
-    if(input$reduction_selection.dd != '')
-      seurat@reductions[[input$reduction_selection.dd]]@cell.embeddings[,1:2] %>%
-        as.data.frame() %>%
-        set_names(c('DIMRED_1','DIMRED_2')) %>%
-        cbind(seurat@meta.data) -> seurat_object.reactions$dimred
-
-    progress$inc(detail='Counting clusters identified in each set')
-    select_at(seurat@meta.data, vars(contains('_snn_res.'), 'seurat_clusters')) %>%
-      mutate_all(function(x) {as.character(x) %>% as.numeric()}) %>%
-      gather(key='cluster_set', value='ID') %>%
-      group_by(cluster_set) %>%
-      summarise(N=length(unique(ID))+1) %>%
-      deframe() -> clusters_per_resolution
-
-    progress$inc(detail='Getting summary statistics')
-    list(n_cells=nrow(seurat@meta.data),
-         total_reads=sum(seurat@meta.data$nCount_RNA),
-         median_reads_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
-         median_genes_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
-         min_reads_per_cell=min(seurat@meta.data$nCount_RNA), max_reads_per_cell=max(seurat@meta.data$nCount_RNA),
-         min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
-         max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> cell_filtering_data.reference
-
-    progress$inc(detail='Setting default assay')
-    selected_assay <- 'RNA'
-    DefaultAssay(seurat) <- selected_assay
-    if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
-      seurat <- NormalizeData(seurat)
-
-    progress$inc(detail='Updating UI elements')
-    updateTextInput(session=session, inputId='min_features_per_cell.textinput', placeholder=cell_filtering_data.reference$min_genes_per_cell)
-    updateTextInput(session=session, inputId='max_features_per_cell.textinput', placeholder=cell_filtering_data.reference$max_genes_per_cell)
-    updateTextInput(session=session, inputId='min_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$min_reads_per_cell)
-    updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
-    updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
-    updateSelectInput(session=session, inputId='reduction_selection.dd', choices=names(seurat@reductions), selected=Seurat:::DefaultDimReduc(seurat))
-    updateSelectInput(session=session, inputId='assay_selection.dd', choices=Assays(seurat), selected=DefaultAssay(seurat))
-    update_autocomplete_input(session=session, id='gene_of_interest.dd', options=c(sort(rownames(seurat)), 'nFeature_RNA', 'nCount_RNA', 'percent_mt', 'orig.ident', 'orig.species','orig.timepoint','orig.tissue','orig.replicate'))
-
-    progress$inc(detail='Saving variables')
-    available_assays <- Assays(seurat)
-    available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
-
-   # copy the important stuff into the reaction values
-    seurat_object.reactions$seurat <- seurat
-    seurat_object.reactions$mart <- seurat@misc$mart
-    seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
-    seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
-    seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
-    seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution[input$seurat_cluster_set.dd]
-  })
+  available_seurat_objects <- find_seurat_objects() # has to be here to access the global environment ... ?
+  callModule(module=available_seurats.server, id='load_dataset')
+  callModule(module=load_a_seurat.server, id='load_dataset')
 
   # ###############################################################################################
   # cell filtering tab ----------------------------------------------------------------------------

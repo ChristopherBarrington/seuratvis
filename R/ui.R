@@ -214,16 +214,13 @@ shinyAppUI <- function(...) {
   submit_data.tab <- menuItem(text='Configure', tabName='submit_data_tab', icon=icon('cogs'), badgeLabel='!', badgeColor='yellow', selected=TRUE)
 
   ### define ui elements
-  prettyRadioButtons(inputId='seurat_select.input', label='Select a Seurat object', 
-                     choiceNames='', choiceValues='',
-                     icon=icon('check'), shape='curve', outline=TRUE, bigger=TRUE, status='primary', animation='smooth') -> seurat_select.checkbox
 
   ### define layout boxes
 
   ### assemble tab content
   load_dataset.content <- tabItem(tabName='submit_data_tab',
                                   h1('Select a Seurat object'),
-                                  seurat_select.checkbox)
+                                  available_seurats.ui(id='load_dataset'))
 
   ## menu tab hyperlinks
   email_me.tab <- menuItem(text='mail me', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] Hello there', icon=icon('comment-dots'))
@@ -232,6 +229,7 @@ shinyAppUI <- function(...) {
   github_link.tab <- menuItem(text=sprintf('GitHub (version: %s)', packageVersion('seuratvis')), href='github.com/ChristopherBarrington/seuratvis', icon=icon('code-branch'))
 
   # header definition
+  css <- 'table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'
   dashboard_header <- dashboardHeader(title='seurat-vis')
 
   # dashboard body definition
@@ -240,7 +238,7 @@ shinyAppUI <- function(...) {
        features_heatmap.content,
        load_dataset.content) %>%
     do.call(what=tabItems) %>%
-    dashboardBody(rclipboardSetup()) -> dashboard_body
+    dashboardBody(rclipboardSetup(), tags$head(tags$style(HTML(css)))) -> dashboard_body
 
   # sidebar definition
   list(cell_filtering.tab,

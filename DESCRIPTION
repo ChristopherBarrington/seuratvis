@@ -19,6 +19,7 @@ Depends:
   rclipboard,
   scales,
   dqshiny,
+  DT,
   shinycssloaders,
   shinyWidgets,
   colourpicker,
