@@ -10,7 +10,7 @@
 #' \dontrun{
 #' ui <- fluidPage(cluster_resolution_picker.ui(id='page_name'))
 #' server <- function(input, output, session) {
-#'   callModule(update_selected_cluster_resolution.server, id='page_name')
+#'   callModule(cluster_resolution_picker.server, id='page_name')
 #' }}
 #' 
 #' 
