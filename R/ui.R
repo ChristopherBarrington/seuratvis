@@ -74,9 +74,6 @@ shinyAppUI <- function(...) {
                                            options=NULL,
                                            placeholder='Gene name', value='orig.ident')
 
-  gene_highlighting.reduction_selection.dd <- selectInput(inputId='reduction_selection.dd', label='Reduction method',
-                                                          choices=NULL, selected=NULL,
-                                                          multiple=FALSE)
   gene_highlighting.assay_selection.dd <- selectInput(inputId='assay_selection.dd', label='Assay',
                                                       choices=NULL, selected=NULL,
                                                       multiple=FALSE)
@@ -121,7 +118,7 @@ shinyAppUI <- function(...) {
                                                     gene_name.dropdown,
                                                     expression_range.slider,
                                                     cluster_resolution_picker.ui(id='gene_highlighting', include_label_switch=TRUE),
-                                                    gene_highlighting.reduction_selection.dd,
+                                                    reduction_method_picker.ui(id='gene_highlighting'),
                                                     gene_highlighting.assay_selection.dd),
                                   plot_options=box(title='Plot options',
                                                    status='primary',

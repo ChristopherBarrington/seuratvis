@@ -353,6 +353,9 @@ shinyAppServer <- function(input, output, session) {
         set_names(c('DIMRED_1','DIMRED_2')) %>%
         cbind(seurat_object.reactions$seurat@meta.data) -> seurat_object.reactions$dimred})
 
+  for(id in module_environments$reduction_method_pickers$id)
+    callModule(module=reduction_method_picker.server, id=id)
+  
   ## react to assay selection
   observeEvent(eventExpr=input$assay_selection.dd, handlerExpr={
     if(input$assay_selection.dd != '')
