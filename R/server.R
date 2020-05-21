@@ -360,7 +360,7 @@ shinyAppServer <- function(input, output, session) {
 
   ## react to cluster set selection
   for(id in module_environments$cluster_resolution_pickers$id)
-    callModule(module=update_selected_cluster_resolution.server, id=id)
+    callModule(module=cluster_resolution_picker.server, id=id)
 
   ## gene highlighting
   # genes_highlighting.reactions <- reactiveValues(data=NULL, expression_map=NULL, cluster_expression=NULL, expression_map.running=0, cluster_expression.running=0)
