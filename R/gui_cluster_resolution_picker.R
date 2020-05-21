@@ -16,26 +16,35 @@
 #' 
 #' @rdname cluster_resolution_picker
 #' 
-cluster_resolution_picker.ui <- function(id, label='Cluster resolutions') {
+cluster_resolution_picker.ui <- function(id, label='Cluster resolutions', include_label_switch=FALSE) {
   message('### cluster_resolution_picker.ui')
 
   module <- 'cluster_resolution_picker'
 
   # make unique id for this object
-  ns <- NS(namespace=id, id=module)
+  ns <- NS(namespace=id)
+  module_ns <- ns(id=module)
 
   # create an environment in the seuratvis namespace
   e <- new.env()
   e$id <- id
-  assign(x=ns, val=e, envir=module_environments)
+  assign(x=module_ns, val=e, envir=module_environments)
 
-  module_environments$cluster_resolution_pickers$ns %<>% c(ns)
+  module_environments$cluster_resolution_pickers$ns %<>% c(module_ns)
   module_environments$cluster_resolution_pickers$id %<>% c(id)
 
+  # if a label switch is required, make one
+  label_switch <- NULL
+  if(include_label_switch)
+      materialSwitch(inputId=ns(id='label_clusters'), label='Cluster labels', value=TRUE, right=TRUE, status='success') -> label_switch
+
+  # make a drop down selector element
+  selectInput(inputId=ns(id='cluster_resolution_picker'), label=label,
+                        choices='seurat_clusters', selected='seurat_clusters',
+                        multiple=FALSE) -> dropdown
+
   # return ui element(s)
-  selectInput(inputId=ns, label=label,
-              choices='seurat_clusters', selected='seurat_clusters',
-              multiple=FALSE)
+  tagList(dropdown, label_switch)
 }
 
 #' React to a cluster resolution choice
@@ -60,5 +69,10 @@ update_selected_cluster_resolution.server <- function(input, output, session, i)
 
     for(nsid in module_environments$cluster_resolution_pickers$ns)
       updateSelectInput(session=session, inputId=nsid, selected=input$cluster_resolution_picker)
+  })
+
+  # react to the cluster labels switch
+  observeEvent(eventExpr=input$label_clusters, handlerExpr={
+    seurat_object.reactions$label_clusters <- input$label_clusters
   })
 }

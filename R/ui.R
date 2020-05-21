@@ -90,9 +90,6 @@ shinyAppUI <- function(...) {
                                               min=0.1, max=3, step=0.1, value=0.6)
                                               # min=1, max=15, step=1, value=3)
 
-  gene_highlighting.label_clusters <- checkboxInput(inputId='gene_highlighting.label_clusters.checkbox', label='Label clusters', value=TRUE)
-  gene_highlighting.label_clusters <- materialSwitch(inputId='gene_highlighting.label_clusters.checkbox', label='Cluster labels', value=TRUE, right=TRUE, status='success')
-
   ### define layout boxes
   gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                        footer='Seurat map showing cell clusters',
@@ -123,8 +120,7 @@ shinyAppUI <- function(...) {
                                                     collapsible=TRUE,
                                                     gene_name.dropdown,
                                                     expression_range.slider,
-                                                    cluster_resolution_picker.ui(id='gene_highlighting'),
-                                                    gene_highlighting.label_clusters,
+                                                    cluster_resolution_picker.ui(id='gene_highlighting', include_label_switch=TRUE),
                                                     gene_highlighting.reduction_selection.dd,
                                                     gene_highlighting.assay_selection.dd),
                                   plot_options=box(title='Plot options',

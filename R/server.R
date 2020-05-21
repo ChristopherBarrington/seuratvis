@@ -367,7 +367,7 @@ shinyAppServer <- function(input, output, session) {
 
   ## make map coloured by clusters
   genes_highlighting.clustered_map.plot <- reactive({
-    progress <- shiny::Progress$new(session=session, min=0, max=if_else(input$gene_highlighting.label_clusters.checkbox, 4, 2)/10)
+    progress <- shiny::Progress$new(session=session, min=0, max=if_else(seurat_object.reactions$label_clusters, 4, 2)/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making cell clusters map')
 
@@ -383,7 +383,7 @@ shinyAppServer <- function(input, output, session) {
       theme_void() +
       theme(legend.position='none') -> output_plot
 
-    if(input$gene_highlighting.label_clusters.checkbox) {
+    if(seurat_object.reactions$label_clusters) {
       progress$inc(detail='Getting cluster label positions')
       seurat_object.reactions$dimred %>%
         group_by_at(vars(cluster_id=seurat_object.reactions$selected_cluster_resolution)) %>%
