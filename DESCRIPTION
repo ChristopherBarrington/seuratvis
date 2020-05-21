@@ -7,7 +7,7 @@ Authors@R:
            email='christopher.barrington@crick.ac.uk',
            comment=c(ORCID='0000-0003-1281-2658'))
 Description: Seurat is used to process and analyse single cell data. This package reads a Seurat object and presents visualisation of the data to the user.
-License: license to thrill
+License: GNU General Public License v3.0
 Encoding: UTF-8
 LazyData: true
 biocViews:
