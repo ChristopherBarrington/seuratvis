@@ -58,6 +58,7 @@ reduction_method_picker.server <- function(input, output, session) {
 
   # react to the reduction method selection
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
+    # create varaibles for shorthand
     dimred_method <- input$reduction_method_picker
     seurat_object.reactions$selected_reduction_method <- dimred_method
 
@@ -75,11 +76,20 @@ reduction_method_picker.server <- function(input, output, session) {
 
   # update UI when Seurat object is loaded
   observe(x={
+    # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
     if(is.null(seurat))
       return(NULL)
 
+    # update the ui element(s)
     updateSelectInput(session=session, inputId='reduction_method_picker',
                       choices=Reductions(seurat),
-                      selected=Seurat:::DefaultDimReduc(seurat))})
+                      selected=Seurat:::DefaultDimReduc(seurat))
+
+    # initialise the dimension reduced map
+    seurat@reductions[[Seurat:::DefaultDimReduc(seurat)]]@cell.embeddings[,1:2] %>%
+        as.data.frame() %>%
+        set_names(c('DIMRED_1','DIMRED_2')) %>%
+        cbind(seurat@meta.data) -> seurat_object.reactions$dimred
+  })
 }
