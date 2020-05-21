@@ -28,5 +28,6 @@ Depends:
   Seurat,
   tidyverse,
   magrittr,
-  biomaRt
+  biomaRt,
+  BiocManager
 RoxygenNote: 7.0.2
