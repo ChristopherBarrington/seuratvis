@@ -93,12 +93,6 @@ shinyAppUI <- function(...) {
   gene_highlighting.label_clusters <- checkboxInput(inputId='gene_highlighting.label_clusters.checkbox', label='Label clusters', value=TRUE)
   gene_highlighting.label_clusters <- materialSwitch(inputId='gene_highlighting.label_clusters.checkbox', label='Cluster labels', value=TRUE, right=TRUE, status='success')
 
-  #### colour selector palette box
-  # colourInput.defaults <- list(showColour='both', palette='limited', allowedCols=default_colour_palette(), allowTransparent=FALSE, returnName=TRUE)
-  # append(colourInput.defaults, list(inputId='expression_min.colour', label='Low', value='linen')) %>% do.call(what=colourInput) -> expression_min.colour.selector
-  # append(colourInput.defaults, list(inputId='expression_max.colour', label='High', value='darkviolet')) %>% do.call(what=colourInput) -> expression_max.colour.selector
-  # materialSwitch(inputId='expression_palette_full', label='Show full palette?', value=FALSE, right=TRUE, status='success') -> expression_paletette_type_selector
-
   ### define layout boxes
   gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
                                                        footer='Seurat map showing cell clusters',
@@ -219,10 +213,10 @@ shinyAppUI <- function(...) {
                                   available_seurats.ui(id='load_dataset'))
 
   ## menu tab hyperlinks
-  email_me.tab <- menuItem(text='mail me', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] Hello there', icon=icon('comment-dots'))
-  bug_report.tab <- menuItem(text='report a bug', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] I found a bug!', icon=icon('bug'))
-  feature_request.tab <- menuItem(text='suggest a feature', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] It would be cool if...', icon=icon('lightbulb'))
-  github_link.tab <- menuItem(text=sprintf('GitHub (version: %s)', packageVersion('seuratvis')), href='github.com/ChristopherBarrington/seuratvis', icon=icon('code-branch'))
+  email_me.tab <- menuItem(text='mail me', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] Hello there', icon=icon('comment-dots'), newtab=FALSE)
+  bug_report.tab <- menuItem(text='report a bug', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] I found a bug!', icon=icon('bug'), newtab=FALSE)
+  feature_request.tab <- menuItem(text='suggest a feature', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] It would be cool if...', icon=icon('lightbulb'), newtab=FALSE)
+  github_link.tab <- menuItem(text=sprintf('GitHub (version: %s)', packageVersion('seuratvis')), href='github.com/ChristopherBarrington/seuratvis', icon=icon('code-branch'), newtab=FALSE)
 
   # header definition
   css <- 'table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'
