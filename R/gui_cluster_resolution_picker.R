@@ -40,8 +40,8 @@ cluster_resolution_picker.ui <- function(id, label='Cluster resolutions', includ
 
   # make a drop down selector element
   selectInput(inputId=ns(id='cluster_resolution_picker'), label=label,
-                        choices='seurat_clusters', selected='seurat_clusters',
-                        multiple=FALSE) -> dropdown
+              choices='seurat_clusters', selected='seurat_clusters',
+              multiple=FALSE) -> dropdown
 
   # return ui element(s)
   tagList(dropdown, label_switch)
@@ -54,7 +54,7 @@ cluster_resolution_picker.ui <- function(id, label='Cluster resolutions', includ
 #' 
 #' @rdname cluster_resolution_picker
 #' 
-cluster_resolution_picker.server <- function(input, output, session, i) {
+cluster_resolution_picker.server <- function(input, output, session) {
   message('### cluster_resolution_picker.server')
 
   # get environments containing variables to run/configure this object
