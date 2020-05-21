@@ -10,6 +10,7 @@ Description: Seurat is used to process and analyse single cell data. This packag
 License: license to thrill
 Encoding: UTF-8
 LazyData: true
+biocViews:
 Imports:
   biomaRt,
   gplots
@@ -26,8 +27,8 @@ Depends:
   ggvis,
   hdf5r,
   viridis,
-  ComplexHeatmap,
   Seurat,
   tidyverse,
-  magrittr
+  magrittr,
+  BiocManager
 RoxygenNote: 7.0.2
