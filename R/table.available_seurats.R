@@ -146,12 +146,6 @@ load_a_seurat.server <- function(input, output, session) {
     progress$inc(detail='Initialising reduced dimension plot')
 
     progress$inc(detail='Counting clusters identified in each set')
-    select_at(seurat@meta.data, vars(contains('_snn_res.'), 'seurat_clusters')) %>%
-      mutate_all(function(x) {as.character(x) %>% as.numeric()}) %>%
-      gather(key='cluster_set', value='ID') %>%
-      group_by(cluster_set) %>%
-      summarise(N=length(unique(ID))) %>%
-      deframe() -> clusters_per_resolution
 
     progress$inc(detail='Getting summary statistics')
     list(n_cells=nrow(seurat@meta.data),
@@ -186,7 +180,5 @@ load_a_seurat.server <- function(input, output, session) {
     seurat_object.reactions$mart <- seurat@misc$mart
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
-    seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
-    seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution['seurat_clusters']
   })
 }

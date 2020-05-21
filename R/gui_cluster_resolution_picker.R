@@ -90,5 +90,16 @@ cluster_resolution_picker.server <- function(input, output, session) {
     # update the ui element(s)
     cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
     updateSelectInput(session=session, inputId='cluster_resolution_picker',
-                      choices=cluster_options, selected='seurat_clusters')})
+                      choices=cluster_options, selected='seurat_clusters')
+
+    # count the clusters per resolution and initialise reactive
+    select_at(seurat@meta.data, vars(all_of(cluster_options))) %>%
+      mutate_all(function(x) {as.character(x) %>% as.numeric()}) %>%
+      gather(key='cluster_set', value='ID') %>%
+      group_by(cluster_set) %>%
+      summarise(N=length(unique(ID))) %>%
+      deframe() -> clusters_per_resolution
+
+    seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
+    seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution['seurat_clusters']})
 }
