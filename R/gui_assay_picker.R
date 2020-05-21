@@ -58,6 +58,7 @@ assay_picker.server <- function(input, output, session) {
 
   # react to the reduction method selection
   observeEvent(eventExpr=input$assay_picker, handlerExpr={
+    # create variables for shorthand
     assay <- input$assay_picker
     seurat_object.reactions$selected_assay <- assay
 
@@ -71,10 +72,12 @@ assay_picker.server <- function(input, output, session) {
 
   # update UI when Seurat object is loaded
   observe(x={
+    # create variables for shorthand
     seurat <- seurat_object.reactions$seurat
     if(is.null(seurat))
       return(NULL)
 
+    # update the ui element(s)
     updateSelectInput(session=session, inputId='assay_picker',
                       choices=Assays(seurat), selected=DefaultAssay(seurat))})
 }
