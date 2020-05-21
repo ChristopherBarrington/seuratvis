@@ -163,7 +163,7 @@ load_a_seurat.server <- function(input, output, session) {
       mutate_all(function(x) {as.character(x) %>% as.numeric()}) %>%
       gather(key='cluster_set', value='ID') %>%
       group_by(cluster_set) %>%
-      summarise(N=length(unique(ID))+1) %>%
+      summarise(N=length(unique(ID))) %>%
       deframe() -> clusters_per_resolution
 
     progress$inc(detail='Getting summary statistics')
