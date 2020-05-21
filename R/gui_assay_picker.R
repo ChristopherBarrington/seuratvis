@@ -1,0 +1,96 @@
+#' Select assay
+#' 
+#' Provides a way to select an assay to use
+#' 
+#' @param id unique name of the element
+#' @param label text label of the element
+#' 
+#' @examples
+#' 
+#' \dontrun{
+#' ui <- fluidPage(assay_picker.ui(id='page_name'))
+#' server <- function(input, output, session) {
+#'   callModule(assay_picker.server, id='page_name')
+#' }}
+#' 
+#' 
+#' @rdname assay_picker
+#' 
+assay_picker.ui <- function(id, label='Assay') {
+  message('### assay_picker')
+
+  module <- 'assay_picker'
+
+  # make unique id for this object
+  ns <- NS(namespace=id)
+  module_ns <- ns(id=module)
+
+  # create an environment in the seuratvis namespace
+  e <- new.env()
+  e$id <- id
+  assign(x=module_ns, val=e, envir=module_environments)
+
+  module_environments$assay_pickers$ns %<>% c(module_ns)
+  module_environments$assay_pickers$id %<>% c(id)
+
+  # make a drop down selector element
+  selectInput(inputId=ns(id='assay_picker'), label=label,
+              choices=NULL, selected=NULL,
+              multiple=FALSE) -> dropdown
+  
+  # return ui element(s)
+  dropdown
+}
+
+#' React to an assay choice
+#' 
+#' @details
+#' Updates the Seurat object reactive values.
+#' 
+#' @rdname assay_picker
+#' 
+assay_picker.server <- function(input, output, session) {
+  message('### assay_picker.server')
+
+  # get environments containing variables to run/configure this object
+  collect_environments(id=parent.frame()$id, module='assay_picker') # provides `seuratvis_env`, `server_env` and `module_env`
+  session_server <- get(x='session', env=server_env)
+
+  # react to the reduction method selection
+  observeEvent(eventExpr=input$assay_picker, handlerExpr={
+    assay <- input$assay_picker
+    seurat_object.reactions$selected_assay <- assay
+
+    # update other reduction method pickers
+    for(nsid in module_environments$assay_pickers$ns)
+      updateSelectInput(session=session_server, inputId=nsid, selected=assay)
+
+    # set the default assay for the reactive seurat object
+    if(assay!='' && !is.null(seurat_object.reactions$seurat))
+      DefaultAssay(seurat_object.reactions$seurat) <- assay})
+
+  # update UI when Seurat object is loaded
+  observe(x={
+    seurat <- seurat_object.reactions$seurat
+    if(is.null(seurat))
+      return(NULL)
+
+    updateSelectInput(session=session, inputId='assay_picker',
+                      choices=Assays(seurat), selected=DefaultAssay(seurat))})
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -74,9 +74,6 @@ shinyAppUI <- function(...) {
                                            options=NULL,
                                            placeholder='Gene name', value='orig.ident')
 
-  gene_highlighting.assay_selection.dd <- selectInput(inputId='assay_selection.dd', label='Assay',
-                                                      choices=NULL, selected=NULL,
-                                                      multiple=FALSE)
   expression_range.slider <- sliderInput(inputId='expression_range.slider', label='Expression limits',
                                          # min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))
                                          min=0, max=1, step=0.1, value=c(-Inf,Inf))
@@ -119,7 +116,7 @@ shinyAppUI <- function(...) {
                                                     expression_range.slider,
                                                     cluster_resolution_picker.ui(id='gene_highlighting', include_label_switch=TRUE),
                                                     reduction_method_picker.ui(id='gene_highlighting'),
-                                                    gene_highlighting.assay_selection.dd),
+                                                    assay_picker.ui(id='gene_highlighting')),
                                   plot_options=box(title='Plot options',
                                                    status='primary',
                                                    solidHeader=TRUE,

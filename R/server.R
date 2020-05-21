@@ -357,9 +357,8 @@ shinyAppServer <- function(input, output, session) {
     callModule(module=reduction_method_picker.server, id=id)
   
   ## react to assay selection
-  observeEvent(eventExpr=input$assay_selection.dd, handlerExpr={
-    if(input$assay_selection.dd != '')
-      DefaultAssay(seurat_object.reactions$seurat) <- input$assay_selection.dd})
+  for(id in module_environments$assay_pickers$id)
+    callModule(module=assay_picker.server, id=id)
 
   ## react to cluster set selection
   for(id in module_environments$cluster_resolution_pickers$id)
