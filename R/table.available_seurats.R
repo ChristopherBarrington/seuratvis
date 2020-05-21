@@ -139,8 +139,6 @@ load_a_seurat.server <- function(input, output, session) {
     seurat <- parse(text=input_seurat_expr) %>% eval()
     seurat <- subset(seurat, subset=nFeature_RNA>0 & nCount_RNA>0)
     cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
-    updateSelectInput(session=session, inputId='seurat_cluster_set.dd', choices=cluster_options)
-    updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
     for(nsid in module_environments$cluster_resolution_pickers$ns)
       updateSelectInput(session=session, inputId=nsid, choices=cluster_options)
 
@@ -149,14 +147,6 @@ load_a_seurat.server <- function(input, output, session) {
       seurat@meta.data$seurat_clusters <- 0
 
     progress$inc(detail='Initialising reduced dimension plot')
-    dimred_method <- Seurat:::DefaultDimReduc(seurat)
-    if(!is.null(input$reduction_selection.dd))
-      dimred_method <- input$reduction_selection.dd
-    
-    seurat@reductions[[dimred_method]]@cell.embeddings[,1:2] %>%
-        as.data.frame() %>%
-        set_names(c('DIMRED_1','DIMRED_2')) %>%
-        cbind(seurat@meta.data) -> seurat_object.reactions$dimred
 
     progress$inc(detail='Counting clusters identified in each set')
     select_at(seurat@meta.data, vars(contains('_snn_res.'), 'seurat_clusters')) %>%
@@ -175,7 +165,7 @@ load_a_seurat.server <- function(input, output, session) {
          min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
          max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> cell_filtering_data.reference
 
-    progress$inc(detail='Setting default assay')
+    progress$inc(detail='Setting default assay') # keep here for now
     selected_assay <- 'RNA'
     DefaultAssay(seurat) <- selected_assay
     if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
@@ -187,8 +177,6 @@ load_a_seurat.server <- function(input, output, session) {
     updateTextInput(session=session, inputId='min_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$min_reads_per_cell)
     updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
     updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
-    updateSelectInput(session=session, inputId='reduction_selection.dd', choices=names(seurat@reductions), selected=Seurat:::DefaultDimReduc(seurat))
-    updateSelectInput(session=session, inputId='assay_selection.dd', choices=Assays(seurat), selected=DefaultAssay(seurat))
     update_autocomplete_input(session=session, id='gene_of_interest.dd', options=c(sort(rownames(seurat)), 'nFeature_RNA', 'nCount_RNA', 'percent_mt', 'orig.ident', 'orig.species','orig.timepoint','orig.tissue','orig.replicate'))
 
     progress$inc(detail='Saving variables')

@@ -16,7 +16,7 @@
 #' 
 #' @rdname reduction_method_picker
 #' 
-reduction_method_picker.ui <- function(id, label='Reduction method', include_label_switch=FALSE) {
+reduction_method_picker.ui <- function(id, label='Reduction method') {
   message('### reduction_method_picker.ui')
 
   module <- 'reduction_method_picker'
