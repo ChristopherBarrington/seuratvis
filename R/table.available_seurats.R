@@ -57,20 +57,20 @@ available_seurats.server <- function(input, output, session) {
     `Integrated?`='integrated') -> column_order
 
   # make the `data.frame` of Seurat information
-    server_env$available_seurat_objects %>%
-      dplyr::select(-choiceName) %>%
-      plyr::adply(.margins=1, function(params) {
-        x <- eval(parse(text=params$choiceValue))
-        data.frame(project=reformat_project_name(Project(x)),
-                   environment=if_else(params$env=='globalenv()', 'RGlobal', as.character(params$env)),
-                   ncells=ncol(x),
-                   nfeatures=nrow(x),
-                   dimensions=ifelse(is.null(x@misc$n_dimensions), -1, x@misc$n_dimensions),
-                   filtered=!is.null(x@misc$cells_filtered) && x@misc$cells_filtered,
-                   integrated=!is.null(x@misc$integrated_dataset) && x@misc$integrated_dataset)}) %>%
-      mutate(dimensions=as.integer(dimensions),
-             object=value) %>%
-      select_at(vars(all_of(column_order), everything())) -> data_to_show
+  server_env$available_seurat_objects %>%
+    dplyr::select(-choiceName) %>%
+    plyr::adply(.margins=1, function(params) {
+      x <- eval(parse(text=params$choiceValue))
+      data.frame(project=reformat_project_name(Project(x)),
+                 environment=if_else(params$env=='globalenv()', 'RGlobal', as.character(params$env)),
+                 ncells=ncol(x),
+                 nfeatures=nrow(x),
+                 dimensions=ifelse(is.null(x@misc$n_dimensions), -1, x@misc$n_dimensions),
+                 filtered=!is.null(x@misc$cells_filtered) && x@misc$cells_filtered,
+                 integrated=!is.null(x@misc$integrated_dataset) && x@misc$integrated_dataset)}) %>%
+    mutate(dimensions=as.integer(dimensions),
+           object=value) %>%
+    select_at(vars(all_of(column_order), everything())) -> data_to_show
 
   # identify columns to format in the `datatable` `columnDefs` argument
   formatted_colnames <- c(names(column_order), colnames(data_to_show)[! colnames(data_to_show) %in% column_order])
@@ -141,6 +141,8 @@ load_a_seurat.server <- function(input, output, session) {
     cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
     updateSelectInput(session=session, inputId='seurat_cluster_set.dd', choices=cluster_options)
     updateSelectInput(session=session, inputId='features_heatmap.seurat_cluster_set.dd', choices=cluster_options)
+    for(nsid in module_environments$cluster_resolution_pickers$ns)
+      updateSelectInput(session=session, inputId=nsid, choices=cluster_options)
 
     progress$inc(detail='Checking meta.data')
     if(is.null(seurat@meta.data$seurat_clusters))
