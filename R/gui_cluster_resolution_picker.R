@@ -63,6 +63,8 @@ cluster_resolution_picker.server <- function(input, output, session) {
 
   # react to the cluster resolution selection
   observeEvent(eventExpr=input$cluster_resolution_picker, handlerExpr={
+    message('### cluster_resolution_picker.server-observeEvent-input$cluster_resolution_picker')
+
     # create variables for shorthand
     r <- input$cluster_resolution_picker
 
@@ -72,20 +74,19 @@ cluster_resolution_picker.server <- function(input, output, session) {
 
     # update other cluster resolution pickers
     for(nsid in module_environments$cluster_resolution_pickers$ns)
-      updateSelectInput(session=session_server, inputId=nsid, selected=input$cluster_resolution_picker)
-  })
+      updateSelectInput(session=session_server, inputId=nsid, selected=input$cluster_resolution_picker)})
 
   # react to the cluster labels switch
   observeEvent(eventExpr=input$label_clusters, handlerExpr={
-    seurat_object.reactions$label_clusters <- input$label_clusters
-  })
+    message('### cluster_resolution_picker.server-observeEvent-input$label_clusters')
+    seurat_object.reactions$label_clusters <- input$label_clusters})
 
   # update UI when Seurat object is loaded
-  observe(x={
+  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+    message('### cluster_resolution_picker.server-observeEvent-seurat_object.reactions$seurat')
+
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat
-    if(is.null(seurat))
-      return(NULL)
 
     # update the ui element(s)
     cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))

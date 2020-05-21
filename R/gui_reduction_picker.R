@@ -58,6 +58,8 @@ reduction_method_picker.server <- function(input, output, session) {
 
   # react to the reduction method selection
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
+    message('### reduction_method_picker.server-observeEvent-input$reduction_method_picker')
+
     # create varaibles for shorthand
     dimred_method <- input$reduction_method_picker
     seurat_object.reactions$selected_reduction_method <- dimred_method
@@ -75,11 +77,11 @@ reduction_method_picker.server <- function(input, output, session) {
         cbind(seurat@meta.data) -> seurat_object.reactions$dimred})
 
   # update UI when Seurat object is loaded
-  observe(x={
+  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+    message('### reduction_method_picker.server-observeEvent-seurat_object.reactions$seurat')
+
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
-    if(is.null(seurat))
-      return(NULL)
 
     # update the ui element(s)
     updateSelectInput(session=session, inputId='reduction_method_picker',
