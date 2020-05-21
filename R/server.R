@@ -371,13 +371,13 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making cell clusters map')
 
-    cluster_set <- sprintf('~%s', input$seurat_cluster_set.dd)
+    cluster_set <- sprintf('~%s', seurat_object.reactions$selected_cluster_resolution)
 
     progress$inc(detail='Making plot')
     seurat_object.reactions$dimred %>%
       ggplot() +
       aes(x=DIMRED_1, y=DIMRED_2) +
-      aes_string(colour=input$seurat_cluster_set.dd) +
+      aes_string(colour=seurat_object.reactions$selected_cluster_resolution) +
       geom_hline(yintercept=0) + geom_vline(xintercept=0) +
       geom_point(size=input$gene_highlighting.point_size.slider, alpha=input$opacity.slider) +
       theme_void() +
@@ -386,7 +386,7 @@ shinyAppServer <- function(input, output, session) {
     if(input$gene_highlighting.label_clusters.checkbox) {
       progress$inc(detail='Getting cluster label positions')
       seurat_object.reactions$dimred %>%
-        group_by_at(vars(cluster_id=input$seurat_cluster_set.dd)) %>%
+        group_by_at(vars(cluster_id=seurat_object.reactions$selected_cluster_resolution)) %>%
         summarise(DIMRED_1=mean(DIMRED_1), DIMRED_2=mean(DIMRED_2)) -> data_labels
 
       progress$inc(detail='Adding cluster labels')
@@ -441,7 +441,7 @@ shinyAppServer <- function(input, output, session) {
 
     update_slider()
     progress$inc(detail='Fetching data')
-    FetchData(object=seurat_object.reactions$seurat, vars=c(input$seurat_cluster_set.dd, input$gene_of_interest.dd)) %>%
+    FetchData(object=seurat_object.reactions$seurat, vars=c(seurat_object.reactions$selected_cluster_resolution, input$gene_of_interest.dd)) %>%
       set_names(c('cluster_id', 'expression_value')) -> data
 
     if(is.numeric(data$expression_value)) {
