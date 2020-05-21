@@ -10,6 +10,7 @@ Description: Seurat is used to process and analuyse single cell data. This packa
 License: license to thrill
 Encoding: UTF-8
 LazyData: true
+biocViews:
 Imports:
   gplots
 Depends:
