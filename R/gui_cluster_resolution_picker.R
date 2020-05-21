@@ -59,20 +59,36 @@ cluster_resolution_picker.server <- function(input, output, session) {
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='cluster_resolution_picker') # provides `seuratvis_env`, `server_env` and `module_env`
-  session <- get(x='session', env=server_env)
+  session_server <- get(x='session', env=server_env)
 
   # react to the cluster resolution selection
   observeEvent(eventExpr=input$cluster_resolution_picker, handlerExpr={
+    # create variables for shorthand
     r <- input$cluster_resolution_picker
+
+    # save cluster information in the reactive
     seurat_object.reactions$selected_cluster_resolution <- r
     seurat_object.reactions$selected_clusters_per_resolution <- seurat_object.reactions$clusters_per_resolution[r]
 
+    # update other cluster resolution pickers
     for(nsid in module_environments$cluster_resolution_pickers$ns)
-      updateSelectInput(session=session, inputId=nsid, selected=input$cluster_resolution_picker)
+      updateSelectInput(session=session_server, inputId=nsid, selected=input$cluster_resolution_picker)
   })
 
   # react to the cluster labels switch
   observeEvent(eventExpr=input$label_clusters, handlerExpr={
     seurat_object.reactions$label_clusters <- input$label_clusters
   })
+
+  # update UI when Seurat object is loaded
+  observe(x={
+    # create variables for shorthand
+    seurat <- seurat_object.reactions$seurat
+    if(is.null(seurat))
+      return(NULL)
+
+    # update the ui element(s)
+    cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
+    updateSelectInput(session=session, inputId='cluster_resolution_picker',
+                      choices=cluster_options, selected='seurat_clusters')})
 }

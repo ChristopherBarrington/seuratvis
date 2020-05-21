@@ -138,9 +138,6 @@ load_a_seurat.server <- function(input, output, session) {
     progress$inc(detail='Updating UI with cluster options')
     seurat <- parse(text=input_seurat_expr) %>% eval()
     seurat <- subset(seurat, subset=nFeature_RNA>0 & nCount_RNA>0)
-    cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
-    for(nsid in module_environments$cluster_resolution_pickers$ns)
-      updateSelectInput(session=session, inputId=nsid, choices=cluster_options)
 
     progress$inc(detail='Checking meta.data')
     if(is.null(seurat@meta.data$seurat_clusters))
@@ -190,6 +187,6 @@ load_a_seurat.server <- function(input, output, session) {
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
     seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
-    seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution[cluster_options[1]]
+    seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution['seurat_clusters']
   })
 }
