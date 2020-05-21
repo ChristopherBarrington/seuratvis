@@ -359,8 +359,8 @@ shinyAppServer <- function(input, output, session) {
       DefaultAssay(seurat_object.reactions$seurat) <- input$assay_selection.dd})
 
   ## react to cluster set selection
-  observeEvent(eventExpr=input$seurat_cluster_set.dd, handlerExpr={
-    seurat_object.reactions$selected_clusters_per_resolution <- seurat_object.reactions$clusters_per_resolution[input$seurat_cluster_set.dd]})
+  for(id in module_environments$cluster_resolution_pickers$id)
+    callModule(module=update_selected_cluster_resolution.server, id=id)
 
   ## gene highlighting
   # genes_highlighting.reactions <- reactiveValues(data=NULL, expression_map=NULL, cluster_expression=NULL, expression_map.running=0, cluster_expression.running=0)

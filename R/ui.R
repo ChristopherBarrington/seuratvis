@@ -74,9 +74,6 @@ shinyAppUI <- function(...) {
                                            options=NULL,
                                            placeholder='Gene name', value='orig.ident')
 
-  seurat_cluster_set.dropdown <- selectInput(inputId='seurat_cluster_set.dd', label='Seurat cluster definitions',
-                                             choices='seurat_clusters', selected='seurat_clusters',
-                                             multiple=FALSE)
   gene_highlighting.reduction_selection.dd <- selectInput(inputId='reduction_selection.dd', label='Reduction method',
                                                           choices=NULL, selected=NULL,
                                                           multiple=FALSE)
@@ -132,7 +129,7 @@ shinyAppUI <- function(...) {
                                                     collapsible=TRUE,
                                                     gene_name.dropdown,
                                                     expression_range.slider,
-                                                    seurat_cluster_set.dropdown,
+                                                    cluster_resolution_picker.ui(id='gene_highlighting'),
                                                     gene_highlighting.label_clusters,
                                                     gene_highlighting.reduction_selection.dd,
                                                     gene_highlighting.assay_selection.dd),
