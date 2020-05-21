@@ -22,7 +22,7 @@
 #' 
 #' @rdname colour_palette
 #' 
-colour_palette.ui <- function(id, selectors=list(), include_full=FALSE) {
+colour_palette.ui <- function(id, label='Feature value colours', selectors=list(), include_full=FALSE) {
   message('### colour_palette.ui')
 
   module <- 'colour_palette'
@@ -58,7 +58,7 @@ colour_palette.ui <- function(id, selectors=list(), include_full=FALSE) {
   assign(x=module_ns, val=e, envir=module_environments)
 
   # return ui element(s)
-  selectors %>% tagList()
+  tagList(tags$label(label), br(), selectors)
 }
 
 #' Update the colour selectors palette style

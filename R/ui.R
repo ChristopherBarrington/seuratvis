@@ -138,7 +138,6 @@ shinyAppUI <- function(...) {
                                                    solidHeader=TRUE,
                                                    width=4,
                                                    collapsible=TRUE,
-                                                   shiny::tags$label('Feature value colours'), br(),
                                                    colour_palette.ui(id='gene_highlighting', include_full=TRUE,
                                                                      selectors=list(list(inputId='low', label='Low', value='linen'),
                                                                                     list(inputId='high', label='High', value='darkviolet'))),
