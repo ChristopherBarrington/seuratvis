@@ -67,6 +67,10 @@ cluster_resolution_picker.server <- function(input, output, session) {
 
     # create variables for shorthand
     r <- input$cluster_resolution_picker
+    seurat <- seurat_object.reactions$seurat
+
+    if(is.null(seurat))
+      return(NULL)
 
     # save cluster information in the reactive
     seurat_object.reactions$selected_cluster_resolution <- r
