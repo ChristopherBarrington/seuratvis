@@ -385,10 +385,9 @@ shinyAppServer <- function(input, output, session) {
     cluster_set <- sprintf('~%s', seurat_object.reactions$selected_cluster_resolution)
 
     progress$inc(detail='Making plot')
-    seurat_object.reactions$dimred %>%
+    cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_cluster_resolution_idents) %>%
       ggplot() +
-      aes(x=DIMRED_1, y=DIMRED_2) +
-      aes_string(colour=seurat_object.reactions$selected_cluster_resolution) +
+      aes(x=DIMRED_1, y=DIMRED_2, colour=ident) +
       geom_hline(yintercept=0) + geom_vline(xintercept=0) +
       geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
       theme_void() +
@@ -396,14 +395,15 @@ shinyAppServer <- function(input, output, session) {
 
     if(seurat_object.reactions$label_clusters) {
       progress$inc(detail='Getting cluster label positions')
-      seurat_object.reactions$dimred %>%
-        group_by_at(vars(cluster_id=seurat_object.reactions$selected_cluster_resolution)) %>%
+
+      cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_cluster_resolution_idents) %>%
+        group_by(ident) %>%
         summarise(DIMRED_1=mean(DIMRED_1), DIMRED_2=mean(DIMRED_2)) -> data_labels
 
       progress$inc(detail='Adding cluster labels')
       output_plot +
         ggrepel::geom_label_repel(data=data_labels,
-                                  mapping=aes(label=cluster_id),
+                                  mapping=aes(label=ident),
                                   colour='black',
                                   size=12/(14/5)) -> output_plot
     }
