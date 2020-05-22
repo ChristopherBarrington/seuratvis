@@ -49,7 +49,7 @@ feature_picker.ui <- function(id, label='Feature selection', include_metadata_sw
               min=0, max=1, step=0.1, value=c(-Inf,Inf)) -> value_range
 
   # return ui element(s)
-  tagList(dropdown, value_range, metadata_switch)
+  tagList(dropdown, metadata_switch, value_range)
 }
 
 #' React to a feature choice
