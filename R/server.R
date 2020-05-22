@@ -65,7 +65,9 @@ shinyAppServer <- function(input, output, session) {
       format_subset_conditional(x=max_genes_per_cell, fmt='nFeature_RNA<=%d')) %>%
       group_format_subset_conditional() -> cell_filtering_data.reactions$subset_conditions$nFeature
 
-    format_subset_conditional(x=max_percent_mitochondria, fmt='percent_mt<=%s') -> cell_filtering_data.reactions$subset_conditions$percent_mt
+    seurat_object.reactions$percent_mt_target_var %>%
+      sprintf(fmt='%s<=%%s') %>%
+      format_subset_conditional(x=max_percent_mitochondria) -> cell_filtering_data.reactions$subset_conditions$percent_mt
 
     progress$inc(detail='Returning')
     NULL}) -> react_to_cell_filtering
@@ -195,7 +197,8 @@ shinyAppServer <- function(input, output, session) {
     max_value <- seurat_object.reactions$percent_mt_per_cell_max
 
     progress$inc(detail='Making plot')
-    FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
+    # FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
+    seurat_object.reactions$percent_mt %>%
       set_names('y') %>%
       arrange(desc(y)) %>%
       mutate(x=seq(n()),
@@ -251,7 +254,8 @@ shinyAppServer <- function(input, output, session) {
     progress$set(value=0, message='Making percentage mitochondria density plot')
 
     progress$inc(detail='Making plot')
-    FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
+    # FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
+    seurat_object.reactions$percent_mt %>%
       set_names('y') %>%
       ggplot() +
       aes(x=y) +
@@ -321,7 +325,8 @@ shinyAppServer <- function(input, output, session) {
     max_y <- seurat_object.reactions$percent_mt_per_cell_max
 
    progress$inc(detail='Making plot')
-    FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
+    # FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
+    seurat_object.reactions$percent_mt %>%
       set_names('y') %>%
       ggplot() +
       aes(x=0, y=y) +

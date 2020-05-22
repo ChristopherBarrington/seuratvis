@@ -4,6 +4,7 @@
 #' 
 #' @param id unique name of the element
 #' @param label text label of the element
+#' @param target_var name of column in \code{@meta.data} that is percentage mitochondria
 #' 
 #' @examples
 #' 
@@ -16,7 +17,7 @@
 #' 
 #' @rdname percent_mt_per_cell_filter
 #' 
-percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt') {
+percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt', target_var='percent_mt') {
   message('### features_per_cell_filter.ui')
 
   module <- 'percent_mt_per_cell_filter'
@@ -28,6 +29,7 @@ percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt') {
   # create an environment in the seuratvis namespace
   e <- new.env()
   e$id <- id
+  e$target_var <- target_var
   assign(x=module_ns, val=e, envir=module_environments)
 
   module_environments$percent_mt_per_cell_filters$ns %<>% c(module_ns)
@@ -73,5 +75,7 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
     updateTextInput(session=session, inputId='max_percent_mt', placeholder=high)
 
     # update the reactive
-    seurat_object.reactions$percent_mt_per_cell_max <- high})
+    seurat_object.reactions$percent_mt_per_cell_max <- high
+    seurat_object.reactions$percent_mt_target_var <- module_env$target_var
+    seurat_object.reactions$percent_mt <- FetchData(object=seurat, vars=module_env$target_var) %>% set_names('percent_mt')})
 }
