@@ -69,8 +69,6 @@ shinyAppUI <- function(...) {
   gene_highlighting.tab <- menuItem(text='Highlight genes', tabName='gene_highlighting-tab', icon=icon('search'))
 
   ### define ui elements
-  opacity.slider <- sliderInput(inputId='opacity.slider', label='Opacity', min=0.1, max=1, step=0.1, value=1)
-
   gene_highlighting.point_size <- sliderInput(inputId='gene_highlighting.point_size.slider', label='Point size',
                                               min=0.1, max=3, step=0.1, value=0.6)
                                               # min=1, max=15, step=1, value=3)
@@ -116,7 +114,7 @@ shinyAppUI <- function(...) {
                                                                      selectors=list(list(inputId='low', label='Low', value='linen'),
                                                                                     list(inputId='high', label='High', value='darkviolet'))),
                                                    gene_highlighting.point_size,
-                                                   opacity.slider))
+                                                   opacity_slider.ui(id='gene_highlighting')))
 
   ### assemble tab content
   gene_highlighting.content <- tabItem(tabName='gene_highlighting-tab',
