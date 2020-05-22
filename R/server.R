@@ -36,9 +36,9 @@ shinyAppServer <- function(input, output, session) {
     progress$inc(detail='Extracting input options')
     min_genes_per_cell <- if_else(is.na(cell_filtering_data.reactions$min_genes_per_cell), as.numeric(seurat_object.reactions$reference_metrics$min_genes_per_cell), cell_filtering_data.reactions$min_genes_per_cell)
     max_genes_per_cell <- if_else(is.na(cell_filtering_data.reactions$max_genes_per_cell), as.numeric(seurat_object.reactions$reference_metrics$max_genes_per_cell), cell_filtering_data.reactions$max_genes_per_cell)
-    min_expression_per_cell <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), as.numeric(seurat_object.reactions$reference_metrics$min_reads_per_cell), cell_filtering_data.reactions$min_expression_per_cell)
-    max_expression_per_cell <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), as.numeric(seurat_object.reactions$reference_metrics$max_reads_per_cell), cell_filtering_data.reactions$max_expression_per_cell)
     max_percent_mitochondria <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), as.numeric(seurat_object.reactions$reference_metrics$max_percent_mitochondria), cell_filtering_data.reactions$max_percent_mitochondria)
+    min_expression_per_cell <- seurat_object.reactions$total_umi_per_cell_min
+    max_expression_per_cell <- seurat_object.reactions$total_umi_per_cell_max
 
     progress$inc(detail='Filtering @meta.data')
     seurat_object.reactions$seurat@meta.data %>%
@@ -88,19 +88,25 @@ shinyAppServer <- function(input, output, session) {
 
   ## react to total UMIs density plot brush
   observeEvent(eventExpr=input$total_expression_density.brush, handlerExpr={
-    cell_filtering_data.reactions$min_expression_per_cell <- floor(input$total_expression_density.brush$xmin)
-    cell_filtering_data.reactions$max_expression_per_cell <- ceiling(input$total_expression_density.brush$xmax)
+    message('### input$total_expression_density.brush')
 
-    updateTextInput(session=session, inputId='min_expression_per_cell.textinput', value=cell_filtering_data.reactions$min_expression_per_cell)
-    updateTextInput(session=session, inputId='max_expression_per_cell.textinput', value=cell_filtering_data.reactions$max_expression_per_cell)})
+    # update module elements
+    low <- floor(input$total_expression_density.brush$xmin)
+    high <- ceiling(input$total_expression_density.brush$xmax)
 
-  observeEvent(eventExpr=input$min_expression_per_cell.textinput, handlerExpr={
-    # session$resetBrush(brushId='total_expression_density.brush')
-    cell_filtering_data.reactions$min_expression_per_cell <- floor(as.numeric(input$min_expression_per_cell.textinput))})
+    for(id in module_environments$total_umi_per_cell_filters$id) {
+      updateTextInput(session=session, inputId=NS(namespace=id, id='min_umis'), value=low)
+      updateTextInput(session=session, inputId=NS(namespace=id, id='max_umis'), value=high)
+    }
 
-  observeEvent(eventExpr=input$max_expression_per_cell.textinput, handlerExpr={
-    # session$resetBrush(brushId='total_expression_density.brush')
-    cell_filtering_data.reactions$max_expression_per_cell <- ceiling(as.numeric(input$max_expression_per_cell.textinput))})
+    seurat_object.reactions$total_umi_per_cell_min <- low
+    seurat_object.reactions$total_umi_per_cell_max <- high})
+
+  ## react to total UMI per cell filters
+  for(id in module_environments$total_umi_per_cell_filters$id)
+    callModule(module=total_umi_per_cell_filter.server, id=id)
+
+
 
   ## react to percent mitochondria density plot brush
   observeEvent(eventExpr=input$percent_mitochondria_density.brush, handlerExpr={
@@ -127,8 +133,8 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making total expression knee plot')
 
-    min_value <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), seurat_object.reactions$reference_metrics$min_reads_per_cell, cell_filtering_data.reactions$min_expression_per_cell)
-    max_value <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), seurat_object.reactions$reference_metrics$max_reads_per_cell, cell_filtering_data.reactions$max_expression_per_cell)
+    min_value <- seurat_object.reactions$total_umi_per_cell_min
+    max_value <- seurat_object.reactions$total_umi_per_cell_max
 
     progress$inc(detail='Making plot')
     FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
@@ -255,8 +261,8 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
 
-    min_y <- if_else(is.na(cell_filtering_data.reactions$min_expression_per_cell), seurat_object.reactions$reference_metrics$min_reads_per_cell, cell_filtering_data.reactions$min_expression_per_cell)
-    max_y <- if_else(is.na(cell_filtering_data.reactions$max_expression_per_cell), seurat_object.reactions$reference_metrics$max_reads_per_cell, cell_filtering_data.reactions$max_expression_per_cell)
+    min_y <- seurat_object.reactions$total_umi_per_cell_min
+    max_y <- seurat_object.reactions$total_umi_per_cell_max
 
     progress$inc(detail='Making plot')
     FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
