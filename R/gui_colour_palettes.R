@@ -29,7 +29,7 @@ colour_palette.ui <- function(id, label='Feature value colours', selectors=list(
 
   # make unique id for this object
   module_ns <- ns <- NS(namespace=id, id=module)
-  ns %<>% NS() # now namespace will be eg: `id-module-selector_label`
+  ns %<>% NS() # now namespace will be eg: `id-module-element`
 
   # for each selector, make a list UI element arguments
   defaults <- list(value=sample(x=default_colour_palette(), size=1), showColour='both', palette='limited', allowedCols=default_colour_palette(), allowTransparent=FALSE, returnName=TRUE)
