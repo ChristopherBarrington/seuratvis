@@ -328,31 +328,13 @@ shinyAppServer <- function(input, output, session) {
   # ###############################################################################################
   # gene expression tab ---------------------------------------------------------------------------
 
-  ## update UI
-  ### when gene is selected
-  reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message=sprintf('Updating UI for %s', input$gene_of_interest.dd))
-
-    if(! startsWith(x=input$gene_of_interest.dd, prefix='orig.'))
-      updateSliderInput(session=session, inputId='expression_range.slider', max={max(FetchData(object=seurat_object.reactions$seurat, vars=input$gene_of_interest.dd)+0.05) %>% round(digits=1)}, value=c(-Inf,Inf))
-
-    progress$inc(detail='Done')
-    NULL}) -> update_slider
-
+  ## call modules
   ### when full palette type is selected
   callModule(module=update_palette_type.server, id='gene_highlighting')
   callModule(module=add_to_colour_palette.server, id='gene_highlighting')
 
-  ## react to reduction method selection
-  observeEvent(eventExpr=input$reduction_selection.dd, handlerExpr={
-    if(input$reduction_selection.dd != '')
-      seurat_object.reactions$seurat@reductions[[input$reduction_selection.dd]]@cell.embeddings[,1:2] %>%
-        as.data.frame() %>%
-        set_names(c('DIMRED_1','DIMRED_2')) %>%
-        cbind(seurat_object.reactions$seurat@meta.data) -> seurat_object.reactions$dimred})
 
+  ## react to reduction method selection
   for(id in module_environments$reduction_method_pickers$id)
     callModule(module=reduction_method_picker.server, id=id)
   
@@ -460,7 +442,7 @@ shinyAppServer <- function(input, output, session) {
         mutate(x={as.character(cluster_id) %>% as.numeric()}) %>%
         ggplot() +
         aes(x=x, y=y, colour=cluster_id) +
-        labs(x='Cluster identifier', y='Normalised expression') +
+        labs(x='Cluster identifier', y='Normalised expression (median ± 1.5x IQR)') +
         geom_line(size=1) +
         geom_point(mapping=aes(y=median), colour='black', shape=20, size=3) +
         theme_bw() +
