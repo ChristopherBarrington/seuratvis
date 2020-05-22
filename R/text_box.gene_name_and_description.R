@@ -14,23 +14,30 @@
 #' 
 #' @rdname gene_name_and_description_text_box
 #' 
-gene_name_and_description_text_box.ui <- function(id, width=12)
-  valueBoxOutput(outputId=NS(namespace=id, id='gene_name_and_description'), width=width)
+gene_name_and_description_text_box.ui <- function(id, width=12) {
+  message('### gene_name_and_description_text_box.server')
+  valueBoxOutput(outputId=NS(namespace=id, id='picked_feature_and_description'), width=width)
+}
 
 #' @rdname gene_name_and_description_text_box
 #' 
 gene_name_and_description_text_box.server <- function(input, output, session) {
   renderValueBox(env=parent.frame(n=2), quoted=FALSE, expr={
+    message('### gene_name_and_description_text_box.server')
+
+    # create variables for shorthand
+    picked_feature <- seurat_object.reactions$picked_feature
+
     # get gene description from biomaRt
     Misc(seurat_object.reactions$seurat, slot='mart') %>%
-      get_formatted_gene_description(external_gene_name=input$gene_of_interest.dd) -> subtitle
+      get_formatted_gene_description(external_gene_name=picked_feature) -> subtitle
 
     # create output object
-    list(value=input$gene_of_interest.dd,
+    list(value=picked_feature,
          subtitle=subtitle,
          icon=icon('jedi-order')) %>%
       modifyList(x=text_box_defaults()) %>%
-      do.call(what=valueBox)}) -> output$gene_name_and_description
+      do.call(what=valueBox)}) -> output$picked_feature_and_description
 }
 
 #' Get description of a gene
@@ -45,6 +52,7 @@ gene_name_and_description_text_box.server <- function(input, output, session) {
 #' @return a character string of the \code{attribute} from the \code{mart} for the \code{external_gene_name}.
 #' 
 get_formatted_gene_description <- function(external_gene_name, mart) {
+  message('### get_formatted_gene_description')
   tryCatch(expr=getBM(mart=mart, attributes='description', filter='external_gene_name', values=external_gene_name[1]),
            error=function(x) data.frame(description='Could not query biomaRt!')) -> description 
   
