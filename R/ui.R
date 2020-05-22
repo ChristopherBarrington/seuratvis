@@ -66,39 +66,39 @@ shinyAppUI <- function(...) {
 
 
   ## gene highlighting on map tab
-  gene_highlighting.tab <- menuItem(text='Highlight genes', tabName='gene_highlighting-tab', icon=icon('search'))
+  gene_highlighting.tab <- menuItem(text='Highlight features', tabName='gene_highlighting-tab', icon=icon('search'))
 
   ### define ui elements
 
   ### define layout boxes
   gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
-                                                       footer='Seurat map showing cell clusters',
+                                                       footer='Map showing cell clusters',
                                                        status='success',
                                                        solidHeader=TRUE,
                                                        width=4,
                                                        collapsible=TRUE,
                                                        {plotOutput('genes_highlighting-clustered_map') %>% withSpinner()}),
-                                  gene_expression_map=box(title='Marker gene on map',
-                                                          footer='Cells coloured by expression',
+                                  gene_expression_map=box(title='Feature on map',
+                                                          footer='Cells coloured by selected feature',
                                                           status='success',
                                                           solidHeader=TRUE,
                                                           width=4,
                                                           collapsible=TRUE,
                                                           {plotOutput('genes_highlighting-gene_expression_map') %>% withSpinner()}),
-                                  expression_per_cluster=box(title='Marker gene in clusters',
-                                                             footer='Expression of gene in clusters',
+                                  expression_per_cluster=box(title='Feature in clusters',
+                                                             footer='Feature values in clusters',
                                                              status='success',
                                                              solidHeader=TRUE,
                                                              width=4,
                                                              collapsible=TRUE,
                                                              {plotOutput('genes_highlighting-expression_per_cluster') %>% withSpinner()}),
                                                              # {plotlyOutput('genes_highlighting-expression_per_cluster') %>% withSpinner()}),
-                                  gene_selector=box(title='Select gene',
+                                  gene_selector=box(title='Select feature',
                                                     status='primary',
                                                     solidHeader=TRUE,
                                                     width=4,
                                                     collapsible=TRUE,
-                                                    feature_picker.ui(id='gene_highlighting', label='foobar'),
+                                                    feature_picker.ui(id='gene_highlighting'),
                                                     cluster_resolution_picker.ui(id='gene_highlighting', include_label_switch=TRUE),
                                                     reduction_method_picker.ui(id='gene_highlighting'),
                                                     assay_picker.ui(id='gene_highlighting')),
@@ -115,7 +115,7 @@ shinyAppUI <- function(...) {
 
   ### assemble tab content
   gene_highlighting.content <- tabItem(tabName='gene_highlighting-tab',
-                                       h1('Highlight expression of interesting genes on the map'),
+                                       h1('Highlight cell features on the map'),
                                        fluidRow(project_name_text_box.ui(id='gene_highlighting', width=5),
                                                 gene_name_and_description_text_box.ui(id='gene_highlighting', width=7)),
                                        fluidRow(number_of_reads_text_box.ui(id='gene_highlighting', width=2),

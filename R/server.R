@@ -138,7 +138,7 @@ shinyAppServer <- function(input, output, session) {
              pass=between(x=y, left=min_value, right=max_value)) %>%
       ggplot()+
       aes(x=x, y=y, colour=pass)+
-      labs(x='Ranked cells', y='Total expression per cell', colour='Cells passing threshold')+
+      labs(x='Ranked cells', y='Total UMIs per cell', colour='Cells passing threshold')+
       geom_hline(yintercept=min_value, size=1) +
       geom_hline(yintercept=max_value, size=1) +
       geom_point(alpha=1, shape=16)+
@@ -454,7 +454,7 @@ shinyAppServer <- function(input, output, session) {
         mutate(x={as.character(cluster_id) %>% as.numeric()}) %>%
         ggplot() +
         aes(x=x, y=y, colour=cluster_id) +
-        labs(x='Cluster identifier', y='Normalised expression (median ± 1.5x IQR)') +
+        labs(x='Cluster identifier', y='Feature value (median ± 1.5x IQR)') +
         geom_line(size=1) +
         geom_point(mapping=aes(y=median), colour='black', shape=20, size=3) +
         theme_bw() +
