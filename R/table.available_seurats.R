@@ -163,11 +163,6 @@ load_a_seurat.server <- function(input, output, session) {
       seurat <- NormalizeData(seurat)
 
     progress$inc(detail='Updating UI elements')
-    updateTextInput(session=session, inputId='min_features_per_cell.textinput', placeholder=cell_filtering_data.reference$min_genes_per_cell)
-    updateTextInput(session=session, inputId='max_features_per_cell.textinput', placeholder=cell_filtering_data.reference$max_genes_per_cell)
-    updateTextInput(session=session, inputId='min_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$min_reads_per_cell)
-    updateTextInput(session=session, inputId='max_expression_per_cell.textinput', placeholder=cell_filtering_data.reference$max_reads_per_cell)
-    updateTextInput(session=session, inputId='percent_mitochondria.textinput', placeholder=cell_filtering_data.reference$max_percent_mitochondria)
 
     progress$inc(detail='Saving variables')
     available_assays <- Assays(seurat)
