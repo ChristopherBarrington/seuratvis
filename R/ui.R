@@ -6,8 +6,6 @@ shinyAppUI <- function(...) {
   cell_filtering.tab <- menuItem(text='Cell filtering', tabName='cell_filtering-tab', icon=icon('filter'))
 
   ### define ui elements
-  min_features_per_cell.textinput <- textInput(inputId='min_features_per_cell.textinput', label='Minimum features per cell', placeholder='min')
-  max_features_per_cell.textinput <- textInput(inputId='max_features_per_cell.textinput', label='Maximum features per cell', placeholder='max')
   percent_mitochondria.textinput <- textInput(inputId='percent_mitochondria.textinput', label='Maximum mitochondrial (%)', placeholder='max')
 
   subset_conditions.textoutput <- verbatimTextOutput(outputId='cell_filtering-subset_conditions')
@@ -40,9 +38,9 @@ shinyAppUI <- function(...) {
 
                                thresholds=append(cell_filtering.plot_boxes.defaults,
                                                  list(title='Thresholds', status='primary',
-                                                      column(width=2, min_features_per_cell.textinput, max_features_per_cell.textinput),
                                                       column(width=2, percent_mitochondria.textinput),
                                                       column(width=2, total_umi_per_cell_filter.ui('cell_filtering')),
+                                                      column(width=2, features_per_cell_filter.ui('cell_filtering')),
                                                       column(width=4, shiny::tags$label('Conditional expression to select cells'), br(), subset_conditions.textoutput,
                                                                       shiny::tags$label('Copy subset conditions to clipboard'), br(), subset_conditions.plain.copybutton, subset_conditions.tsv.copybutton, subset_conditions.r.copybutton))) %>%
                                           do.call(what=box))
