@@ -71,6 +71,7 @@ cluster_resolution_picker.server <- function(input, output, session) {
     # save cluster information in the reactive
     seurat_object.reactions$selected_cluster_resolution <- r
     seurat_object.reactions$selected_clusters_per_resolution <- seurat_object.reactions$clusters_per_resolution[r]
+    seurat_object.reactions$picked_cluster_resolution_idents <- FetchData(object=seurat, vars=r) %>% set_names('ident')
 
     # update other cluster resolution pickers
     for(nsid in module_environments$cluster_resolution_pickers$ns)
@@ -102,5 +103,6 @@ cluster_resolution_picker.server <- function(input, output, session) {
       deframe() -> clusters_per_resolution
 
     seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
-    seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution['seurat_clusters']})
+    seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution['seurat_clusters']
+    seurat_object.reactions$picked_cluster_resolution_idents <- FetchData(object=seurat, vars='seurat_clusters') %>% set_names('ident')})
 }
