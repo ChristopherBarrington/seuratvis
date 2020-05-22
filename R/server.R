@@ -34,11 +34,11 @@ shinyAppServer <- function(input, output, session) {
     progress$set(value=0, message='Reacting to threshold parameters')
 
     progress$inc(detail='Extracting input options')
-    max_percent_mitochondria <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), as.numeric(seurat_object.reactions$reference_metrics$max_percent_mitochondria), cell_filtering_data.reactions$max_percent_mitochondria)
     min_expression_per_cell <- seurat_object.reactions$total_umi_per_cell_min
     max_expression_per_cell <- seurat_object.reactions$total_umi_per_cell_max
     min_genes_per_cell <- seurat_object.reactions$features_per_cell_min
     max_genes_per_cell <- seurat_object.reactions$features_per_cell_max
+    max_percent_mitochondria <- seurat_object.reactions$percent_mt_per_cell_max
 
     progress$inc(detail='Filtering @meta.data')
     seurat_object.reactions$seurat@meta.data %>%
@@ -110,16 +110,18 @@ shinyAppServer <- function(input, output, session) {
   for(id in module_environments$features_per_cell_filters$id)
     callModule(module=features_per_cell_filter.server, id=id)
 
+  ## react to percent Mt per cell filters
+  for(id in module_environments$percent_mt_per_cell_filters$id)
+    callModule(module=percent_mt_per_cell_filter.server, id=id)
 
   ## react to percent mitochondria density plot brush
   observeEvent(eventExpr=input$percent_mitochondria_density.brush, handlerExpr={
-    cell_filtering_data.reactions$max_percent_mitochondria <- round(input$percent_mitochondria_density.brush$xmax+0.05, digits=1)
+    high <- round(input$percent_mitochondria_density.brush$xmax+0.05, digits=1)
 
-    updateTextInput(session=session, inputId='percent_mitochondria.textinput', value=cell_filtering_data.reactions$max_percent_mitochondria)})
+    for(id in module_environments$percent_mt_per_cell_filters$id)
+      updateTextInput(session=session, inputId=NS(namespace=id, id='max_percent_mt'), value=high)
 
-  observeEvent(eventExpr=input$percent_mitochondria.textinput, handlerExpr={
-    # session$resetBrush(brushId='percent_mitochondria_density.brush')
-    cell_filtering_data.reactions$max_percent_mitochondria <- as.numeric(input$percent_mitochondria.textinput)})
+    seurat_object.reactions$percent_mt_per_cell_max <- high})
 
   ## react to opening tab with a filtered object loaded
   observeEvent(input$sidebarmenu, {
@@ -190,7 +192,7 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making mitochondrial expression knee plot')
 
-    max_value <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), seurat_object.reactions$reference_metrics$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
+    max_value <- seurat_object.reactions$percent_mt_per_cell_max
 
     progress$inc(detail='Making plot')
     FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
@@ -316,7 +318,7 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
 
-    max_y <- if_else(is.na(cell_filtering_data.reactions$max_percent_mitochondria), seurat_object.reactions$reference_metrics$max_percent_mitochondria, cell_filtering_data.reactions$max_percent_mitochondria)
+    max_y <- seurat_object.reactions$percent_mt_per_cell_max
 
    progress$inc(detail='Making plot')
     FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
