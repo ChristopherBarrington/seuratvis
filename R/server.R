@@ -353,6 +353,10 @@ shinyAppServer <- function(input, output, session) {
   for(id in module_environments$opacity_sliders$id)
     callModule(module=opacity_slider.server, id=id)
 
+  ## react to point size selection
+  for(id in module_environments$point_size_sliders$id)
+    callModule(module=point_size_slider.server, id=id)
+
   ## gene highlighting
   # genes_highlighting.reactions <- reactiveValues(data=NULL, expression_map=NULL, cluster_expression=NULL, expression_map.running=0, cluster_expression.running=0)
 

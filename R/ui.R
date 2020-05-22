@@ -69,9 +69,6 @@ shinyAppUI <- function(...) {
   gene_highlighting.tab <- menuItem(text='Highlight genes', tabName='gene_highlighting-tab', icon=icon('search'))
 
   ### define ui elements
-  gene_highlighting.point_size <- sliderInput(inputId='gene_highlighting.point_size.slider', label='Point size',
-                                              min=0.1, max=3, step=0.1, value=0.6)
-                                              # min=1, max=15, step=1, value=3)
 
   ### define layout boxes
   gene_highlighting.boxes <- list(cluster_dim_plot=box(title='Clustered map',
@@ -113,7 +110,7 @@ shinyAppUI <- function(...) {
                                                    colour_palette.ui(id='gene_highlighting', include_full=TRUE,
                                                                      selectors=list(list(inputId='low', label='Low', value='linen'),
                                                                                     list(inputId='high', label='High', value='darkviolet'))),
-                                                   gene_highlighting.point_size,
+                                                   point_size_slider.ui(id='gene_highlighting'),
                                                    opacity_slider.ui(id='gene_highlighting')))
 
   ### assemble tab content
