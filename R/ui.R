@@ -69,15 +69,6 @@ shinyAppUI <- function(...) {
   gene_highlighting.tab <- menuItem(text='Highlight genes', tabName='gene_highlighting-tab', icon=icon('search'))
 
   ### define ui elements
-  gene_name.dropdown <- autocomplete_input(id='gene_of_interest.dd', label='Gene name',
-                                           # options=sort(rownames(seurat)),
-                                           options=NULL,
-                                           placeholder='Gene name', value='orig.ident')
-
-  expression_range.slider <- sliderInput(inputId='expression_range.slider', label='Expression limits',
-                                         # min=0, max=round(max(FetchData(seurat, starter_gene))+0.05), step=0.1, value=c(-Inf,Inf))
-                                         min=0, max=1, step=0.1, value=c(-Inf,Inf))
-
   opacity.slider <- sliderInput(inputId='opacity.slider', label='Opacity', min=0.1, max=1, step=0.1, value=1)
 
   gene_highlighting.point_size <- sliderInput(inputId='gene_highlighting.point_size.slider', label='Point size',
@@ -112,8 +103,7 @@ shinyAppUI <- function(...) {
                                                     solidHeader=TRUE,
                                                     width=4,
                                                     collapsible=TRUE,
-                                                    gene_name.dropdown,
-                                                    expression_range.slider,
+                                                    feature_picker.ui(id='gene_highlighting', label='foobar'),
                                                     cluster_resolution_picker.ui(id='gene_highlighting', include_label_switch=TRUE),
                                                     reduction_method_picker.ui(id='gene_highlighting'),
                                                     assay_picker.ui(id='gene_highlighting')),

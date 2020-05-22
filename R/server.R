@@ -333,6 +333,9 @@ shinyAppServer <- function(input, output, session) {
   callModule(module=update_palette_type.server, id='gene_highlighting')
   callModule(module=add_to_colour_palette.server, id='gene_highlighting')
 
+  ## react to feature selection
+  for(id in module_environments$feature_pickers$id)
+    callModule(module=feature_picker.server, id=id)
 
   ## react to reduction method selection
   for(id in module_environments$reduction_method_pickers$id)
@@ -390,10 +393,10 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making expression per cluster plot')
 
-    update_slider()
+    # update_slider()
     progress$inc(detail='Making plot')
-    seurat_object.reactions$dimred %>%
-      cbind({FetchData(object=seurat_object.reactions$seurat, vars=input$gene_of_interest.dd) %>% set_names('expression_value')}) -> data
+    cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_feature_values) %>%
+      rename(expression_value=value) -> data
 
     if(is.numeric(data$expression_value)) {
     data %>%
@@ -401,7 +404,8 @@ shinyAppServer <- function(input, output, session) {
       ggplot() +
       aes(x=DIMRED_1, y=DIMRED_2, colour=expression_value) +
       geom_point(size=input$gene_highlighting.point_size.slider, alpha=input$opacity.slider) +
-      scale_colour_gradient(low=input$`gene_highlighting-colour_palette-low`, high=input$`gene_highlighting-colour_palette-high`, limits=input$expression_range.slider, oob=scales::squish) +
+      scale_colour_gradient(low=input$`gene_highlighting-colour_palette-low`, high=input$`gene_highlighting-colour_palette-high`, limits=seurat_object.reactions$value_range_limits, oob=scales::squish) +
+      # scale_colour_gradient(low=input$`gene_highlighting-colour_palette-low`, high=input$`gene_highlighting-colour_palette-high`, limits=input$expression_range.slider, oob=scales::squish) +
       theme_void() +
       theme(legend.position='none')
     } else {
@@ -423,10 +427,10 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making expression per cluster plot')
 
-    update_slider()
+    # update_slider()
     progress$inc(detail='Fetching data')
-    FetchData(object=seurat_object.reactions$seurat, vars=c(seurat_object.reactions$selected_cluster_resolution, input$gene_of_interest.dd)) %>%
-      set_names(c('cluster_id', 'expression_value')) -> data
+    cbind(seurat_object.reactions$picked_cluster_resolution_idents, seurat_object.reactions$picked_feature_values) %>%
+      rename(cluster_id=ident, expression_value=value) -> data
 
     if(is.numeric(data$expression_value)) {
       progress$inc(detail='Summarising expression in clusters')
