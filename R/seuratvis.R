@@ -1,11 +1,15 @@
-#' launches the shinyAppDemo app
+#' launches the seuratvis app
 #'
 #' @return shiny application object
 #'
 #' @import shiny
 #'
+#' @examples
+#' 
+#' \dontrun{
+#' seuratvis()}
+#' 
 #' @export
-launchApp <- function() {
-
+#' 
+seuratvis <- function()
   shinyApp(ui=shinyAppUI, server=shinyAppServer)
-}
