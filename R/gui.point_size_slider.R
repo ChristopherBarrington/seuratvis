@@ -13,7 +13,6 @@
 #'   callModule(point_size_slider.server, id='page_name')
 #' }}
 #' 
-#' 
 #' @rdname point_size_slider
 #' 
 point_size_slider.ui <- function(id, label='Point size') {

@@ -12,8 +12,7 @@
 #' ui <- fluidPage(total_umi_per_cell_filter.ui(id='page_name'))
 #' server <- function(input, output, session) {
 #'   callModule(total_umi_per_cell_filter.server, id='page_name')
-#' }}
-#' 
+#' }} 
 #' 
 #' @rdname total_umi_per_cell_filter
 #' 

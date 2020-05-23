@@ -13,7 +13,6 @@
 #'   callModule(assay_picker.server, id='page_name')
 #' }}
 #' 
-#' 
 #' @rdname assay_picker
 #' 
 assay_picker.ui <- function(id, label='Assay') {

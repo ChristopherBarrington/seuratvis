@@ -13,7 +13,6 @@
 #'   callModule(opacity_slider.server, id='page_name')
 #' }}
 #' 
-#' 
 #' @rdname opacity_slider
 #' 
 opacity_slider.ui <- function(id, label='Opacity') {

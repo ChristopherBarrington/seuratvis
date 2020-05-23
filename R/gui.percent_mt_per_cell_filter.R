@@ -14,7 +14,6 @@
 #'   callModule(percent_mt_per_cell_filter.server, id='page_name')
 #' }}
 #' 
-#' 
 #' @rdname percent_mt_per_cell_filter
 #' 
 percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt', target_var='percent_mt') {

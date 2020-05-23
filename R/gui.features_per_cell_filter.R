@@ -14,7 +14,6 @@
 #'   callModule(features_per_cell_filter.server, id='page_name')
 #' }}
 #' 
-#' 
 #' @rdname features_per_cell_filter
 #' 
 features_per_cell_filter.ui <- function(id, label='Features per cell', low=TRUE, high=TRUE) {

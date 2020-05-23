@@ -12,8 +12,7 @@
 #' server <- function(input, output, session) {
 #'   callModule(reduction_method_picker.server, id='page_name')
 #' }}
-#' 
-#' 
+#'
 #' @rdname reduction_method_picker
 #' 
 reduction_method_picker.ui <- function(id, label='Reduction method') {

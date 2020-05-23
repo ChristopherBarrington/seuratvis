@@ -13,7 +13,6 @@
 #'   callModule(cluster_resolution_picker.server, id='page_name')
 #' }}
 #' 
-#' 
 #' @rdname cluster_resolution_picker
 #' 
 cluster_resolution_picker.ui <- function(id, label='Cluster resolutions', include_label_switch=FALSE) {

@@ -13,7 +13,6 @@
 #'   callModule(feature_picker.server, id='page_name')
 #' }}
 #' 
-#' 
 #' @rdname feature_picker
 #' 
 feature_picker.ui <- function(id, label='Feature selection', include_metadata_switch=TRUE) {
