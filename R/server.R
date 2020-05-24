@@ -5,6 +5,7 @@
 module_environments <- new.env()
 seurat_object.reactions <- reactiveValues()
 filtering_parameters.reactions <- reactiveValues()
+filtered_cells.reactions <- reactiveValues()
 
 shinyAppServer <- function(input, output, session) {
 
@@ -21,46 +22,6 @@ shinyAppServer <- function(input, output, session) {
   # ###############################################################################################
   # cell filtering tab ----------------------------------------------------------------------------
 
-  ## react to cell filtering parameters
-  reactiveValues(filtered_cell_set=NULL, n_cells=0, total_reads=0, median_reads_per_cell=0, median_genes_per_cell=0,
-                 min_genes_per_cell=NULL, max_genes_per_cell=NULL,
-                 min_expression_per_cell=NULL, max_expression_per_cell=NULL,
-                 max_percent_mitochondria=NULL,
-                 subset_conditions=list(),
-                 subset_conditions.nCount='', subset_conditions.nFeature='', subset_conditions.percent_mt='') -> cell_filtering_data.reactions
-
-  reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=4/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Reacting to threshold parameters')
-
-    progress$inc(detail='Extracting input options')
-    min_expression_per_cell <- seurat_object.reactions$total_umi_per_cell_min
-    max_expression_per_cell <- seurat_object.reactions$total_umi_per_cell_max
-    min_genes_per_cell <- seurat_object.reactions$features_per_cell_min
-    max_genes_per_cell <- seurat_object.reactions$features_per_cell_max
-    max_percent_mitochondria <- seurat_object.reactions$percent_mt_per_cell_max
-
-    progress$inc(detail='Filtering @meta.data')
-    seurat_object.reactions$seurat@meta.data %>%
-      filter(percent_mt <= max_percent_mitochondria &
-             between(x=nFeature_RNA, left=min_genes_per_cell, right=max_genes_per_cell) &
-             between(x=nCount_RNA, left=min_expression_per_cell, right=max_expression_per_cell)) -> filtered_cell_set
-
-    progress$inc(detail='Saving results to reactiveValues')
-    cell_filtering_data.reactions$filtered_cell_set <- filtered_cell_set
-    cell_filtering_data.reactions$n_cells <- nrow(filtered_cell_set)
-    cell_filtering_data.reactions$total_reads <- sum(filtered_cell_set$nCount_RNA)
-    cell_filtering_data.reactions$median_reads_per_cell <- round(x=median(filtered_cell_set$nCount_RNA), digits=0)
-    cell_filtering_data.reactions$median_genes_per_cell <- round(x=median(filtered_cell_set$nFeature_RNA), digits=0)
-
-    # save values to filtering reactive
-    filtering_parameters.reactions$n_cells <- nrow(filtered_cell_set)
-    filtering_parameters.reactions$n_umi <- sum(filtered_cell_set$nCount_RNA)
-
-    progress$inc(detail='Returning')
-    NULL}) -> react_to_cell_filtering
-
   ## react to unique features detected density plot brush
   observeEvent(eventExpr=input$unique_genes_density.brush, handlerExpr={
     message('### input$unique_genes_density.brush')
@@ -74,8 +35,8 @@ shinyAppServer <- function(input, output, session) {
       updateTextInput(session=session, inputId=NS(id, 'max_features'), value=high)
     }
 
-    seurat_object.reactions$features_per_cell_min <- low
-    seurat_object.reactions$features_per_cell_max <- high})
+    filtering_parameters.reactions$features_per_cell_min <- low
+    filtering_parameters.reactions$features_per_cell_max <- high})
 
   ## react to total UMIs density plot brush
   observeEvent(eventExpr=input$total_expression_density.brush, handlerExpr={
@@ -90,8 +51,8 @@ shinyAppServer <- function(input, output, session) {
       updateTextInput(session=session, inputId=NS(namespace=id, id='max_umis'), value=high)
     }
 
-    seurat_object.reactions$total_umi_per_cell_min <- low
-    seurat_object.reactions$total_umi_per_cell_max <- high})
+    filtering_parameters.reactions$total_umi_per_cell_min <- low
+    filtering_parameters.reactions$total_umi_per_cell_max <- high})
 
   ## react to total UMI per cell filters
   for(id in module_environments$total_umi_per_cell_filters$id)
@@ -116,7 +77,7 @@ shinyAppServer <- function(input, output, session) {
     for(id in module_environments$percent_mt_per_cell_filters$id)
       updateTextInput(session=session, inputId=NS(namespace=id, id='max_percent_mt'), value=high)
 
-    seurat_object.reactions$percent_mt_per_cell_max <- high})
+    filtering_parameters.reactions$percent_mt_per_cell_max <- high})
 
   ## react to opening tab with a filtered object loaded
   observeEvent(input$sidebarmenu, {
@@ -127,14 +88,17 @@ shinyAppServer <- function(input, output, session) {
                      closeOnClickOutside=TRUE, showCloseButton=FALSE)
   })
 
+  ## load the filter_seurat module
+  callModule(module=cell_filtering.server, id='seuratvis')
+
   ## make knee plot of total expression
   cell_filtering.total_expression_knee.plot <- reactive(x={
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
     progress$set(value=0, message='Making total expression knee plot')
 
-    min_value <- seurat_object.reactions$total_umi_per_cell_min
-    max_value <- seurat_object.reactions$total_umi_per_cell_max
+    min_value <- filtering_parameters.reactions$total_umi_per_cell_min
+    max_value <- filtering_parameters.reactions$total_umi_per_cell_max
 
     progress$inc(detail='Making plot')
     FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
@@ -160,8 +124,8 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making unique genes detected knee plot')
 
-    min_value <- seurat_object.reactions$features_per_cell_min
-    max_value <- seurat_object.reactions$features_per_cell_max
+    min_value <- filtering_parameters.reactions$features_per_cell_min
+    max_value <- filtering_parameters.reactions$features_per_cell_max
 
     progress$inc(detail='Making plot')
     FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
@@ -187,7 +151,7 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making mitochondrial expression knee plot')
 
-    max_value <- seurat_object.reactions$percent_mt_per_cell_max
+    max_value <- filtering_parameters.reactions$max_percent_mitochondria
 
     progress$inc(detail='Making plot')
     # FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
@@ -210,14 +174,14 @@ shinyAppServer <- function(input, output, session) {
   cell_filtering.total_expression_density.plot <- reactive(x={
     progress <- shiny::Progress$new(session=session, min=0, max=1/10)
     on.exit(progress$close())
-    progress$set(value=0, message='Making total UMIs density plot')
+    progress$set(value=0, message='Making total UMI density plot')
 
     progress$inc(detail='Making plot')
     FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
       set_names('y') %>%
       ggplot() +
       aes(x=y) +
-      labs(x='Total UMIs per cell', y='Density') +
+      labs(x='Total UMI per cell', y='Density') +
       stat_density(geom='line', trim=TRUE, size=2) +
       scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
       theme_bw()+
@@ -263,15 +227,15 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
 
-    min_y <- seurat_object.reactions$total_umi_per_cell_min
-    max_y <- seurat_object.reactions$total_umi_per_cell_max
+    min_y <- filtering_parameters.reactions$total_umi_per_cell_min
+    max_y <- filtering_parameters.reactions$total_umi_per_cell_max
 
     progress$inc(detail='Making plot')
     FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
       set_names('y') %>%
       ggplot() +
       aes(x=0, y=y) +
-      labs(y='Total UMIs per cell') +
+      labs(y='Total UMI per cell') +
       geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
       geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
       coord_cartesian(xlim=c(-1, 1), ylim=c(min_y, max_y)) +
@@ -289,8 +253,8 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
 
-    min_y <- seurat_object.reactions$features_per_cell_min
-    max_y <- seurat_object.reactions$features_per_cell_max
+    min_y <- filtering_parameters.reactions$features_per_cell_min
+    max_y <- filtering_parameters.reactions$features_per_cell_max
 
     progress$inc(detail='Making plot')
     FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
@@ -315,9 +279,9 @@ shinyAppServer <- function(input, output, session) {
     on.exit(progress$close())
     progress$set(value=0, message='Making percentage mitochondria boxplot')
 
-    max_y <- seurat_object.reactions$percent_mt_per_cell_max
+    max_y <- filtering_parameters.reactions$max_percent_mitochondria
 
-   progress$inc(detail='Making plot')
+    progress$inc(detail='Making plot')
     # FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
     seurat_object.reactions$percent_mt %>%
       set_names('y') %>%
