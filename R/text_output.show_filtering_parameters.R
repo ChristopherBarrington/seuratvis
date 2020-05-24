@@ -67,13 +67,15 @@ show_filtering_parameters.server <- function(input, output, session) {
   group_format_subset_conditional <- function(x) x %>% na.omit() %>% paste(collapse=' & ')
 
   observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
-    message('### show_filtering_parameters.server-observeEvent-seurat_object.reactions$seurat')
+    message('### show_filtering_parameters.server-observeEvent-reactiveValuesToList(filtering_parameters.reactions)')
 
     # make sure seurat object is loaded
     req(seurat_object.reactions$seurat)
+    req(filtered_cells.reactions$n_cells)
 
     # create variables for shorthand
     thresholds <- reactiveValuesToList(filtering_parameters.reactions)
+    filtered_cells <- reactiveValuesToList(filtered_cells.reactions)
 
     # save formatted filters
     c(format_subset_conditional(x=thresholds$total_umi_per_cell_min, fmt='nCount_RNA>=%d'),
@@ -93,8 +95,8 @@ show_filtering_parameters.server <- function(input, output, session) {
 
     # combine all output lines
     list(project_line={thresholds$project %>% sprintf(fmt='# %s')},
-         n_cells_line={thresholds$n_cells %>% comma() %>% sprintf(fmt='# n_cells=%s')},
-         n_umi_line={thresholds$n_umi %>% comma() %>% sprintf(fmt='# n_umi=%s')},
+         n_cells_line={filtered_cells$n_cells %>% comma() %>% sprintf(fmt='# n_cells=%s')},
+         n_umi_line={filtered_cells$n_umi %>% comma() %>% sprintf(fmt='# n_umi=%s')},
          filters_line={all_subset_conditions %>% str_c(collapse=' &\n')}) %>%
       str_c(collapse='\n') -> output_text
 
