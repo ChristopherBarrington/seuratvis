@@ -52,7 +52,7 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
 #' React to filtering parameters
 #' 
 #' @details
-#' Updates the Seurat object reactive values.
+#' Updates the filtering parameters reactive values.
 #' 
 #' @rdname show_filtering_parameters
 #' 

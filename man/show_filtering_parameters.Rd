@@ -10,5 +10,5 @@ show_filtering_parameters.server(input, output, session)
 React to filtering parameters
 }
 \details{
-Updates the Seurat object reactive values.
+Updates the filtering parameters reactive values.
 }
