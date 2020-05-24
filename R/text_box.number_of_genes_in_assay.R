@@ -39,7 +39,7 @@ number_of_genes_in_assay_text_box.server <- function(input, output, session) {
   renderValueBox(expr={
     # get the box subtitle
     switch(module_env$id,
-           'Unique genes in assay') -> subtitle
+           'Unique features in assay') -> subtitle
 
     # create output object
     list(value={nrow(seurat_object.reactions$seurat) %>% comma()},
