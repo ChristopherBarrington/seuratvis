@@ -40,11 +40,13 @@ total_umi_per_cell_filter.ui <- function(id, label='UMIs per cell', low=TRUE, hi
 
   ## if a minium box is required, make one
   if(low)
-    textInput(inputId=ns('min_umis'), label='Minimum', placeholder='Minimum total UMIs per cell') -> low_ui
+    div(tags$h6('Minimum', style='display: inline;'),
+        numericInput(inputId=ns('min_umis'), label=NULL, value=0, step=50, width='100%')) -> low_ui
 
   ## if a max_umis box is required, make one
   if(high)
-    textInput(inputId=ns('max_umis'), label='Maximum', placeholder='Maximum total UMIs per cell') -> high_ui
+    div(tags$h6('Maximum', style='display: inline;'),
+        numericInput(inputId=ns('max_umis'), label=NULL, value=0, step=50, width='100%')) -> high_ui
 
   # return ui element(s)
   tagList(tags$label(label), br(), low_ui, high_ui)
@@ -69,16 +71,16 @@ total_umi_per_cell_filter.server <- function(input, output, session) {
     message('### total_umi_per_cell_filter.server-observeEvent-input$min_umis')
 
     # update the reactive
-    filtering_parameters.reactions$total_umi_per_cell_min <- as.numeric(input$min_umis) %>% round(digits=0)
-    seurat_object.reactions$total_umi_per_cell_min <- as.numeric(input$min_umis) %>% round(digits=0)})
+    filtering_parameters.reactions$total_umi_per_cell_min <- round(input$min_umis, digits=0)
+    seurat_object.reactions$total_umi_per_cell_min <- round(input$min_umis, digits=0)})
 
   # react to the max_umis input element
   observeEvent(eventExpr=input$max_umis, handlerExpr={
     message('### total_umi_per_cell_filter.server-observeEvent-input$max_umis')
 
     # update the reactive
-    filtering_parameters.reactions$total_umi_per_cell_max <- as.numeric(input$max_umis) %>% round(digits=0)
-    seurat_object.reactions$total_umi_per_cell_max <- as.numeric(input$max_umis) %>% round(digits=0)})
+    filtering_parameters.reactions$total_umi_per_cell_max <- round(input$max_umis, digits=0)
+    seurat_object.reactions$total_umi_per_cell_max <- round(input$max_umis, digits=0)})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
@@ -90,8 +92,8 @@ total_umi_per_cell_filter.server <- function(input, output, session) {
     high <- max(seurat@meta.data$nCount_RNA)
 
     # update the ui element(s)
-    updateTextInput(session=session, inputId='min_umis', placeholder=low)
-    updateTextInput(session=session, inputId='max_umis', placeholder=high)
+    updateNumericInput(session=session, inputId='min_umis', value=low)
+    updateNumericInput(session=session, inputId='max_umis', value=high)
 
     # update the reactive
     seurat_object.reactions$total_umi_per_cell_min <- low

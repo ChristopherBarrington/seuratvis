@@ -35,7 +35,8 @@ percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt', target_var=
   module_environments$percent_mt_per_cell_filters$id %<>% c(id)
 
   # make ui elements
-  textInput(inputId=ns('max_percent_mt'), label='Maximum', placeholder='Maximum proportion Mt') -> high_ui
+  div(tags$h6('Maximum', style='display: inline;'),
+    numericInput(inputId=ns('max_percent_mt'), label=NULL, value=0, step=0.1, width='100%')) -> high_ui
 
   # return ui element(s)
   tagList(tags$label(label), br(), high_ui)
@@ -61,7 +62,7 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
 
     # update the reactive
     filtering_parameters.reactions$max_percent_mitochondria <- input$max_percent_mt
-    seurat_object.reactions$percent_mt_per_cell_max <- input$max_percent_mt %>% as.numeric() %>% add(0.05) %>% round(digits=1)})
+    seurat_object.reactions$percent_mt_per_cell_max <- input$max_percent_mt %>% add(0.05) %>% round(digits=1)})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
@@ -72,7 +73,7 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
     high <- max(seurat@meta.data$percent_mt) %>% add(0.05) %>% round(digits=1)
 
     # update the ui element(s)
-    updateTextInput(session=session, inputId='max_percent_mt', placeholder=high)
+    updateNumericInput(session=session, inputId='max_percent_mt', value=high)
 
     # update the reactive
     seurat_object.reactions$percent_mt_per_cell_max <- high

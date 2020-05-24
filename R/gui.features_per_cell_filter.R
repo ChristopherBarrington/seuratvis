@@ -39,14 +39,14 @@ features_per_cell_filter.ui <- function(id, label='Features per cell', low=TRUE,
   low_ui <- high_ui <- NULL
 
   ## if a minium box is required, make one
-  if(low) {
-    textInput(inputId=ns('min_features'), label='Minimum', placeholder='Minimum features per cell') -> low_ui
-  }
+  if(low)
+    div(tags$h6('Minimum', style='display: inline;'),
+        numericInput(inputId=ns('min_features'), label=NULL, value=0, step=50, width='100%')) -> low_ui
 
   ## if a maximum box is required, make one
-  if(high) {
-    textInput(inputId=ns('max_features'), label='Maximum', placeholder='Maximum features per cell') -> high_ui
-  }
+  if(high)
+    div(tags$h6('Maximum', style='display: inline;'),
+        numericInput(inputId=ns('max_features'), label=NULL, , value=0, step=50, width='100%')) -> high_ui
 
   # return ui element(s)
   tagList(tags$label(label), br(), low_ui, high_ui)
@@ -71,16 +71,16 @@ features_per_cell_filter.server <- function(input, output, session) {
     message('### features_per_cell_filter.server-observeEvent-input$min_features')
 
     # update the reactive
-    filtering_parameters.reactions$features_per_cell_min <- as.numeric(input$min_features) %>% round(digits=0)
-    seurat_object.reactions$features_per_cell_min <- as.numeric(input$min_features) %>% round(digits=0)})
+    filtering_parameters.reactions$features_per_cell_min <- round(input$min_features, digits=0)
+    seurat_object.reactions$features_per_cell_min <- round(input$min_features, digits=0)})
 
   # react to the maximum input element
   observeEvent(eventExpr=input$max_features, handlerExpr={
     message('### features_per_cell_filter.server-observeEvent-input$max_features')
 
     # update the reactive
-    filtering_parameters.reactions$features_per_cell_max <- as.numeric(input$max_features) %>% round(digits=0)
-    seurat_object.reactions$features_per_cell_max <- as.numeric(input$max_features) %>% round(digits=0)})
+    filtering_parameters.reactions$features_per_cell_max <- round(input$max_features, digits=0)
+    seurat_object.reactions$features_per_cell_max <- round(input$max_features, digits=0)})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
@@ -92,8 +92,8 @@ features_per_cell_filter.server <- function(input, output, session) {
     high <- max(seurat@meta.data$nFeature_RNA)
 
     # update the ui element(s)
-    updateTextInput(session=session, inputId='min_features', placeholder=low)
-    updateTextInput(session=session, inputId='max_features', placeholder=high)
+    updateNumericInput(session=session, inputId='min_features', value=low)
+    updateNumericInput(session=session, inputId='max_features', value=high)
 
     # update the reactive
     seurat_object.reactions$features_per_cell_min <- low

@@ -40,7 +40,7 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
   ## if copy buttons are required
   copy_buttons <- NULL
   if(include_copy_buttons)
-    div(tags$h6('Copy to clipboard'), # , style="display: inline;"
+    div(tags$h6('Copy to clipboard', style='display: inline;'),
         uiOutput(outputId=ns(id='plain.copybutton'), inline=TRUE),
         uiOutput(outputId=ns(id='csv.copybutton'), inline=TRUE),
         uiOutput(outputId=ns(id='r.copybutton'), inline=TRUE)) -> copy_buttons
