@@ -73,7 +73,7 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
     high <- max(seurat@meta.data$percent_mt) %>% add(0.05) %>% round(digits=1)
 
     # update the ui element(s)
-    updateNumericInput(session=session, inputId='max_percent_mt', value=high)
+    updateNumericInput(session=session, inputId='max_percent_mt', value=high, min=0, max=high)
 
     # update the reactive
     seurat_object.reactions$percent_mt_per_cell_max <- high

@@ -92,8 +92,8 @@ features_per_cell_filter.server <- function(input, output, session) {
     high <- max(seurat@meta.data$nFeature_RNA)
 
     # update the ui element(s)
-    updateNumericInput(session=session, inputId='min_features', value=low)
-    updateNumericInput(session=session, inputId='max_features', value=high)
+    updateNumericInput(session=session, inputId='min_features', value=low, min=floor(low/50)*50, max=ceiling(high/50)*50)
+    updateNumericInput(session=session, inputId='max_features', value=high, min=floor(low/50)*50, max=ceiling(high/50)*50)
 
     # update the reactive
     seurat_object.reactions$features_per_cell_min <- low
