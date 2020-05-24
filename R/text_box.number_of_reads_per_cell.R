@@ -42,7 +42,7 @@ number_of_reads_per_cell_text_box.server <- function(input, output, session) {
   renderValueBox(expr={
     # get summarised values
     n_reference <- seurat_object.reactions$seurat$nCount_RNA %>% module_env$summary_function()
-    n_filtered <- server_env$cell_filtering_data.reactions$filtered_cell_set$nCount_RNA %>% module_env$summary_function()
+    n_filtered <- filtered_cells.reactions$cell_metadata$nCount_RNA %>% module_env$summary_function()
 
     # get the box subtitle
     switch(module_env$id,

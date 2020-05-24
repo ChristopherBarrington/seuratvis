@@ -42,7 +42,7 @@ number_of_genes_in_assay_text_box.server <- function(input, output, session) {
            'Unique features in assay') -> subtitle
 
     # create output object
-    list(value={nrow(seurat_object.reactions$seurat) %>% comma()},
+    list(value={seurat_object.reactions$reference_metrics$n_features %>% comma()},
          subtitle=subtitle,
          icon=icon('galactic-senate')) %>%
       modifyList(x=seuratvis:::text_box_defaults()) %>%

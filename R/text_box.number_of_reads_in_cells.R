@@ -37,15 +37,17 @@ number_of_reads_text_box.server <- function(input, output, session) {
 
   # make the text box
   renderValueBox(expr={
-    server_env$react_to_cell_filtering() # not sure about this line, is it necessary?
+    # create variables for shorthand
+    n_reference <- seurat_object.reactions$reference_metrics$total_umi
+    n_filtered <- filtered_cells.reactions$n_umi
 
     # get the box subtitle
     switch(module_env$id,
-           cell_filtering=sprintf(fmt='Total reads remaining (%.1f%%)', server_env$cell_filtering_data.reactions$total_reads/seurat_object.reactions$reference_metrics$total_umi*100), # neaten this up
-           'Total reads in cells') -> subtitle
+           cell_filtering=sprintf(fmt='Total UMI remaining (%.1f%%)', n_filtered/n_reference*100),
+           'Total UMI in cells') -> subtitle
 
     # create output object
-    list(value={server_env$cell_filtering_data.reactions$total_reads %>% comma()}, # not the best, should not depend on this object, may not be filtered
+    list(value={n_filtered %>% comma()},
          subtitle=subtitle,
          icon=icon('old-republic')) %>%
       modifyList(x=seuratvis:::text_box_defaults()) %>%
