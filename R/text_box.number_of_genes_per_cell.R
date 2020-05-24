@@ -46,8 +46,8 @@ number_of_genes_per_cell_text_box.server <- function(input, output, session) {
 
     # get the box subtitle
     switch(module_env$id,
-           cell_filtering=sprintf(fmt='%s genes per cell (%s)', str_to_title(module_env$summary_function_name), comma(n_filtered-n_reference) %>% ifelse(str_detect(., '^-'), ., str_c('+', .))),
-           sprintf('%s genes per cell', str_to_title(module_env$summary_function_name))) -> subtitle
+           cell_filtering=sprintf(fmt='%s features per cell (%s)', str_to_title(module_env$summary_function_name), comma(n_filtered-n_reference) %>% ifelse(str_detect(., '^-'), ., str_c('+', .))),
+           sprintf('%s features per cell', str_to_title(module_env$summary_function_name))) -> subtitle
 
     # create output object
     list(value={n_filtered %>% round(digits=1) %>% comma()},
