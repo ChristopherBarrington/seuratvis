@@ -69,7 +69,10 @@ assay_picker.server <- function(input, output, session) {
 
     # set the default assay for the reactive seurat object
     if(assay!='' && !is.null(seurat_object.reactions$seurat))
-      DefaultAssay(seurat_object.reactions$seurat) <- assay})
+      DefaultAssay(seurat_object.reactions$seurat) <- assay
+
+    # update the reactive
+    seurat_object.reactions$reference_metrics$n_features <- nrow(seurat_object.reactions$seurat)})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
