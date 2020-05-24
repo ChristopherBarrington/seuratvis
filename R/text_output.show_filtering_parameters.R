@@ -118,26 +118,4 @@ show_filtering_parameters.server <- function(input, output, session) {
   renderUI(expr={
     paste(filtering_parameters.reactions$all_subset_conditions, collapse=' & ') %>%
       rclipButton(inputId='rclipButton.r.in', label='', icon('r-project'))}) -> output$r.copybutton
-
-  # initialise filtering reactive when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    message('### show_filtering_parameters.server-observeEvent-seurat_object.reactions$seurat')
-
-    # create variables for shorthand
-    seurat <- seurat_object.reactions$seurat
-
-    list(project=Project(seurat),
-         n_cells=nrow(seurat@meta.data),
-         n_umi=sum(seurat@meta.data$nCount_RNA),
-         
-         total_umi_per_cell_min=min(seurat@meta.data$nCount_RNA),
-         total_umi_per_cell_max=max(seurat@meta.data$nCount_RNA),
-         
-         features_per_cell_min=min(seurat@meta.data$nFeature_RNA),
-         features_per_cell_max=max(seurat@meta.data$nFeature_RNA),
-         
-         max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> initial_values
-
-    for(i in names(initial_values))
-      filtering_parameters.reactions[[i]] <- initial_values[[i]]})
 }
