@@ -67,7 +67,7 @@ show_filtering_parameters.server <- function(input, output, session) {
   group_format_subset_conditional <- function(x) x %>% na.omit() %>% paste(collapse=' & ')
 
   observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
-    message('!!! show_filtering_parameters.server-observeEvent-seurat_object.reactions$seurat')
+    message('### show_filtering_parameters.server-observeEvent-seurat_object.reactions$seurat')
 
     if(is.null(seurat_object.reactions$seurat))
       return(NULL)
