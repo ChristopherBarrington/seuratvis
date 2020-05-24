@@ -69,8 +69,8 @@ show_filtering_parameters.server <- function(input, output, session) {
   observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
     message('### show_filtering_parameters.server-observeEvent-seurat_object.reactions$seurat')
 
-    if(is.null(seurat_object.reactions$seurat))
-      return(NULL)
+    # make sure seurat object is loaded
+    req(seurat_object.reactions$seurat)
 
     # create variables for shorthand
     thresholds <- reactiveValuesToList(filtering_parameters.reactions)

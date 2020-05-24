@@ -41,7 +41,7 @@ number_of_reads_text_box.server <- function(input, output, session) {
 
     # get the box subtitle
     switch(module_env$id,
-           cell_filtering=sprintf(fmt='Total reads remaining (%.1f%%)', server_env$cell_filtering_data.reactions$total_reads/seurat_object.reactions$reference_metrics$total_reads*100), # neaten this up
+           cell_filtering=sprintf(fmt='Total reads remaining (%.1f%%)', server_env$cell_filtering_data.reactions$total_reads/seurat_object.reactions$reference_metrics$total_umi*100), # neaten this up
            'Total reads in cells') -> subtitle
 
     # create output object
