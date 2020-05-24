@@ -38,8 +38,7 @@ cell_filtering.server <- function(input, output, session) {
     filtered_cells.reactions$n_umi <- sum(filtered_cell_metadata$nCount_RNA)
     filtered_cells.reactions$median_umi_per_cell <- round(x=median(filtered_cell_metadata$nCount_RNA), digits=0)
     filtered_cells.reactions$median_features_per_cell <- round(x=median(filtered_cell_metadata$nFeature_RNA), digits=0)
-    filtered_cells.reactions$cell_metadata <- filtered_cell_metadata
-  })
+    filtered_cells.reactions$cell_metadata <- filtered_cell_metadata})
 
   # initialise filtering thresholds and filtered object reactives when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
