@@ -148,13 +148,18 @@ load_a_seurat.server <- function(input, output, session) {
     progress$inc(detail='Counting clusters identified in each set')
 
     progress$inc(detail='Getting summary statistics')
+
     list(n_cells=nrow(seurat@meta.data),
-         total_reads=sum(seurat@meta.data$nCount_RNA),
-         median_reads_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
-         median_genes_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
-         min_reads_per_cell=min(seurat@meta.data$nCount_RNA), max_reads_per_cell=max(seurat@meta.data$nCount_RNA),
-         min_genes_per_cell=min(seurat@meta.data$nFeature_RNA), max_genes_per_cell=max(seurat@meta.data$nFeature_RNA),
-         max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1)) -> cell_filtering_data.reference
+         total_umi=sum(seurat@meta.data$nCount_RNA),
+         median_umi_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
+         median_features_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
+         min_umi_per_cell=min(seurat@meta.data$nCount_RNA), max_umi_per_cell=max(seurat@meta.data$nCount_RNA),
+         min_features_per_cell=min(seurat@meta.data$nFeature_RNA), max_features_per_cell=max(seurat@meta.data$nFeature_RNA),
+         
+         total_umi_per_cell_min=min(seurat@meta.data$nCount_RNA), total_umi_per_cell_max=max(seurat@meta.data$nCount_RNA),
+         features_per_cell_min=min(seurat@meta.data$nFeature_RNA), features_per_cell_max=max(seurat@meta.data$nFeature_RNA),
+         max_percent_mitochondria=round(max(seurat@meta.data$percent_mt)+0.05, digits=1),
+         project=Project(seurat)) -> cell_filtering_data.reference
 
     progress$inc(detail='Setting default assay') # keep here for now
     selected_assay <- 'RNA'

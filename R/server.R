@@ -4,6 +4,7 @@
 
 module_environments <- new.env()
 seurat_object.reactions <- reactiveValues()
+filtering_parameters.reactions <- reactiveValues()
 
 shinyAppServer <- function(input, output, session) {
 
@@ -53,21 +54,9 @@ shinyAppServer <- function(input, output, session) {
     cell_filtering_data.reactions$median_reads_per_cell <- round(x=median(filtered_cell_set$nCount_RNA), digits=0)
     cell_filtering_data.reactions$median_genes_per_cell <- round(x=median(filtered_cell_set$nFeature_RNA), digits=0)
 
-    # save formatted filters
-    format_subset_conditional <- function(x, fmt) ifelse(is.na(x), NA, sprintf(fmt=fmt, x))
-    group_format_subset_conditional <- function(x) x %>% na.omit() %>% paste(collapse=' & ')
-
-    c(format_subset_conditional(x=min_expression_per_cell, fmt='nCount_RNA>=%d'),
-      format_subset_conditional(x=max_expression_per_cell, fmt='nCount_RNA<=%d')) %>%
-      group_format_subset_conditional() -> cell_filtering_data.reactions$subset_conditions$nCount
-
-    c(format_subset_conditional(x=min_genes_per_cell, fmt='nFeature_RNA>=%d'),
-      format_subset_conditional(x=max_genes_per_cell, fmt='nFeature_RNA<=%d')) %>%
-      group_format_subset_conditional() -> cell_filtering_data.reactions$subset_conditions$nFeature
-
-    seurat_object.reactions$percent_mt_target_var %>%
-      sprintf(fmt='%s<=%%s') %>%
-      format_subset_conditional(x=max_percent_mitochondria) -> cell_filtering_data.reactions$subset_conditions$percent_mt
+    # save values to filtering reactive
+    filtering_parameters.reactions$n_cells <- nrow(filtered_cell_set)
+    filtering_parameters.reactions$n_umi <- sum(filtered_cell_set$nCount_RNA)
 
     progress$inc(detail='Returning')
     NULL}) -> react_to_cell_filtering
@@ -115,6 +104,10 @@ shinyAppServer <- function(input, output, session) {
   ## react to percent Mt per cell filters
   for(id in module_environments$percent_mt_per_cell_filters$id)
     callModule(module=percent_mt_per_cell_filter.server, id=id)
+
+  ## react to show filtering parameters
+  for(id in module_environments$show_filtering_parameters$id)
+    callModule(module=show_filtering_parameters.server, id=id)
 
   ## react to percent mitochondria density plot brush
   observeEvent(eventExpr=input$percent_mitochondria_density.brush, handlerExpr={
@@ -613,33 +606,6 @@ shinyAppServer <- function(input, output, session) {
   callModule(module=number_of_cells_text_box.server, id='cell_filtering')
   callModule(module=number_of_reads_per_cell_text_box.server, id='cell_filtering')
   callModule(module=number_of_genes_per_cell_text_box.server, id='cell_filtering')
-
-  ### formatted text box with filtering parameters
-  output$`cell_filtering-subset_conditions` <- renderText({
-    react_to_cell_filtering()
-    c(sprintf(fmt='# %s', seurat_object.reactions$seurat@project.name),
-      sprintf(fmt='# n_cells=%s', comma(cell_filtering_data.reactions$n_cells)),
-      paste(cell_filtering_data.reactions$subset_conditions, collapse=' &\n')) %>%
-      paste(collapse='\n') -> cell_filtering_data.reactions$subset_conditions.text})
-
-  ### copy to clipboard buttons
-  output$`cell_filtering-subset_conditions.plain` <- renderUI({ # copy text as is
-    react_to_cell_filtering()
-    rclipButton(inputId='rclipButton.plain.in', label='', icon('clipboard-check'),
-                clipText=cell_filtering_data.reactions$subset_conditions.text)})
-
-  output$`cell_filtering-subset_conditions.tsv` <- renderUI({ # tab separate elements
-    react_to_cell_filtering()
-    c(seurat_object.reactions$seurat@project.name,
-      cell_filtering_data.reactions$n_cells,
-      paste(cell_filtering_data.reactions$subset_conditions, collapse=' & ')) %>%
-      paste(collapse=',') %>%
-      rclipButton(inputId='rclipButton.tsv.in', label='', icon('file-excel'))})
-
-  output$`cell_filtering-subset_conditions.r` <- renderUI({ # copy only the conditional
-    react_to_cell_filtering()
-    paste(cell_filtering_data.reactions$subset_conditions, collapse=' & ') %>%
-      rclipButton(inputId='rclipButton.r.in', label='', icon('r-project'))})
 
   ### knee plots
   renderPlot(cell_filtering.total_expression_knee.plot()) -> output$`cell_filtering-total_expression_knee`

@@ -6,10 +6,6 @@ shinyAppUI <- function(...) {
   cell_filtering.tab <- menuItem(text='Cell filtering', tabName='cell_filtering-tab', icon=icon('filter'))
 
   ### define ui elements
-  subset_conditions.textoutput <- verbatimTextOutput(outputId='cell_filtering-subset_conditions')
-  subset_conditions.plain.copybutton <- uiOutput(outputId='cell_filtering-subset_conditions.plain', inline=TRUE)
-  subset_conditions.tsv.copybutton <- uiOutput(outputId='cell_filtering-subset_conditions.tsv', inline=TRUE)
-  subset_conditions.r.copybutton <- uiOutput(outputId='cell_filtering-subset_conditions.r', inline=TRUE)
 
   ### define layout boxes
   cell_filtering.plot_boxes.defaults <- list(solidHeader=TRUE, width=12, collapsible=TRUE, collapsed=TRUE)
@@ -39,8 +35,7 @@ shinyAppUI <- function(...) {
                                                       column(width=2, total_umi_per_cell_filter.ui('cell_filtering')),
                                                       column(width=2, features_per_cell_filter.ui('cell_filtering')),
                                                       column(width=2, percent_mt_per_cell_filter.ui(id='cell_filtering')),
-                                                      column(width=4, shiny::tags$label('Conditional expression to select cells'), br(), subset_conditions.textoutput,
-                                                                      shiny::tags$label('Copy subset conditions to clipboard'), br(), subset_conditions.plain.copybutton, subset_conditions.tsv.copybutton, subset_conditions.r.copybutton))) %>%
+                                                      column(width=4, show_filtering_parameters.ui('cell_filtering')))) %>%
                                           do.call(what=box))
 
   ### assemble tab content
