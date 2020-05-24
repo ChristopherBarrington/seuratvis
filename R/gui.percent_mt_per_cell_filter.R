@@ -60,6 +60,7 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
     message('### percent_mt_per_cell_filter.server-observeEvent-input$max_percent_mt')
 
     # update the reactive
+    filtering_parameters.reactions$max_percent_mitochondria <- input$max_percent_mt
     seurat_object.reactions$percent_mt_per_cell_max <- input$max_percent_mt %>% as.numeric() %>% add(0.05) %>% round(digits=1)})
 
   # update UI when Seurat object is loaded
