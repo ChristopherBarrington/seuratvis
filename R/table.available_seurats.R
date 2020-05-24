@@ -149,7 +149,8 @@ load_a_seurat.server <- function(input, output, session) {
 
     progress$inc(detail='Getting summary statistics')
 
-    list(n_cells=nrow(seurat@meta.data),
+    list(n_cells=ncol(seurat),
+         n_features=nrow(seurat),
          total_umi=sum(seurat@meta.data$nCount_RNA),
          median_umi_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
          median_features_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
@@ -179,5 +180,6 @@ load_a_seurat.server <- function(input, output, session) {
     seurat_object.reactions$mart <- seurat@misc$mart
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
+    seurat_object.reactions$cell_metadata <- seurat@meta.data
   })
 }
