@@ -85,7 +85,7 @@ shinyAppUI <- function(...) {
                                                     solidHeader=TRUE,
                                                     width=4,
                                                     collapsible=TRUE,
-                                                    feature_picker.ui(id='gene_highlighting'),
+                                                    feature_picker.ui(id='gene_highlighting', include_metadata_switch=TRUE),
                                                     cluster_resolution_picker.ui(id='gene_highlighting', include_label_switch=TRUE),
                                                     reduction_method_picker.ui(id='gene_highlighting'),
                                                     assay_picker.ui(id='gene_highlighting')),
