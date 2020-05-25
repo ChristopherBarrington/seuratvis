@@ -91,6 +91,7 @@ feature_picker.server <- function(input, output, session) {
   observeEvent(eventExpr=input$list_metadata, handlerExpr={
     sprintf(fmt='### feature_picker.server-observeEvent-input$list_metadata [%s]', input$list_metadata) %>% message()
 
+    # make sure these elements are defined
     req(seurat_object.reactions$picked_feature_previous)
 
     # pick the feature to revert to
@@ -106,6 +107,7 @@ feature_picker.server <- function(input, output, session) {
   observeEvent(eventExpr=seurat_object.reactions$picked_feature, handlerExpr={  
     sprintf(fmt='### feature_picker.server-observeEvent-seurat_object.reactions$picked_feature [%s]', seurat_object.reactions$picked_feature) %>% message()
 
+    # make sure these elements are defined
     req(seurat_object.reactions$seurat)
 
     # create variables for shorthand
@@ -138,6 +140,7 @@ feature_picker.server <- function(input, output, session) {
       sprintf(fmt='### feature_picker.server-observeEvent-input$value_range [%s]') %>%
       message()
 
+    # make sure these elements are defined
     req(seurat_object.reactions$value_range_limits)
 
     # update the reactive
