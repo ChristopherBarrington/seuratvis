@@ -16,7 +16,7 @@
 #' @rdname assay_picker
 #' 
 assay_picker.ui <- function(id, label='Assay') {
-  message('### assay_picker')
+  message('### assay_picker.ui')
 
   module <- 'assay_picker'
 
@@ -57,7 +57,7 @@ assay_picker.server <- function(input, output, session) {
 
   # react to the reduction method selection
   observeEvent(eventExpr=input$assay_picker, handlerExpr={
-    message('### assay_picker.server-observeEvent-input$assay_picker')
+    sprintf(fmt='### assay_picker.server-observeEvent-input$assay_picker [%s]', input$assay_picker) %>% message()
 
     # create variables for shorthand
     assay <- input$assay_picker
@@ -76,7 +76,7 @@ assay_picker.server <- function(input, output, session) {
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    message('### assay_picker.server-observeEvent-seurat_object.reactions$seurat')
+    sprintf(fmt='### assay_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat

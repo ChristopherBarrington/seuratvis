@@ -42,7 +42,7 @@ cell_filtering.server <- function(input, output, session) {
 
   # initialise filtering thresholds and filtered object reactives when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    message('### cell_filtering.server-observeEvent-seurat_object.reactions$seurat')
+    sprintf(fmt='### cell_filtering.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat

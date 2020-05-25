@@ -66,7 +66,7 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    message('### percent_mt_per_cell_filter.server-observeEvent-seurat_object.reactions$seurat')
+    sprintf(fmt='### percent_mt_per_cell_filter.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
