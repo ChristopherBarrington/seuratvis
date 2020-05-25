@@ -76,25 +76,25 @@ feature_picker.server <- function(input, output, session) {
   # react to the feature selection
   ## if a feature is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_feature_names, handlerExpr={
-    message('### feature_picker.server-observeEvent-input$feature_picker_feature_names')
+    sprintf(fmt='### feature_picker.server-observeEvent-input$feature_picker_feature_names', input$feature_picker_feature_names) %>% message()
     if(is.null(input$list_metadata) || !input$list_metadata)
       seurat_object.reactions$picked_feature <- input$feature_picker_feature_names})
 
   ## if a metadata column is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_metadata, handlerExpr={
-    message('### feature_picker.server-observeEvent-input$feature_picker_metadata')
+    sprintf(fmt='### feature_picker.server-observeEvent-input$feature_picker_metadata [%s]', input$feature_picker_metadata) %>% message()
     if(!is.null(input$list_metadata) && input$list_metadata)
       seurat_object.reactions$picked_feature <- input$feature_picker_metadata})
 
   ## if the metadata switch is toggled, set the picked feature
   observeEvent(eventExpr=input$list_metadata, handlerExpr={
-    message('### feature_picker.server-observeEvent-input$list_metadata')
-    picked_feature <- ifelse(input$list_metadata, input$feature_picker_metadata, input$feature_picker_feature_names)
+    sprintf(fmt='### feature_picker.server-observeEvent-input$list_metadata [%s]', input$list_metadata) %>% message()
+
     seurat_object.reactions$picked_feature <- picked_feature})
 
   ## use the selected feature (it may be a feature or metadata)
   observeEvent(eventExpr=seurat_object.reactions$picked_feature, handlerExpr={  
-    message('### feature_picker.server-observeEvent-seurat_object.reactions$picked_feature')
+    sprintf(fmt='### feature_picker.server-observeEvent-seurat_object.reactions$picked_feature [%s]', seurat_object.reactions$picked_feature) %>% message()
 
     req(seurat_object.reactions$seurat)
 
@@ -118,14 +118,17 @@ feature_picker.server <- function(input, output, session) {
 
   # react to the colour scale limits
   observeEvent(eventExpr=input$value_range, handlerExpr={
-    message('### feature_picker.server-observeEvent-input$value_range')
+    input$value_range %>%
+      str_c(collapse=',') %>%
+      sprintf(fmt='### feature_picker.server-observeEvent-input$value_range [%s]') %>%
+      message()
 
     # update the reactive
     seurat_object.reactions$value_range_limits <- input$value_range})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    message('### feature_picker.server-observeEvent-seurat_object.reactions$seurat')
+    sprintf(fmt='### feature_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat
