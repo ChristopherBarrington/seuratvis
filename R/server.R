@@ -388,7 +388,7 @@ shinyAppServer <- function(input, output, session) {
       scale_colour_gradient(low=input$`gene_highlighting-colour_palette-low`, high=input$`gene_highlighting-colour_palette-high`, limits=seurat_object.reactions$value_range_limits, oob=scales::squish) +
       # scale_colour_gradient(low=input$`gene_highlighting-colour_palette-low`, high=input$`gene_highlighting-colour_palette-high`, limits=input$expression_range.slider, oob=scales::squish) +
       theme_void() +
-      theme(legend.position='none')
+      theme(legend.position='none') + labs(title=seurat_object.reactions$picked_feature)
     } else {
     data %>%
       arrange(expression_value) %>%
@@ -399,7 +399,7 @@ shinyAppServer <- function(input, output, session) {
       facet_wrap(~expression_value, scales='free') +
       guides(colour=guide_legend(override.aes=list(size=3, shape=15))) +
       theme_void() +
-      theme(legend.position='bottom', legend.title=element_blank())
+      theme(legend.position='bottom', legend.title=element_blank()) + labs(title=seurat_object.reactions$picked_feature)
     }})
 
   ## plot expression ranges per cluster
