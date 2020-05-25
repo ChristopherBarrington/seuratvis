@@ -78,7 +78,8 @@ feature_picker.server <- function(input, output, session) {
   observeEvent(eventExpr=input$feature_picker_feature_names, handlerExpr={
     sprintf(fmt='### feature_picker.server-observeEvent-input$feature_picker_feature_names', input$feature_picker_feature_names) %>% message()
     if(is.null(input$list_metadata) || !input$list_metadata)
-      seurat_object.reactions$picked_feature <- input$feature_picker_feature_names})
+      seurat_object.reactions$picked_feature <- input$feature_picker_feature_names
+    })
 
   ## if a metadata column is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_metadata, handlerExpr={
@@ -90,6 +91,15 @@ feature_picker.server <- function(input, output, session) {
   observeEvent(eventExpr=input$list_metadata, handlerExpr={
     sprintf(fmt='### feature_picker.server-observeEvent-input$list_metadata [%s]', input$list_metadata) %>% message()
 
+    req(seurat_object.reactions$picked_feature_previous)
+
+    # pick the feature to revert to
+    ## if metadata switch is true, get the value of the metadata dropdown
+    ## if metadata switch is false, get the previously shown feature (autocomplete_input return empty in this case)
+    picked_feature <- ifelse(input$list_metadata, input$feature_picker_metadata, seurat_object.reactions$picked_feature_previous)
+    seurat_object.reactions$picked_feature_previous <- seurat_object.reactions$picked_feature
+
+    # update the reactive
     seurat_object.reactions$picked_feature <- picked_feature})
 
   ## use the selected feature (it may be a feature or metadata)
@@ -107,14 +117,19 @@ feature_picker.server <- function(input, output, session) {
 
     # update the ui element(s)
     ## slider to limit colour range
+    min_value <- 0
     max_value <- 1
-    if(class(picked_feature_values$value)=='numeric')
+    if(class(picked_feature_values$value)=='numeric') {
+      min_value <- min(picked_feature_values$value) %>% subtract(0.05) %>% round(digits=1)
       max_value <- max(picked_feature_values$value) %>% add(0.05) %>% round(digits=1)
+    }
+
     updateSliderInput(session=session, inputId='value_range',
-                      max=max_value, value=c(-Inf,Inf))
+                      min=min_value, max=max_value, value=c(-Inf,Inf))
 
     # save feature information in the reactive
-    seurat_object.reactions$picked_feature_values <- picked_feature_values})
+    seurat_object.reactions$picked_feature_values <- picked_feature_values
+    seurat_object.reactions$value_range_limits <- c(min_value, max_value)})
 
   # react to the colour scale limits
   observeEvent(eventExpr=input$value_range, handlerExpr={
@@ -123,8 +138,11 @@ feature_picker.server <- function(input, output, session) {
       sprintf(fmt='### feature_picker.server-observeEvent-input$value_range [%s]') %>%
       message()
 
+    req(seurat_object.reactions$value_range_limits)
+
     # update the reactive
-    seurat_object.reactions$value_range_limits <- input$value_range})
+    if(!identical(seurat_object.reactions$value_range_limits, input$value_range))
+      seurat_object.reactions$value_range_limits <- input$value_range})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
@@ -163,6 +181,7 @@ feature_picker.server <- function(input, output, session) {
 
     # update the reactive
     seurat_object.reactions$picked_feature <- picked_feature
+    seurat_object.reactions$picked_feature_previous <- picked_feature
     seurat_object.reactions$feature_picker_features <- feature_picker_options$features
     seurat_object.reactions$feature_picker_metadata <- feature_picker_options$metadata})
 }
