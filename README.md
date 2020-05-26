@@ -32,7 +32,7 @@ The package expects the current workspace to contain:
   * it will crash if there is not at least one!
 
 ```r
-launchApp()
+seuratvis()
 ```
 
 The app should now open a new window.
