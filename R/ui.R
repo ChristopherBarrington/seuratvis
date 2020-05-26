@@ -181,10 +181,11 @@ shinyAppUI <- function(...) {
   github_link.tab <- menuItem(text=sprintf('GitHub (version: %s)', packageVersion('seuratvis')), href='github.com/ChristopherBarrington/seuratvis', icon=icon('code-branch'), newtab=FALSE)
 
   # header definition
-  css <- 'table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'
-  dashboard_header <- dashboardHeader(title='seurat-vis')
+  logo <- htmltools::HTML("<p style='font-size:26px'><b>seurat</b>vis</p>")
+  dashboard_header <- dashboardHeader(title=logo)
 
   # dashboard body definition
+  css <- 'table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'
   list(cell_filtering.content,
        gene_highlighting.content,
        features_heatmap.content,
