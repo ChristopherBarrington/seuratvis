@@ -62,6 +62,9 @@ available_seurats.server <- function(input, output, session) {
     `Reductions`='reductions') -> column_order
 
   # make the `data.frame` of Seurat information
+  collapse_strings <- function(x, replacement='-', sep=', ')
+    ifelse(length(x)==0 | (length(x)==1 && x==''), replacement, str_c(x, collapse=sep))
+
   server_env$available_seurat_objects %>%
     dplyr::select(-choiceName) %>%
     plyr::adply(.margins=1, function(params) {
@@ -75,9 +78,9 @@ available_seurats.server <- function(input, output, session) {
                  filtered=!is.null(x@misc$cells_filtered) && x@misc$cells_filtered,
                  integrated=!is.null(x@misc$integrated_dataset) && x@misc$integrated_dataset,
                  active_assay=DefaultAssay(x),
-                 assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% str_c(collapse=', ')},
+                 assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% collapse_strings()},
                  nfeatures=nrow(x),
-                 reductions=str_c(Reductions(x), collapse=', '))}) %>%
+                 reductions={Reductions(x) %>% collapse_strings()})}) %>%
     mutate(dimensions=as.integer(dimensions),
            object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
@@ -123,6 +126,9 @@ available_seurats.server <- function(input, output, session) {
                   backgroundSize='98% 50%',
                   backgroundRepeat='no-repeat',
                   backgroundPosition='center') %>%
+      formatStyle(columns='object',
+                  fontFamily='monospace',
+                  fontWeight='bold') %>%
       formatRound(columns=c('ncells', 'numi', 'median_umi', 'nfeatures'),
                   digits=0) %>%
       formatStyle(columns={sapply(data_to_show, class) %>% str_which('logical')},
