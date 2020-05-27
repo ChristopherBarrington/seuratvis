@@ -52,6 +52,8 @@ available_seurats.server <- function(input, output, session) {
     Environment='environment',
     `Object name`='object',
     `Number of cells`='ncells',
+    `Total UMI`='numi',
+    `Median UMI`='median_umi',
     `Features in active assay`='nfeatures',
     `Filtered?`='filtered',
     `Integrated?`='integrated') -> column_order
@@ -64,6 +66,8 @@ available_seurats.server <- function(input, output, session) {
       data.frame(project=reformat_project_name(Project(x)),
                  environment=if_else(params$env=='globalenv()', 'RGlobal', as.character(params$env)),
                  ncells=ncol(x),
+                 numi=sum(x@meta.data$nCount_RNA),
+                 median_umi=median(x@meta.data$nCount_RNA),
                  nfeatures=nrow(x),
                  dimensions=ifelse(is.null(x@misc$n_dimensions), -1, x@misc$n_dimensions),
                  filtered=!is.null(x@misc$cells_filtered) && x@misc$cells_filtered,
@@ -98,12 +102,22 @@ available_seurats.server <- function(input, output, session) {
                   backgroundSize='98% 50%',
                   backgroundRepeat='no-repeat',
                   backgroundPosition='center') %>%
+      formatStyle(columns='numi',
+                  background=styleColorBar(data=c(0,max(data_to_show$numi)), color='#3CB96A'),
+                  backgroundSize='98% 50%',
+                  backgroundRepeat='no-repeat',
+                  backgroundPosition='center') %>%
+      formatStyle(columns='median_umi',
+                  background=styleColorBar(data=c(0,max(data_to_show$median_umi)), color='#3CB96A'),
+                  backgroundSize='98% 50%',
+                  backgroundRepeat='no-repeat',
+                  backgroundPosition='center') %>%
       formatStyle(columns='nfeatures',
                   background=styleColorBar(data=c(0,max(data_to_show$nfeatures)), color='#3CB96A'),
                   backgroundSize='98% 50%',
                   backgroundRepeat='no-repeat',
                   backgroundPosition='center') %>%
-      formatRound(columns=c('ncells', 'nfeatures'),
+      formatRound(columns=c('ncells', 'numi', 'median_umi', 'nfeatures'),
                   digits=0) %>%
       formatStyle(columns={sapply(data_to_show, class) %>% str_which('logical')},
                   color=styleEqual(levels=c(0,1), values=c('#B96A3C','#B93C8B'), default='orange'),
