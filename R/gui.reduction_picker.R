@@ -81,6 +81,10 @@ reduction_method_picker.server <- function(input, output, session) {
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
+    reductions <- Reductions(seurat)
+
+    if(length(reductions)==0)
+      return(NULL)
 
     # update the ui element(s)
     updateSelectInput(session=session, inputId='reduction_method_picker',
