@@ -54,9 +54,12 @@ available_seurats.server <- function(input, output, session) {
     `Number of cells`='ncells',
     `Total UMI`='numi',
     `Median UMI`='median_umi',
-    `Features in active assay`='nfeatures',
     `Filtered?`='filtered',
-    `Integrated?`='integrated') -> column_order
+    `Integrated?`='integrated',
+    `Active assay`='active_assay',
+    `Other assays`='assays',
+    `Features in active assay`='nfeatures',
+    `Reductions`='reductions') -> column_order
 
   # make the `data.frame` of Seurat information
   server_env$available_seurat_objects %>%
@@ -68,10 +71,13 @@ available_seurats.server <- function(input, output, session) {
                  ncells=ncol(x),
                  numi=sum(x@meta.data$nCount_RNA),
                  median_umi=median(x@meta.data$nCount_RNA),
-                 nfeatures=nrow(x),
                  dimensions=ifelse(is.null(x@misc$n_dimensions), -1, x@misc$n_dimensions),
                  filtered=!is.null(x@misc$cells_filtered) && x@misc$cells_filtered,
-                 integrated=!is.null(x@misc$integrated_dataset) && x@misc$integrated_dataset)}) %>%
+                 integrated=!is.null(x@misc$integrated_dataset) && x@misc$integrated_dataset,
+                 active_assay=DefaultAssay(x),
+                 assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% str_c(collapse=', ')},
+                 nfeatures=nrow(x),
+                 reductions=str_c(Reductions(x), collapse=', '))}) %>%
     mutate(dimensions=as.integer(dimensions),
            object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
