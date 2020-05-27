@@ -181,7 +181,7 @@ shinyAppUI <- function(...) {
   github_link.tab <- menuItem(text=sprintf('GitHub (version: %s)', packageVersion('seuratvis')), href='github.com/ChristopherBarrington/seuratvis', icon=icon('code-branch'), newtab=FALSE)
 
   # header definition
-  logo <- htmltools::HTML("<p style='font-size:26px'><b>seurat</b>vis</p>")
+  logo <- htmltools::HTML("<p style='font-size:26px'>seurat<b>vis</b></p>")
   dashboard_header <- dashboardHeader(title=logo)
 
   # dashboard body definition
