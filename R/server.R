@@ -91,84 +91,10 @@ shinyAppServer <- function(input, output, session) {
   ## load the filter_seurat module
   callModule(module=cell_filtering.server, id='seuratvis')
 
-  ## make knee plot of total expression
-  cell_filtering.total_expression_knee.plot <- reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making total expression knee plot')
 
-    min_value <- filtering_parameters.reactions$total_umi_per_cell_min
-    max_value <- filtering_parameters.reactions$total_umi_per_cell_max
-
-    progress$inc(detail='Making plot')
-    FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
-      set_names('y') %>%
-      arrange(desc(y)) %>%
-      mutate(x=seq(n()),
-             pass=between(x=y, left=min_value, right=max_value)) %>%
-      ggplot()+
-      aes(x=x, y=y, colour=pass)+
-      labs(x='Ranked cells', y='Total UMIs per cell', colour='Cells passing threshold')+
-      geom_hline(yintercept=min_value, size=1) +
-      geom_hline(yintercept=max_value, size=1) +
-      geom_point(alpha=1, shape=16)+
-      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
-      scale_y_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(y) scales::comma(y, accuracy=1))+
-      scale_colour_brewer(palette='Set1', direction=1) +
-      theme_bw()+
-      theme(legend.position='none', legend.title=element_blank())})
-
-  ## make knee plot of unique genes detected
-  cell_filtering.unique_genes_knee.plot <- reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making unique genes detected knee plot')
-
-    min_value <- filtering_parameters.reactions$features_per_cell_min
-    max_value <- filtering_parameters.reactions$features_per_cell_max
-
-    progress$inc(detail='Making plot')
-    FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
-      set_names('y') %>%
-      arrange(desc(y)) %>%
-      mutate(x=seq(n()),
-             pass=between(x=y, left=min_value, right=max_value)) %>%
-      ggplot()+
-      aes(x=x, y=y, colour=pass)+
-      labs(x='Ranked cells', y='Genes detected per cell', colour='Cells passing threshold')+
-      geom_hline(yintercept=min_value, size=1) +
-      geom_hline(yintercept=max_value, size=1) +
-      geom_point(alpha=1, shape=16)+
-      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
-      scale_y_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(y) scales::comma(y, accuracy=1))+
-      scale_colour_brewer(palette='Set1', direction=1) +
-      theme_bw()+
-      theme(legend.position='none', legend.title=element_blank())})
-
-  ## make knee plot of mitochondrial expression
-  cell_filtering.percent_mitochondria_knee.plot <- reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making mitochondrial expression knee plot')
-
-    max_value <- filtering_parameters.reactions$max_percent_mitochondria
-
-    progress$inc(detail='Making plot')
-    # FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
-    seurat_object.reactions$percent_mt %>%
-      set_names('y') %>%
-      arrange(desc(y)) %>%
-      mutate(x=seq(n()),
-             pass=y<=max_value) %>%
-      ggplot()+
-      aes(x=x, y=y, colour=pass)+
-      labs(x='Ranked cells', y='Proportion mitochondrial expression', colour='Cells passing threshold')+
-      geom_hline(yintercept=max_value, size=1) +
-      geom_point(alpha=1, shape=16)+
-      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
-      scale_colour_brewer(palette='Set1', direction=1) +
-      theme_bw()+
-      theme(legend.position='none', legend.title=element_blank())})
+  ## call knee plot modules
+  for(id in module_environments$knee_plots$id)
+    callModule(module=knee_plot.server, id=id)
 
   ## make density plot of total cell expression
   cell_filtering.total_expression_density.plot <- reactive(x={
@@ -570,11 +496,6 @@ shinyAppServer <- function(input, output, session) {
   callModule(module=number_of_cells_text_box.server, id='cell_filtering')
   callModule(module=number_of_reads_per_cell_text_box.server, id='cell_filtering')
   callModule(module=number_of_genes_per_cell_text_box.server, id='cell_filtering')
-
-  ### knee plots
-  renderPlot(cell_filtering.total_expression_knee.plot()) -> output$`cell_filtering-total_expression_knee`
-  renderPlot(cell_filtering.unique_genes_knee.plot()) -> output$`cell_filtering-unique_genes_knee`
-  renderPlot(cell_filtering.percent_mitochondria_knee.plot()) -> output$`cell_filtering-percent_mitochondria_knee`
 
   ### density plots
   renderPlot(cell_filtering.total_expression_density.plot()) -> output$`cell_filtering-total_expression_density`
