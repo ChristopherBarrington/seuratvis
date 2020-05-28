@@ -64,12 +64,11 @@ cluster_resolution_picker.server <- function(input, output, session) {
   observeEvent(eventExpr=input$cluster_resolution_picker, handlerExpr={
     message('### cluster_resolution_picker.server-observeEvent-input$cluster_resolution_picker')
 
+    req(seurat_object.reactions$seurat)
+
     # create variables for shorthand
     r <- input$cluster_resolution_picker
     seurat <- seurat_object.reactions$seurat
-
-    if(is.null(seurat))
-      return(NULL)
 
     # save cluster information in the reactive
     seurat_object.reactions$selected_cluster_resolution <- r
