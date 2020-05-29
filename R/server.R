@@ -91,10 +91,13 @@ shinyAppServer <- function(input, output, session) {
   ## load the filter_seurat module
   callModule(module=cell_filtering.server, id='seuratvis')
 
-
   ## call knee plot modules
   for(id in module_environments$knee_plots$id)
     callModule(module=knee_plot.server, id=id)
+
+  ## call boxplot modules
+  for(id in module_environments$boxplot_plots$id)
+    callModule(module=boxplot_plot.server, id=id)
 
   ## make density plot of total cell expression
   cell_filtering.total_expression_density.plot <- reactive(x={
@@ -146,83 +149,6 @@ shinyAppServer <- function(input, output, session) {
       stat_density(geom='line', trim=TRUE, size=2) +
       theme_bw()+
       theme()})
-
-  ## make boxplot of total cell expression
-  cell_filtering.total_expression_boxplot.plot <- reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making percentage mitochondria boxplot')
-
-    min_y <- filtering_parameters.reactions$total_umi_per_cell_min
-    max_y <- filtering_parameters.reactions$total_umi_per_cell_max
-
-    progress$inc(detail='Making plot')
-    FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
-      set_names('y') %>%
-      ggplot() +
-      aes(x=0, y=y) +
-      labs(y='Total UMI per cell') +
-      geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
-      geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
-      coord_cartesian(xlim=c(-1, 1), ylim=c(min_y, max_y)) +
-      scale_y_continuous(labels=function(y) scales::comma(y, accuracy=1)) +
-      theme_bw()+
-      theme(axis.ticks.length.x=unit(0, 'pt'),
-            axis.text.x=element_text(colour='white'),
-            axis.title.x=element_text(colour='white'),
-            panel.grid.major.x=element_blank(),
-            panel.grid.minor.x=element_blank())})
-
-  ## make boxplot of detected features
-  cell_filtering.unique_genes_boxplot.plot <- reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making percentage mitochondria boxplot')
-
-    min_y <- filtering_parameters.reactions$features_per_cell_min
-    max_y <- filtering_parameters.reactions$features_per_cell_max
-
-    progress$inc(detail='Making plot')
-    FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
-      set_names('y') %>%
-      ggplot() +
-      aes(x=0, y=y) +
-      labs(y='Detected features per cell') +
-      geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
-      geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
-      coord_cartesian(xlim=c(-1, 1), ylim=c(min_y, max_y)) +
-      scale_y_continuous(labels=function(y) scales::comma(y, accuracy=1)) +
-      theme_bw()+
-      theme(axis.ticks.length.x=unit(0, 'pt'),
-            axis.text.x=element_text(colour='white'),
-            axis.title.x=element_text(colour='white'),
-            panel.grid.major.x=element_blank(),
-            panel.grid.minor.x=element_blank())})
-
-  ## make boxplot of mitochondrial expression
-  cell_filtering.percent_mitochondria_boxplot.plot <- reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making percentage mitochondria boxplot')
-
-    max_y <- filtering_parameters.reactions$max_percent_mitochondria
-
-    progress$inc(detail='Making plot')
-    # FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
-    seurat_object.reactions$percent_mt %>%
-      set_names('y') %>%
-      ggplot() +
-      aes(x=0, y=y) +
-      labs(y='Proportion mitochondrial expression') +
-      geom_point(shape=16, size=0.6, colour='lightgrey', alpha=0.6, position=position_jitter(width=0.5)) +
-      geom_boxplot(fill=NA, width=0.4, size=0.9, outlier.size=0.6) +
-      coord_cartesian(xlim=c(-1, 1), ylim=c(0, ceiling(max_y))) +
-      theme_bw()+
-      theme(axis.ticks.length.x=unit(0, 'pt'),
-            axis.text.x=element_text(colour='white'),
-            axis.title.x=element_text(colour='white'),
-            panel.grid.major.x=element_blank(),
-            panel.grid.minor.x=element_blank())})
 
   # ###############################################################################################
   # gene expression tab ---------------------------------------------------------------------------
@@ -501,11 +427,6 @@ shinyAppServer <- function(input, output, session) {
   renderPlot(cell_filtering.total_expression_density.plot()) -> output$`cell_filtering-total_expression_density`
   renderPlot(cell_filtering.unique_features_density.plot()) -> output$`cell_filtering-unique_genes_density`
   renderPlot(cell_filtering.percent_mitochondria_density.plot()) -> output$`cell_filtering-percent_mitochondria_density`
-
-  ### boxplots
-  renderPlot(cell_filtering.total_expression_boxplot.plot()) -> output$`cell_filtering-total_expression_boxplot`
-  renderPlot(cell_filtering.unique_genes_boxplot.plot()) -> output$`cell_filtering-unique_genes_boxplot`
-  renderPlot(cell_filtering.percent_mitochondria_boxplot.plot()) -> output$`cell_filtering-percent_mitochondria_boxplot`
 
   # features heatmap tab
   callModule(project_name_text_box.server, id='features_heatmap')
