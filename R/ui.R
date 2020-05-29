@@ -32,10 +32,10 @@ shinyAppUI <- function(...) {
 
                                thresholds=append(cell_filtering.plot_boxes.defaults,
                                                  list(title='Thresholds', status='primary',
-                                                      column(width=2, total_umi_per_cell_filter.ui('cell_filtering')),
-                                                      column(width=2, features_per_cell_filter.ui('cell_filtering')),
+                                                      column(width=2, total_umi_per_cell_filter.ui(id='cell_filtering')),
+                                                      column(width=2, features_per_cell_filter.ui(id='cell_filtering')),
                                                       column(width=2, percent_mt_per_cell_filter.ui(id='cell_filtering')),
-                                                      column(width=4, show_filtering_parameters.ui('cell_filtering')))) %>%
+                                                      column(width=4, show_filtering_parameters.ui(id='cell_filtering')))) %>%
                                           do.call(what=box))
 
   ### assemble tab content
