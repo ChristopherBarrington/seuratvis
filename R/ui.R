@@ -5,26 +5,24 @@ shinyAppUI <- function(...) {
   ## cell filtering tab
   cell_filtering.tab <- menuItem(text='Cell filtering', tabName='cell_filtering-tab', icon=icon('filter'))
 
-  ### define ui elements
-
   ### define layout boxes
-  cell_filtering.plot_boxes.defaults <- list(solidHeader=TRUE, width=12, collapsible=TRUE, collapsed=TRUE)
+  cell_filtering.plot_boxes.defaults <- list(solidHeader=TRUE, width=12, collapsible=TRUE, collapsed=FALSE)
   cell_filtering.boxes <- list(total_expression=append(cell_filtering.plot_boxes.defaults,
-                                                       list(title='Expression per cell', footer='Total number of reads attributed to a cell', status='success',
+                                                       list(title='UMI per cell', footer='Total UMI attributed to a cell', status='success',
                                                             column(width=2, offset=1, boxplot_plot.ui(id='cell_filtering', feature='nCount_RNA')),
                                                             column(width=3, offset=0, knee_plot.ui(id='cell_filtering', feature='nCount_RNA')),
                                                             column(width=4, offset=1, plotOutput(outputId='cell_filtering-total_expression_density', brush=brushOpts(id='total_expression_density.brush', direction='x')) %>% withSpinner()))) %>%
                                                 do.call(what=box),
 
                                unique_features=append(cell_filtering.plot_boxes.defaults,
-                                                      list(title='Genes per cell', footer='Number of distinct genes detected in a cell', status='success',
+                                                      list(title='Features per cell', footer='Number of distinct features detected in a cell', status='success',
                                                            column(width=2, offset=1, boxplot_plot.ui(id='cell_filtering', feature='nFeature_RNA')),
                                                            column(width=3, offset=0, knee_plot.ui(id='cell_filtering', feature='nFeature_RNA')),
                                                            column(width=4, offset=1, plotOutput(outputId='cell_filtering-unique_genes_density', brush=brushOpts(id='unique_genes_density.brush', direction='x')) %>% withSpinner()))) %>%
                                                do.call(what=box),
 
                                percent_mitochondria=append(cell_filtering.plot_boxes.defaults,
-                                                           list(title='Mitochondrial expression', footer='Proportion of mitochondrial genes detected in a cell', status='success',
+                                                           list(title='Mitochondrial UMI', footer='Proportion of mitochondrial genes detected in a cell', status='success',
                                                                 column(width=2, offset=1, boxplot_plot.ui(id='cell_filtering', feature='percent_mt')),
                                                                 column(width=3, offset=0, knee_plot.ui(id='cell_filtering', feature='percent_mt')),
                                                                 column(width=4, offset=1, plotOutput(outputId='cell_filtering-percent_mitochondria_density', brush=brushOpts(id='percent_mitochondria_density.brush', direction='x')) %>% withSpinner()))) %>%
@@ -50,7 +48,6 @@ shinyAppUI <- function(...) {
                                     fluidRow(cell_filtering.boxes$unique_features),
                                     fluidRow(cell_filtering.boxes$percent_mitochondria),
                                     fluidRow(cell_filtering.boxes$thresholds))
-
 
   ## gene highlighting on map tab
   gene_highlighting.tab <- menuItem(text='Highlight features', tabName='gene_highlighting-tab', icon=icon('search'))

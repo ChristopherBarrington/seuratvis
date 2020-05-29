@@ -8,9 +8,9 @@
 #' @examples
 #' 
 #' \dontrun{
-#' ui <- fluidPage(boxplot.ui(id='page_name', feature='column_name'))
+#' ui <- fluidPage(boxplot_plot.ui(id='page_name', feature='column_name'))
 #' server <- function(input, output, session) {
-#'   callModule(boxknee.server, id='page_name-column_name')
+#'   callModule(boxplot_plot.server, id='page_name-column_name')
 #' }} 
 #' 
 #' @rdname boxplot_plot
