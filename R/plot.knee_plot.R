@@ -16,7 +16,7 @@
 #' @rdname knee_plot
 #' 
 knee_plot.ui <- function(id, feature) {
-  sprintf(fmt='### knee_plot.ui [%s]', id) %>% message()
+  sprintf(fmt='### knee_plot.ui [%s-%s]', id, feature) %>% message()
 
   id %<>% NS(id=feature) # combine the id and feature to allow multiple knee plots per id
   module <- 'knee_plot'
@@ -68,11 +68,11 @@ knee_plot.server <- function(input, output, session) {
                pass=between(x=y, left=min_value, right=max_value)) %>%
         ggplot() +
         aes(x=x, y=y, colour=pass) +
-        labs(y='Total UMIs per cell') +
+        labs(y='Total UMI per cell') +
         geom_hline(yintercept=min_value, size=1) +
         scale_y_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(y) scales::comma(y, accuracy=1)) -> feature_plot
     } else if(module_env$feature=='nFeature_RNA') {
-      # get thresholds of detected fetaures
+      # get thresholds of detected features
       min_value <- filtering_parameters.reactions$features_per_cell_min
       max_value <- filtering_parameters.reactions$features_per_cell_max
       
