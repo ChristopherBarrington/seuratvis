@@ -114,57 +114,8 @@ shinyAppUI <- function(...) {
                                        fluidRow(gene_highlighting.boxes$gene_selector,
                                                 gene_highlighting.boxes$plot_options))
 
-  ## discover markers tab
-  discover_markers.tab <- menuItem(text='Discover markers', tabName='discover_markers-tab', icon=icon('binoculars'), badgeLabel='!', badgeColor='red')
-
-  ### define ui elements
-
-  ### define layout boxes
-
-  ### assemble tab content
-  discover_markers.content <- tabItem(tabName = 'discover_markers-tab',
-                                      h1('Find gene markers for clusters'))
-
-  ## features of interest heatmap tab
-  features_heatmap.tab <- menuItem(text='Features heatmap', tabName='features_heatmap-tab', icon=icon('crosshairs'), badgeLabel='!', badgeColor='red')
-
-  ### define ui elements
-  features_heatmap.features_of_interest.tb <- textAreaInput(inputId='features_of_interest.tb', label='Feature names', value='', width='100%', height='100%', placeholder='A list of gene names separated by whitespace, semicolon or comma')
-  features_heatmap.use_average_value.checkbox <- checkboxInput(inputId='features_heatmap.use_average_value.checkbox', label='Use mean of cells in cluster', value=TRUE)
-  features_heatmap.show_feature_names.checkbox <- checkboxInput(inputId='features_heatmap.show_feature_names.checkbox', label='Show feature names', value=FALSE)
-  features_heatmap.seurat_cluster_set.dropdown <- selectInput(inputId = 'features_heatmap.seurat_cluster_set.dd', label = 'Seurat cluster definitions', choices = 'seurat_clusters', selected = 'seurat_clusters', multiple = FALSE)
-
-  ### define layout boxes
-  features_heatmap.boxes <- list(heatmap_plot=box(title='Heatmap of selected features',
-                                                  footer='Normalised expression of genes in clusters',
-                                                  status='success',
-                                                  solidHeader=TRUE,
-                                                  width=12,
-                                                  collapsible=TRUE,
-                                                  {plotOutput('features_heatmap-heatmap') %>% withSpinner()}),
-                                 features_selector=box(title='Select genes',
-                                                       status='info',
-                                                       solidHeader=TRUE,
-                                                       width=4,
-                                                       collapsible=TRUE,
-                                                       features_heatmap.features_of_interest.tb,
-                                                       features_heatmap.show_feature_names.checkbox,
-                                                       features_heatmap.seurat_cluster_set.dropdown,
-                                                       features_heatmap.use_average_value.checkbox))
-
-  ### assemble tab content
-  features_heatmap.content <-tabItem(tabName='features_heatmap-tab',
-                                    h1('Visualise expression of multiple features in clusters'),
-                                    fluidRow(project_name_text_box.ui(id='features_heatmap', width=12)),
-                                    fluidRow(features_heatmap.boxes$heatmap_plot,
-                                             features_heatmap.boxes$features_selector))
-
   ## submit/configure data tab
   submit_data.tab <- menuItem(text='Configure', tabName='submit_data_tab', icon=icon('cogs'), badgeLabel='!', badgeColor='yellow', selected=TRUE)
-
-  ### define ui elements
-
-  ### define layout boxes
 
   ### assemble tab content
   load_dataset.content <- tabItem(tabName='submit_data_tab',
@@ -193,8 +144,6 @@ shinyAppUI <- function(...) {
   # sidebar definition
   list(cell_filtering.tab,
        gene_highlighting.tab,
-       # discover_markers.tab,
-       # features_heatmap.tab,
        submit_data.tab,
        hr(),
        email_me.tab,
