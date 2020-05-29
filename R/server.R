@@ -342,5 +342,5 @@ shinyAppServer <- function(input, output, session) {
   ## dynamic sidebar outputs can be listed here
 
   # any code to exectue when the session ends
-  session$onSessionEnded(function() {})
+  session$onSessionEnded(function() {message('### session ended')})
 }

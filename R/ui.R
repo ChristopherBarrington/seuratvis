@@ -136,7 +136,6 @@ shinyAppUI <- function(...) {
   css <- 'table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'
   list(cell_filtering.content,
        gene_highlighting.content,
-       features_heatmap.content,
        load_dataset.content) %>%
     do.call(what=tabItems) %>%
     dashboardBody(rclipboardSetup(), tags$head(tags$style(HTML(css)))) -> dashboard_body
