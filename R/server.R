@@ -22,38 +22,6 @@ shinyAppServer <- function(input, output, session) {
   # ###############################################################################################
   # cell filtering tab ----------------------------------------------------------------------------
 
-  ## react to unique features detected density plot brush
-  observeEvent(eventExpr=input$unique_genes_density.brush, handlerExpr={
-    message('### input$unique_genes_density.brush')
-
-    # update module elements
-    low <- floor(input$unique_genes_density.brush$xmin)
-    high <- ceiling(input$unique_genes_density.brush$xmax)
-
-    for(id in module_environments$features_per_cell_filters$id) {
-      updateTextInput(session=session, inputId=NS(id, 'min_features'), value=low)
-      updateTextInput(session=session, inputId=NS(id, 'max_features'), value=high)
-    }
-
-    filtering_parameters.reactions$features_per_cell_min <- low
-    filtering_parameters.reactions$features_per_cell_max <- high})
-
-  ## react to total UMIs density plot brush
-  observeEvent(eventExpr=input$total_expression_density.brush, handlerExpr={
-    message('### input$total_expression_density.brush')
-
-    # update module elements
-    low <- floor(input$total_expression_density.brush$xmin)
-    high <- ceiling(input$total_expression_density.brush$xmax)
-
-    for(id in module_environments$total_umi_per_cell_filters$id) {
-      updateTextInput(session=session, inputId=NS(namespace=id, id='min_umis'), value=low)
-      updateTextInput(session=session, inputId=NS(namespace=id, id='max_umis'), value=high)
-    }
-
-    filtering_parameters.reactions$total_umi_per_cell_min <- low
-    filtering_parameters.reactions$total_umi_per_cell_max <- high})
-
   ## react to total UMI per cell filters
   for(id in module_environments$total_umi_per_cell_filters$id)
     callModule(module=total_umi_per_cell_filter.server, id=id)
@@ -70,23 +38,13 @@ shinyAppServer <- function(input, output, session) {
   for(id in module_environments$show_filtering_parameters$id)
     callModule(module=show_filtering_parameters.server, id=id)
 
-  ## react to percent mitochondria density plot brush
-  observeEvent(eventExpr=input$percent_mitochondria_density.brush, handlerExpr={
-    high <- round(input$percent_mitochondria_density.brush$xmax+0.05, digits=1)
-
-    for(id in module_environments$percent_mt_per_cell_filters$id)
-      updateTextInput(session=session, inputId=NS(namespace=id, id='max_percent_mt'), value=high)
-
-    filtering_parameters.reactions$percent_mt_per_cell_max <- high})
-
   ## react to opening tab with a filtered object loaded
   observeEvent(input$sidebarmenu, {
     if(!is.null(seurat_object.reactions$seurat) & input$sidebarmenu=='cell_filtering-tab' && (!is.null(seurat_object.reactions$seurat@misc$cells_filtered) && seurat_object.reactions$seurat@misc$cells_filtered))
       sendSweetAlert(session=session, type='success', html=TRUE,
                      title='Notice', btn_labels='Great!',
                      text=tags$span('It looks like low-quality cells have already been removed from this Seurat object:', tags$h5(tags$code('@misc$cells_filtered == TRUE'))),
-                     closeOnClickOutside=TRUE, showCloseButton=FALSE)
-  })
+                     closeOnClickOutside=TRUE, showCloseButton=FALSE)})
 
   ## load the filter_seurat module
   callModule(module=cell_filtering.server, id='seuratvis')
@@ -99,56 +57,9 @@ shinyAppServer <- function(input, output, session) {
   for(id in module_environments$boxplot_plots$id)
     callModule(module=boxplot_plot.server, id=id)
 
-  ## make density plot of total cell expression
-  cell_filtering.total_expression_density.plot <- reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making total UMI density plot')
-
-    progress$inc(detail='Making plot')
-    FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
-      set_names('y') %>%
-      ggplot() +
-      aes(x=y) +
-      labs(x='Total UMI per cell', y='Density') +
-      stat_density(geom='line', trim=TRUE, size=2) +
-      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
-      theme_bw()+
-      theme()})
-
-  ## make density plot of detected features
-  cell_filtering.unique_features_density.plot <- reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making detected features density plot')
-
-    progress$inc(detail='Making plot')
-    FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
-      set_names('y') %>%
-      ggplot() +
-      aes(x=y) +
-      labs(x='Detected features per cell', y='Density') +
-      stat_density(geom='line', trim=TRUE, size=2) +
-      scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))+
-      theme_bw()+
-      theme()})
-
-  ## make density plot of mitochondrial expression
-  cell_filtering.percent_mitochondria_density.plot <- reactive(x={
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making percentage mitochondria density plot')
-
-    progress$inc(detail='Making plot')
-    # FetchData(seurat_object.reactions$seurat, 'percent_mt') %>%
-    seurat_object.reactions$percent_mt %>%
-      set_names('y') %>%
-      ggplot() +
-      aes(x=y) +
-      labs(x='Proportion mitochondrial expression', y='Density') +
-      stat_density(geom='line', trim=TRUE, size=2) +
-      theme_bw()+
-      theme()})
+  ## call density plot modules
+  for(id in module_environments$density_plots$id)
+    callModule(module=density_plot.server, id=id)
 
   # ###############################################################################################
   # gene expression tab ---------------------------------------------------------------------------
@@ -422,11 +333,6 @@ shinyAppServer <- function(input, output, session) {
   callModule(module=number_of_cells_text_box.server, id='cell_filtering')
   callModule(module=number_of_reads_per_cell_text_box.server, id='cell_filtering')
   callModule(module=number_of_genes_per_cell_text_box.server, id='cell_filtering')
-
-  ### density plots
-  renderPlot(cell_filtering.total_expression_density.plot()) -> output$`cell_filtering-total_expression_density`
-  renderPlot(cell_filtering.unique_features_density.plot()) -> output$`cell_filtering-unique_genes_density`
-  renderPlot(cell_filtering.percent_mitochondria_density.plot()) -> output$`cell_filtering-percent_mitochondria_density`
 
   # features heatmap tab
   callModule(project_name_text_box.server, id='features_heatmap')
