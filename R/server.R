@@ -93,77 +93,9 @@ shinyAppServer <- function(input, output, session) {
   for(id in module_environments$point_size_sliders$id)
     callModule(module=point_size_slider.server, id=id)
 
-  ## gene highlighting
-  # genes_highlighting.reactions <- reactiveValues(data=NULL, expression_map=NULL, cluster_expression=NULL, expression_map.running=0, cluster_expression.running=0)
-
-  ## make map coloured by clusters
-  genes_highlighting.clustered_map.plot <- reactive({
-    progress <- shiny::Progress$new(session=session, min=0, max=if_else(seurat_object.reactions$label_clusters, 4, 2)/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making cell clusters map')
-
-    cluster_set <- sprintf('~%s', seurat_object.reactions$selected_cluster_resolution)
-
-    progress$inc(detail='Making plot')
-    cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_cluster_resolution_idents) %>%
-      ggplot() +
-      aes(x=DIMRED_1, y=DIMRED_2, colour=ident) +
-      geom_hline(yintercept=0) + geom_vline(xintercept=0) +
-      geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
-      theme_void() +
-      theme(legend.position='none') -> output_plot
-
-    if(seurat_object.reactions$label_clusters) {
-      progress$inc(detail='Getting cluster label positions')
-
-      cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_cluster_resolution_idents) %>%
-        group_by(ident) %>%
-        summarise(DIMRED_1=mean(DIMRED_1), DIMRED_2=mean(DIMRED_2)) -> data_labels
-
-      progress$inc(detail='Adding cluster labels')
-      output_plot +
-        ggrepel::geom_label_repel(data=data_labels,
-                                  mapping=aes(label=ident),
-                                  colour='black',
-                                  size=12/(14/5)) -> output_plot
-    }
-
-    progress$inc(detail='Returning plot')
-    output_plot})
-
-  ## make map coloured by expression
-  genes_highlighting.gene_expression_map.plot <- reactive({
-    progress <- shiny::Progress$new(session=session, min=0, max=1/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making expression per cluster plot')
-
-    # update_slider()
-    progress$inc(detail='Making plot')
-    cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_feature_values) %>%
-      rename(expression_value=value) -> data
-
-    if(is.numeric(data$expression_value)) {
-    data %>%
-      arrange(expression_value) %>%
-      ggplot() +
-      aes(x=DIMRED_1, y=DIMRED_2, colour=expression_value) +
-      geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
-      scale_colour_gradient(low=input$`gene_highlighting-colour_palette-low`, high=input$`gene_highlighting-colour_palette-high`, limits=seurat_object.reactions$value_range_limits, oob=scales::squish) +
-      # scale_colour_gradient(low=input$`gene_highlighting-colour_palette-low`, high=input$`gene_highlighting-colour_palette-high`, limits=input$expression_range.slider, oob=scales::squish) +
-      theme_void() +
-      theme(legend.position='none') + labs(title=seurat_object.reactions$picked_feature)
-    } else {
-    data %>%
-      arrange(expression_value) %>%
-      ggplot() +
-      aes(x=DIMRED_1, y=DIMRED_2, colour=expression_value) +
-      geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
-      # scale_colour_gradient(low=input$expression_min.colour, high=input$expression_max.colour, limits=input$expression_range.slider, oob=scales::squish) +
-      facet_wrap(~expression_value, scales='free') +
-      guides(colour=guide_legend(override.aes=list(size=3, shape=15))) +
-      theme_void() +
-      theme(legend.position='bottom', legend.title=element_blank()) + labs(title=seurat_object.reactions$picked_feature)
-    }})
+  ## call reduced dimensionality plot modules
+  for(id in module_environments$reduced_dimension_plots$id)
+    callModule(module=reduced_dimension_plot.server, id=id)
 
   ## plot expression ranges per cluster
   genes_highlighting.expression_per_cluster.plot <- reactive({
@@ -211,7 +143,6 @@ shinyAppServer <- function(input, output, session) {
   progress$inc(detail='Returning plots to Shiny')
 
   ## highlighting genes tab
-  # renderPlotly({plot_ly(z=~volcano) %>% add_surface()}) -> output$`genes_highlighting-expression_per_cluster`
 
   callModule(module=project_name_text_box.server, id='gene_highlighting')
   callModule(module=number_of_cells_text_box.server, id='gene_highlighting')
@@ -222,21 +153,15 @@ shinyAppServer <- function(input, output, session) {
   callModule(module=number_of_reads_per_cell_text_box.server, id='gene_highlighting')
   callModule(module=number_of_genes_per_cell_text_box.server, id='gene_highlighting')
 
-  renderPlot(genes_highlighting.clustered_map.plot()) -> output$`genes_highlighting-clustered_map`
-  renderPlot(genes_highlighting.gene_expression_map.plot()) -> output$`genes_highlighting-gene_expression_map`
   renderPlot(genes_highlighting.expression_per_cluster.plot()) -> output$`genes_highlighting-expression_per_cluster`
 
   ## cell filtering tab
-  ### statistics boxes
+
   callModule(module=project_name_text_box.server, id='cell_filtering')
   callModule(module=number_of_reads_text_box.server, id='cell_filtering')
   callModule(module=number_of_cells_text_box.server, id='cell_filtering')
   callModule(module=number_of_reads_per_cell_text_box.server, id='cell_filtering')
   callModule(module=number_of_genes_per_cell_text_box.server, id='cell_filtering')
-
-  # features heatmap tab
-  callModule(project_name_text_box.server, id='features_heatmap')
-  renderPlot(features_heatmap.heatmap.plot()) -> output$`features_heatmap-heatmap`
 
   # sidebar
   ## dynamic sidebar outputs can be listed here
