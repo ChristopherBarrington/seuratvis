@@ -72,13 +72,15 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
-    high <- max(seurat@meta.data$percent_mt) %>% add(0.05) %>% round(digits=1)
+    var <- module_env$target_var
+    values <- FetchData(object=seurat, vars=var) %>% set_names('percent_mt')
+    high <- max(values$percent_mt) %>% add(0.05) %>% round(digits=1)
 
     # update the ui element(s)
     updateNumericInput(session=session, inputId='max_percent_mt', value=high, min=0, max=high)
 
     # update the reactive
     seurat_object.reactions$percent_mt_per_cell_max <- high
-    seurat_object.reactions$percent_mt_target_var <- module_env$target_var
-    seurat_object.reactions$percent_mt <- FetchData(object=seurat, vars=module_env$target_var) %>% set_names('percent_mt')})
+    seurat_object.reactions$percent_mt_target_var <- var
+    seurat_object.reactions$percent_mt <- values %>% set_names('percent_mt')})
 }
