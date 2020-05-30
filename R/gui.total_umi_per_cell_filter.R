@@ -32,10 +32,9 @@ total_umi_per_cell_filter.ui <- function(id, label='UMIs per cell', low=TRUE, hi
   e$high <- high
   assign(x=module_ns, val=e, envir=module_environments)
 
-  module_environments$total_umi_per_cell_filters$ns %<>% c(module_ns)
-  module_environments$total_umi_per_cell_filters$id %<>% c(id)
 
   # record the server(s) to call
+  module_environments$total_umi_per_cell_filters$id %<>% c(id) # keep track so other modules can update
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # make ui elements

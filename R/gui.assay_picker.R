@@ -30,6 +30,7 @@ assay_picker.ui <- function(id, label='Assay') {
   assign(x=module_ns, val=e, envir=module_environments)
 
   # record the server(s) to call
+  module_environments$assay_pickers$ns %<>% c(module_ns) # keep track so other modules can update
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # make a drop down selector element
