@@ -16,6 +16,8 @@
 #'   callModule(module=load_a_seurat.server, id='page_name')
 #' }}
 #' 
+#' @import DT
+#' 
 #' @rdname available_seurats
 #' 
 available_seurats.ui <- function(id) {
@@ -24,18 +26,27 @@ available_seurats.ui <- function(id) {
   module <- 'available_seurats'
 
   # make unique id for this object
-  ns <- NS(namespace=id, id=module)
+  ns <- NS(namespace=id)
+  module_ns <- ns(id=module)
 
   # create an environment in the seuratvis namespace
   e <- new.env()
   e$id <- id
-  assign(x=ns, val=e, envir=module_environments)
+  assign(x=module_ns, val=e, envir=module_environments)
 
   # record the server(s) to call
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', c('available_seurats', 'load_a_seurat'))) %>% assign(env=module_servers_to_call, x=id)
 
+  # make ui elements to pick columns to use
+  selectizeInput_defaults <- list(choices=NULL, selected=NULL, multiple=FALSE)
+  list(inputId=ns(id='n_features_picker'), label='Features') %>% modifyList(x=selectizeInput_defaults) %>% do.call(what=selectizeInput) -> n_features_picker
+  list(inputId=ns(id='n_umi_picker'), label='UMI') %>% modifyList(x=selectizeInput_defaults) %>% do.call(what=selectizeInput) -> n_umi_picker
+  list(inputId=ns(id='percent_mt_picker'), label='Mitochondrial proportion') %>% modifyList(x=selectizeInput_defaults) %>% do.call(what=selectizeInput) -> percent_mt_picker
+
   # return ui element(s)
-  DT::dataTableOutput(outputId=ns)
+  tagList(DTOutput(outputId=ns(id='seurats_table')), tags$h3('Configure metadata columns'),
+          column(width=6, splitLayout(n_features_picker, n_umi_picker, percent_mt_picker),
+          tags$head(tags$style(HTML(".shiny-split-layout > div {overflow: visible; }")))))
 }
 
 #' Render the table of Seurat object and their metadata
@@ -108,7 +119,7 @@ available_seurats.server <- function(input, output, session) {
                     style='bootstrap4',
                     class='stripe',
                     selection=list(mode='single',
-                                   selected=input$available_seurats_rows_selected)) %>%
+                                   selected=input$seurats_table_rows_selected)) %>%
       formatStyle(columns='ncells',
                   background=styleColorBar(data=c(0,max(data_to_show$ncells)), color='#3CB96A'),
                   backgroundSize='98% 50%',
@@ -137,7 +148,7 @@ available_seurats.server <- function(input, output, session) {
       formatStyle(columns={sapply(data_to_show, class) %>% str_which('logical')},
                   color=styleEqual(levels=c(0,1), values=c('#B96A3C','#B93C8B'), default='orange'),
                   fontFamily='monospace',
-                  fontWeight='bold')}) -> output$available_seurats
+                  fontWeight='bold')}) -> output$seurats_table
 }
 
 #' Load a seurat object into a reactive
@@ -149,15 +160,15 @@ load_a_seurat.server <- function(input, output, session) {
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='available_seurats') # provides `seuratvis_env`, `server_env` and `module_env`
-  session <- get(x='session', env=server_env)
+  server_session <- get(x='session', env=server_env)
 
   # react to a row being selected in the available Seurats table
-  observeEvent(eventExpr=input$available_seurats_rows_selected, handlerExpr={
-    if(is.null(input$available_seurats_rows_selected))
+  observeEvent(eventExpr=input$seurats_table_rows_selected, handlerExpr={
+    if(is.null(input$seurats_table_rows_selected))
       return(NULL)
 
     # row number is saved in the `input` so get the expression to `get` the object from the initial search table
-    input_seurat_expr <- server_env$available_seurat_objects %>% pluck('choiceValue') %>% pluck(input$available_seurats_rows_selected)
+    input_seurat_expr <- server_env$available_seurat_objects %>% pluck('choiceValue') %>% pluck(input$seurats_table_rows_selected)
 
     progress <- shiny::Progress$new(session=session, min=0, max=9/10)
     on.exit(progress$close())
@@ -203,12 +214,45 @@ load_a_seurat.server <- function(input, output, session) {
     available_assays <- Assays(seurat)
     available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
 
-   # copy the important stuff into the reaction values
+    # copy the important stuff into the reaction values
     seurat_object.reactions$active_object_expr <- input_seurat_expr
     seurat_object.reactions$seurat <- seurat
     seurat_object.reactions$mart <- seurat@misc$mart
     seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
     seurat_object.reactions$cell_metadata <- seurat@meta.data
+
+    # update ui elements
+    ## get the numeric metadata variables
+    sapply(seurat@meta.data, is.numeric) %>% subset(x=colnames(seurat@meta.data)) -> choices
+
+    ## guess a default choice
+    n_features_picker_default <- preferred_choice(x=choices, preferences='nFeature_RNA')
+    n_umi_picker_default <- preferred_choice(x=choices, preferences='nCount_RNA')
+    percent_mt_picker_default <- preferred_choice(x=choices, preferences=c('percent.mt', 'percent_mt'))
+
+    ## define the choices and default in the input ui elements
+    updateSelectizeInput(session=session, inputId='n_features_picker', choices=choices, selected=n_features_picker_default)
+    updateSelectizeInput(session=session, inputId='n_umi_picker', choices=choices, selected=n_umi_picker_default)
+    updateSelectizeInput(session=session, inputId='percent_mt_picker', choices=choices, selected=percent_mt_picker_default)
   })
+
+  # react when the configuration options are changed
+  ## react to the percent mitochondria column being set
+  observeEvent(eventExpr=input$percent_mt_picker, handlerExpr={
+    req(seurat_object.reactions$seurat)
+    sprintf('!!! load_a_seurat.server-observeEvent-input$percent_mt_picker [%s]', input$percent_mt_picker) %>% message()
+    seurat_configuration.reactions$percent_mt_variable <- input$percent_mt_picker})
+  
+  ## react to the number of features per cell column being set
+  observeEvent(eventExpr=input$n_features_picker, handlerExpr={
+    req(seurat_object.reactions$seurat)
+    sprintf('!!! load_a_seurat.server-observeEvent-input$n_features_picker [%s]', input$n_features_picker) %>% message()
+    seurat_configuration.reactions$n_features_variable <- input$n_features_picker})
+  
+  ## react to the number of UMI column being set
+  observeEvent(eventExpr=input$n_umi_picker, handlerExpr={
+    req(seurat_object.reactions$seurat)
+    sprintf('!!! load_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message()
+    seurat_configuration.reactions$n_umi_variable <- input$n_umi_picker})
 }
