@@ -122,9 +122,9 @@ shinyAppUI <- function(...) {
                                   available_seurats.ui(id='load_dataset'))
 
   ## menu tab hyperlinks
-  email_me.tab <- menuItem(text='mail me', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] Hello there', icon=icon('comment-dots'), newtab=FALSE)
-  bug_report.tab <- menuItem(text='report a bug', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] I found a bug!', icon=icon('bug'), newtab=FALSE)
-  feature_request.tab <- menuItem(text='suggest a feature', href='mailto:christopher.barrington@crick.ac.uk?subject=[seurat-vis] It would be cool if...', icon=icon('lightbulb'), newtab=FALSE)
+  email_me.tab <- menuItem(text='mail me', href='mailto:christopher.barrington@crick.ac.uk?subject=[seuratvis] Hello there', icon=icon('comment-dots'), newtab=FALSE)
+  bug_report.tab <- menuItem(text='report a bug', href='mailto:christopher.barrington@crick.ac.uk?subject=[seuratvis] I found a bug!', icon=icon('bug'), newtab=FALSE)
+  feature_request.tab <- menuItem(text='suggest a feature', href='mailto:christopher.barrington@crick.ac.uk?subject=[seuratvis] It would be cool if...', icon=icon('lightbulb'), newtab=FALSE)
   github_link.tab <- menuItem(text=sprintf('GitHub (version: %s)', packageVersion('seuratvis')), href='github.com/ChristopherBarrington/seuratvis', icon=icon('code-branch'), newtab=FALSE)
 
   # header definition
