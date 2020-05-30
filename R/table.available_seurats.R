@@ -31,6 +31,9 @@ available_seurats.ui <- function(id) {
   e$id <- id
   assign(x=ns, val=e, envir=module_environments)
 
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', c('available_seurats', 'load_a_seurat'))) %>% assign(env=module_servers_to_call, x=id)
+
   # return ui element(s)
   DT::dataTableOutput(outputId=ns)
 }

@@ -14,8 +14,15 @@
 #' 
 #' @rdname project_name_text_box
 #' 
-project_name_text_box.ui <- function(id, width=12)
-  valueBoxOutput(outputId=NS(namespace=id, id='project_name'), width=width)
+project_name_text_box.ui <- function(id, width=12) {
+  module <- 'project_name_text_box'
+
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
+
+  # return ui element(s)
+  valueBoxOutput(outputId=NS(namespace=id, id=module), width=width)
+}
 
 #' @rdname project_name_text_box
 #' 
@@ -25,7 +32,7 @@ project_name_text_box.server <- function(input, output, session) {
          subtitle='Loaded Seurat object',
          icon=icon('certificate')) %>%
     modifyList(x=text_box_defaults()) %>%
-    do.call(what=valueBox)}) -> output$project_name
+    do.call(what=valueBox)}) -> output$project_name_text_box
 }
 
 reformat_project_name <- function(x)

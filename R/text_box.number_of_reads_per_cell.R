@@ -16,7 +16,7 @@
 #' @rdname number_of_reads_per_cell_text_box
 #' 
 number_of_reads_per_cell_text_box.ui <- function(id, width=12, f=median, f_name=deparse(substitute(f))) {
-  module <- 'number_of_reads_per_cell'
+  module <- 'number_of_reads_per_cell_text_box'
 
   # make unique id for this object
   ns <- NS(namespace=id, id=module)
@@ -28,6 +28,9 @@ number_of_reads_per_cell_text_box.ui <- function(id, width=12, f=median, f_name=
   e$summary_function_name <- f_name
   assign(x=ns, val=e, envir=module_environments)
 
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
+
   # return ui element(s)
   valueBoxOutput(outputId=ns, width=width)
 }
@@ -36,7 +39,7 @@ number_of_reads_per_cell_text_box.ui <- function(id, width=12, f=median, f_name=
 #' 
 number_of_reads_per_cell_text_box.server <- function(input, output, session) {
   # get environments containing variables to run/configure this object
-  collect_environments(id=parent.frame()$id, module='number_of_reads_per_cell') # provides `seuratvis_env`, `server_env` and `module_env`
+  collect_environments(id=parent.frame()$id, module='number_of_reads_per_cell_text_box') # provides `seuratvis_env`, `server_env` and `module_env`
 
   # make the text box
   renderValueBox(expr={
@@ -54,5 +57,5 @@ number_of_reads_per_cell_text_box.server <- function(input, output, session) {
          subtitle=subtitle,
          icon=icon('frog')) %>%
       modifyList(x=seuratvis:::text_box_defaults()) %>%
-      do.call(what=valueBox)}) -> output$number_of_reads_per_cell
+      do.call(what=valueBox)}) -> output$number_of_reads_per_cell_text_box
 }

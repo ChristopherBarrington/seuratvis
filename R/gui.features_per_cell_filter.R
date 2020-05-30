@@ -35,6 +35,9 @@ features_per_cell_filter.ui <- function(id, label='Features per cell', low=TRUE,
   module_environments$features_per_cell_filters$ns %<>% c(module_ns)
   module_environments$features_per_cell_filters$id %<>% c(id)
 
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
+
   # make ui elements
   low_ui <- high_ui <- NULL
 

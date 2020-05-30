@@ -15,7 +15,7 @@
 #' @rdname number_of_clusters_text_box
 #' 
 number_of_clusters_text_box.ui <- function(id, width=12) {
-  module <- 'number_of_clusters'
+  module <- 'number_of_clusters_text_box'
 
   # make unique id for this object
   ns <- NS(namespace=id, id=module)
@@ -24,7 +24,10 @@ number_of_clusters_text_box.ui <- function(id, width=12) {
   e <- new.env()
   e$id <- id
   assign(x=ns, val=e, envir=module_environments)
-  
+
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
+
   # return ui element(s)
   valueBoxOutput(outputId=ns, width=width)
 }
@@ -33,7 +36,7 @@ number_of_clusters_text_box.ui <- function(id, width=12) {
 #' 
 number_of_clusters_text_box.server <- function(input, output, session) {
   # get environments containing variables to run/configure this object
-  collect_environments(id=parent.frame()$id, module='number_of_clusters') # provides `seuratvis_env`, `server_env` and `module_env`
+  collect_environments(id=parent.frame()$id, module='number_of_clusters_text_box') # provides `seuratvis_env`, `server_env` and `module_env`
   # input <- get(x='input', envir=server_env)
 
   # make the text box
@@ -47,5 +50,5 @@ number_of_clusters_text_box.server <- function(input, output, session) {
          subtitle=subtitle,
          icon=icon('first-order')) %>%
       modifyList(x=seuratvis:::text_box_defaults()) %>%
-      do.call(what=valueBox)}) -> output$number_of_clusters
+      do.call(what=valueBox)}) -> output$number_of_clusters_text_box
 }

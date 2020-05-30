@@ -31,8 +31,8 @@ knee_plot.ui <- function(id, feature) {
   e$feature <- feature
   assign(x=module_ns, val=e, envir=module_environments)
 
-  module_environments$knee_plots$ns %<>% c(module_ns)
-  module_environments$knee_plots$id %<>% c(id)
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # return ui element(s)
   plotOutput(outputId=ns(id='knee_plot')) %>% withSpinner()

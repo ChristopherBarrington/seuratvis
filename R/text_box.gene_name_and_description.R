@@ -9,21 +9,26 @@
 #' @examples
 #' 
 #' \dontrun{
-#' ui <- fluidPage(gene_name_and_description_text_box.ui(id='page_name'))
-#' server <- function(input, output, session) callModule(gene_name_and_description_text_box.server, id='page_name')}
+#' ui <- fluidPage(picked_feature_and_description_text_box.ui(id='page_name'))
+#' server <- function(input, output, session) callModule(picked_feature_and_description_text_box.server, id='page_name')}
 #' 
-#' @rdname gene_name_and_description_text_box
+#' @rdname picked_feature_and_description_text_box
 #' 
-gene_name_and_description_text_box.ui <- function(id, width=12) {
-  message('### gene_name_and_description_text_box.server')
+picked_feature_and_description_text_box.ui <- function(id, width=12) {
+  module <- 'picked_feature_and_description_text_box'
+
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
+
+  # return ui element(s)
   valueBoxOutput(outputId=NS(namespace=id, id='picked_feature_and_description'), width=width)
 }
 
-#' @rdname gene_name_and_description_text_box
+#' @rdname picked_feature_and_description_text_box
 #' 
-gene_name_and_description_text_box.server <- function(input, output, session) {
+picked_feature_and_description_text_box.server <- function(input, output, session) {
   renderValueBox(env=parent.frame(n=2), quoted=FALSE, expr={
-    message('### gene_name_and_description_text_box.server')
+    message('### picked_feature_and_description_text_box.server')
 
     # create variables for shorthand
     picked_feature <- seurat_object.reactions$picked_feature

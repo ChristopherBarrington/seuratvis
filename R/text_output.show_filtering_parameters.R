@@ -30,8 +30,11 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
   e$id <- id
   assign(x=module_ns, val=e, envir=module_environments)
 
-  module_environments$show_filtering_parameters$ns %<>% c(module_ns)
-  module_environments$show_filtering_parameters$id %<>% c(id)
+  # module_environments$show_filtering_parameters$ns %<>% c(module_ns)
+  # module_environments$show_filtering_parameters$id %<>% c(id)
+
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # make ui elements
   ## if a label switch is required, make one

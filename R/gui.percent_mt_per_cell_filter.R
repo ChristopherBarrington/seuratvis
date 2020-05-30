@@ -34,6 +34,9 @@ percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt', target_var=
   module_environments$percent_mt_per_cell_filters$ns %<>% c(module_ns)
   module_environments$percent_mt_per_cell_filters$id %<>% c(id)
 
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
+
   # make ui elements
   div(tags$h6('Maximum', style='display: inline;'),
     numericInput(inputId=ns('max_percent_mt'), label=NULL, value=0, step=0.1, width='100%')) -> high_ui

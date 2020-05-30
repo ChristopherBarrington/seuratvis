@@ -29,8 +29,8 @@ assay_picker.ui <- function(id, label='Assay') {
   e$id <- id
   assign(x=module_ns, val=e, envir=module_environments)
 
-  module_environments$assay_pickers$ns %<>% c(module_ns)
-  module_environments$assay_pickers$id %<>% c(id)
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # make a drop down selector element
   selectInput(inputId=ns(id='assay_picker'), label=label,

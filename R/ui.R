@@ -100,7 +100,7 @@ shinyAppUI <- function(...) {
   gene_highlighting.content <- tabItem(tabName='gene_highlighting-tab',
                                        h1('Highlight cell features on the map'),
                                        fluidRow(project_name_text_box.ui(id='gene_highlighting', width=5),
-                                                gene_name_and_description_text_box.ui(id='gene_highlighting', width=7)),
+                                                picked_feature_and_description_text_box.ui(id='gene_highlighting', width=7)),
                                        fluidRow(number_of_reads_text_box.ui(id='gene_highlighting', width=2),
                                                 number_of_clusters_text_box.ui(id='gene_highlighting', width=2),
                                                 number_of_cells_text_box.ui(id='gene_highlighting', width=2),

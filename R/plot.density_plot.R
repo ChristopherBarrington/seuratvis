@@ -31,8 +31,8 @@ density_plot.ui <- function(id, feature) {
   e$feature <- feature
   assign(x=module_ns, val=e, envir=module_environments)
 
-  module_environments$density_plots$ns %<>% c(module_ns)
-  module_environments$density_plots$id %<>% c(id)
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # return ui element(s)
   plotOutput(outputId=ns(id='density_plot'), brush=brushOpts(id=ns('brush'), direction='x')) %>% withSpinner()
@@ -95,7 +95,7 @@ density_plot.server <- function(input, output, session) {
 
   # react to the brush
   observeEvent(eventExpr=input$brush, handlerExpr={
-    sprintf(fmt='!!! density_plot.server-observeEvent-input$brush [%s]', id) %>% message()
+    sprintf(fmt='### density_plot.server-observeEvent-input$brush [%s]', id) %>% message()
 
     # update feature-specific reactives and ui elements
     if(module_env$feature=='nFeature_RNA') {

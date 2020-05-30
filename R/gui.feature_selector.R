@@ -30,8 +30,8 @@ feature_picker.ui <- function(id, label='Feature selection', include_metadata_sw
   e$include_metadata_switch <- include_metadata_switch
   assign(x=module_ns, val=e, envir=module_environments)
 
-  module_environments$feature_pickers$ns %<>% c(module_ns)
-  module_environments$feature_pickers$id %<>% c(id)
+  # record the server(s) to call
+  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # make ui elements
   ## if a label switch is required, make one
