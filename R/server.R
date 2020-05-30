@@ -7,6 +7,7 @@ module_servers_to_call <- new.env()
 seurat_object.reactions <- reactiveValues()
 filtering_parameters.reactions <- reactiveValues()
 filtered_cells.reactions <- reactiveValues()
+seurat_configuration.reactions <- reactiveValues()
 
 shinyAppServer <- function(input, output, session) {
 
