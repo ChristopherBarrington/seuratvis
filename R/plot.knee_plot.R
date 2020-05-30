@@ -10,7 +10,7 @@
 #' \dontrun{
 #' ui <- fluidPage(knee_plot.ui(id='page_name', feature='column_name'))
 #' server <- function(input, output, session) {
-#'   callModule(plot_knee.server, id='page_name-column_name')
+#'   callModule(knee_plot.server, id='page_name-column_name')
 #' }} 
 #' 
 #' @rdname knee_plot
