@@ -34,8 +34,7 @@ The package expects the current workspace to contain:
   * it will not be happy if there is not at least one!
 
 ```r
-library(seuratvis)
-launchApp()
+seuratvis()
 ```
 
 The app should now open a new window.
