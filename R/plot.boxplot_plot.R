@@ -28,7 +28,7 @@ boxplot_plot.ui <- function(id, feature) {
   # create an environment in the seuratvis namespace
   e <- new.env()
   e$id <- id
-  e$feature <- feature
+  e$feature <- feature # so we can plot the correct plot in the server
   assign(x=module_ns, val=e, envir=module_environments)
 
   # record the server(s) to call
