@@ -75,7 +75,7 @@ shinyAppUI <- function(...) {
                                                              solidHeader=TRUE,
                                                              width=4,
                                                              collapsible=TRUE,
-                                                             {plotOutput('genes_highlighting-expression_per_cluster') %>% withSpinner()}),
+                                                             feature_values_per_cluster_plot.ui(id='gene_highlighting')),
                                   gene_selector=box(title='Select feature',
                                                     status='primary',
                                                     solidHeader=TRUE,

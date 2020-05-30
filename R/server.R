@@ -97,46 +97,9 @@ shinyAppServer <- function(input, output, session) {
   for(id in module_environments$reduced_dimension_plots$id)
     callModule(module=reduced_dimension_plot.server, id=id)
 
-  ## plot expression ranges per cluster
-  genes_highlighting.expression_per_cluster.plot <- reactive({
-    progress <- shiny::Progress$new(session=session, min=0, max=3/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Making expression per cluster plot')
-
-    # update_slider()
-    progress$inc(detail='Fetching data')
-    cbind(seurat_object.reactions$picked_cluster_resolution_idents, seurat_object.reactions$picked_feature_values) %>%
-      rename(cluster_id=ident, expression_value=value) -> data
-
-    if(is.numeric(data$expression_value)) {
-      progress$inc(detail='Summarising expression in clusters')
-      data %>%
-        # filter(expression_value>0) %>%
-        group_by(cluster_id) %>%
-        summarise(q25=quantile(expression_value, 0.25), q75=quantile(expression_value, 0.75), median=median(expression_value)) %>%
-        mutate(iqr=q75-q25, lower=q25-1.5*iqr, upper=q75+1.5*iqr) -> cluster_data_summary
-
-      progress$inc(detail='Making plot')
-      cluster_data_summary %>%
-        gather(key='key', value='y', lower, upper) %>%
-        mutate(x={as.character(cluster_id) %>% as.numeric()}) %>%
-        ggplot() +
-        aes(x=x, y=y, colour=cluster_id) +
-        labs(x='Cluster identifier', y='Feature value (median ± 1.5x IQR)') +
-        geom_line(size=1) +
-        geom_point(mapping=aes(y=median), colour='black', shape=20, size=3) +
-        theme_bw() +
-        theme(legend.position='none', panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())
-    } else {
-      data %>%
-        mutate(x={as.character(cluster_id) %>% as.numeric()}) %>%
-        ggplot() +
-        aes(x=x, fill=expression_value) +
-        labs(x='Cluster identifier', y='Frequency') +
-        geom_bar(position='dodge') +
-        theme_bw() +
-        theme(legend.position='none', panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())
-    }})
+  ## call feature values per cluster plot modules
+  for(id in module_environments$feature_values_per_cluster_plots$id)
+    callModule(module=feature_values_per_cluster_plot.server, id=id)
 
   # ###############################################################################################
   # return plots to shiny -------------------------------------------------------------------------
@@ -152,8 +115,6 @@ shinyAppServer <- function(input, output, session) {
   callModule(module=number_of_genes_in_assay_text_box.server, id='gene_highlighting')
   callModule(module=number_of_reads_per_cell_text_box.server, id='gene_highlighting')
   callModule(module=number_of_genes_per_cell_text_box.server, id='gene_highlighting')
-
-  renderPlot(genes_highlighting.expression_per_cluster.plot()) -> output$`genes_highlighting-expression_per_cluster`
 
   ## cell filtering tab
 
