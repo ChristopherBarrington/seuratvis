@@ -40,7 +40,7 @@ feature_values_per_cluster_plot.ui <- function(id) {
 #' @rdname feature_values_per_cluster_plot
 #'
 feature_values_per_cluster_plot.server <- function(input, output, session) {
-  message('!!! feature_values_per_cluster_plot.server')
+  message('### feature_values_per_cluster_plot.server')
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='feature_values_per_cluster_plot') # provides `seuratvis_env`, `server_env` and `module_env`
