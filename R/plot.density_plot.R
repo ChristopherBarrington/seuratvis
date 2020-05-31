@@ -142,11 +142,16 @@ density_plot.server <- function(input, output, session) {
 
   # reset the brush when n features variable is changed
   observeEvent(eventExpr=seurat_configuration.reactions$reset_n_features, handlerExpr={
-    sprintf(fmt='### density_plot.server-observeEvent-seurat_configuration.reactions$reset_n_features [%s]', id) %>% message()
-    session_server$resetBrush('brush')})
+    sprintf(fmt='~~~ density_plot.server-observeEvent-seurat_configuration.reactions$reset_n_features [%s]', id) %>% message()
+    session$resetBrush(NS(namespace=id, id= 'brush'))})
 
   # reset the brush when n umi variable is changed
   observeEvent(eventExpr=seurat_configuration.reactions$reset_n_umi, handlerExpr={
-    sprintf(fmt='### density_plot.server-observeEvent-seurat_configuration.reactions$reset_n_umi [%s]', id) %>% message()
-    session_server$resetBrush('brush')})
+    sprintf(fmt='!!! density_plot.server-observeEvent-seurat_configuration.reactions$reset_n_umi [%s]', id) %>% message()
+    session$resetBrush(NS(namespace=id, id='brush'))
+
+  # reset the brush when n umi variable is changed
+  observeEvent(eventExpr=seurat_configuration.reactions$reset_proportion_mt, handlerExpr={
+    sprintf(fmt='!!! density_plot.server-observeEvent-seurat_configuration.reactions$reset_proportion_mt [%s]', id) %>% message()
+    session$resetBrush(NS(namespace=id, id='brush'))})
 }

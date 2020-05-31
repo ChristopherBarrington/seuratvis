@@ -249,11 +249,8 @@ load_a_seurat.server <- function(input, output, session) {
     values <- FetchData(object=seurat, vars=var) %>% set_names('proportion_mt')
     high <- max(values$proportion_mt)
 
-    # update the ui element(s)
-    ## reset any and all density brushes
-    #! TODO can this be made specific to the proportion mt brushes?
-    for(id in module_environments$density_plots$id)
-      NS(namespace=id, id='brush') %>% session_server$resetBrush()
+    # trigger update of the ui element(s)
+    seurat_configuration.reactions$reset_proportion_mt <- rnorm(1)
 
     # update the reactive
     seurat_object.reactions$proportion_mt_values_max <- high
@@ -274,7 +271,7 @@ load_a_seurat.server <- function(input, output, session) {
     high <- max(values)
 
     # trigger update of the ui element(s)
-    seurat_configuration.reactions$reset_n_features %<>% add(1)
+    seurat_configuration.reactions$reset_n_features <- rnorm(1)
 
     # update the reactive
     seurat_object.reactions$n_features_values_min <- low
@@ -297,7 +294,7 @@ load_a_seurat.server <- function(input, output, session) {
     high <- max(values)
 
     # trigger update of the ui element(s)
-    seurat_configuration.reactions$reset_n_umi %<>% add(1)
+    seurat_configuration.reactions$reset_n_umi <- rnorm(1)
 
     # update the reactives
     seurat_object.reactions$n_umi <- sum(values)
