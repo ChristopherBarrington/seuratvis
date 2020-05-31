@@ -61,7 +61,7 @@ knee_plot.server <- function(input, output, session) {
       max_value <- filtering_parameters.reactions$total_umi_per_cell_max
       
       # start the knee plot
-      FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
+      seurat_object.reactions$n_umi_values %>%
         set_names('y') %>%
         arrange(desc(y)) %>%
         mutate(x=seq(n()),
@@ -77,7 +77,7 @@ knee_plot.server <- function(input, output, session) {
       max_value <- filtering_parameters.reactions$features_per_cell_max
       
       # start the knee plot
-      FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
+      seurat_object.reactions$n_features_values %>%
         set_names('y') %>%
         arrange(desc(y)) %>%
         mutate(x=seq(n()),
@@ -92,7 +92,7 @@ knee_plot.server <- function(input, output, session) {
       max_value <- filtering_parameters.reactions$max_percent_mitochondria
 
       # start the knee plot
-      seurat_object.reactions$percent_mt %>%
+      seurat_object.reactions$proportion_mt_values %>%
         set_names('y') %>%
         arrange(desc(y)) %>%
         mutate(x=seq(n()),

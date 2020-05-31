@@ -19,6 +19,13 @@ cell_filtering.server <- function(input, output, session) {
     # make sure seurat object is loaded
     req(seurat_object.reactions$seurat)
 
+    req(seurat_object.reactions$n_features_values)
+    req(seurat_object.reactions$n_umi_values)
+    req(seurat_object.reactions$proportion_mt_values)
+
+    req(seurat_configuration.reactions$n_features_variable)
+    req(seurat_configuration.reactions$n_umi_variable)
+
     # create variables for shorthand
     cell_metadata <- seurat_object.reactions$cell_metadata
     min_umi_per_cell <- filtering_parameters.reactions$total_umi_per_cell_min
@@ -27,42 +34,30 @@ cell_filtering.server <- function(input, output, session) {
     max_features_per_cell <- filtering_parameters.reactions$features_per_cell_max
     max_percent_mitochondria <- filtering_parameters.reactions$max_percent_mitochondria
 
+    if(!all(min_umi_per_cell>0 & max_umi_per_cell>0 &
+            min_features_per_cell>0 & max_features_per_cell>0 &
+            max_percent_mitochondria>0))
+      return(NULL)
+
+    n_features_values <- seurat_object.reactions$n_features_values %>% unlist(use.names=FALSE)
+    proportion_mt_values <- seurat_object.reactions$proportion_mt_values %>% unlist(use.names=FALSE)
+    n_umi_values <- seurat_object.reactions$n_umi_values %>% unlist(use.names=FALSE)
+
     # filter Seurat object
-    cell_metadata %>%
-      filter(percent_mt <= max_percent_mitochondria &
-             between(x=nFeature_RNA, left=min_features_per_cell, right=max_features_per_cell) &
-             between(x=nCount_RNA, left=min_umi_per_cell, right=max_umi_per_cell)) -> filtered_cell_metadata
+    ({n_features_values %>% between(left=min_features_per_cell, right=max_features_per_cell)} &
+     {n_umi_values %>% between(left=min_umi_per_cell, right=max_umi_per_cell)} &
+     {proportion_mt_values<=max_percent_mitochondria}) %>%
+      filter(.data=cell_metadata) -> filtered_cell_metadata
+
+    filtered_n_features_values <- pluck(filtered_cell_metadata, seurat_configuration.reactions$n_features_variable)
+    filtered_n_umi_values <- pluck(filtered_cell_metadata, seurat_configuration.reactions$n_umi_variable)
 
     # save values to filtering reactive
     filtered_cells.reactions$n_cells <- nrow(filtered_cell_metadata)
-    filtered_cells.reactions$n_umi <- sum(filtered_cell_metadata$nCount_RNA)
-    filtered_cells.reactions$median_umi_per_cell <- round(x=median(filtered_cell_metadata$nCount_RNA), digits=0)
-    filtered_cells.reactions$median_features_per_cell <- round(x=median(filtered_cell_metadata$nFeature_RNA), digits=0)
+    filtered_cells.reactions$n_umi <- sum(filtered_n_umi_values)
+    filtered_cells.reactions$n_features_values <- filtered_n_features_values
+    filtered_cells.reactions$n_umi_values <- filtered_n_umi_values
+    filtered_cells.reactions$median_features_per_cell <- round(x=median(filtered_n_features_values), digits=0)
+    filtered_cells.reactions$median_umi_per_cell <- round(x=median(filtered_n_umi_values), digits=0)
     filtered_cells.reactions$cell_metadata <- filtered_cell_metadata})
-
-  # initialise filtering thresholds and filtered object reactives when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    sprintf(fmt='### cell_filtering.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
-
-    # create variables for shorthand
-    seurat <- seurat_object.reactions$seurat
-    cell_metadata <- seurat_object.reactions$cell_metadata
-
-    # get the initialisation values before filtering
-    list(project=Project(seurat),
-         n_cells=nrow(cell_metadata),
-         n_umi=sum(cell_metadata$nCount_RNA),
-         
-         total_umi_per_cell_min=min(cell_metadata$nCount_RNA),
-         total_umi_per_cell_max=max(cell_metadata$nCount_RNA),
-         
-         features_per_cell_min=min(cell_metadata$nFeature_RNA),
-         features_per_cell_max=max(cell_metadata$nFeature_RNA),
-         
-         max_percent_mitochondria=round(max(cell_metadata$percent_mt)+0.05, digits=1)) -> initial_values
-
-    # save the values into the reactives
-    for(i in names(initial_values))
-      filtering_parameters.reactions[[i]] <- initial_values[[i]]
-    filtered_cells.reactions$cell_metadata <- cell_metadata})
 }

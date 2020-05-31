@@ -44,8 +44,8 @@ number_of_genes_per_cell_text_box.server <- function(input, output, session) {
   # make the text box
   renderValueBox(expr={
     # create variables for shorthand
-    n_reference <- seurat_object.reactions$seurat$nFeature_RNA %>% module_env$summary_function()
-    n_filtered <- filtered_cells.reactions$cell_metadata$nFeature_RNA %>% module_env$summary_function()
+    n_reference <- seurat_object.reactions$n_features_values %>% unlist() %>% module_env$summary_function()
+    n_filtered <- filtered_cells.reactions$n_features_values %>% module_env$summary_function()
 
     # get the box subtitle
     switch(module_env$id,

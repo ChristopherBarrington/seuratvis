@@ -41,7 +41,7 @@ number_of_reads_text_box.server <- function(input, output, session) {
   # make the text box
   renderValueBox(expr={
     # create variables for shorthand
-    n_reference <- seurat_object.reactions$reference_metrics$total_umi
+    n_reference <- seurat_object.reactions$n_umi
     n_filtered <- filtered_cells.reactions$n_umi
 
     # get the box subtitle

@@ -72,31 +72,32 @@ features_per_cell_filter.server <- function(input, output, session) {
     message('### features_per_cell_filter.server-observeEvent-input$min_features')
 
     # update the reactive
-    filtering_parameters.reactions$features_per_cell_min <- round(input$min_features, digits=0)
-    seurat_object.reactions$features_per_cell_min <- round(input$min_features, digits=0)})
+    filtering_parameters.reactions$features_per_cell_min <- round(input$min_features, digits=0)})
 
   # react to the maximum input element
   observeEvent(eventExpr=input$max_features, handlerExpr={
     message('### features_per_cell_filter.server-observeEvent-input$max_features')
 
     # update the reactive
-    filtering_parameters.reactions$features_per_cell_max <- round(input$max_features, digits=0)
-    seurat_object.reactions$features_per_cell_max <- round(input$max_features, digits=0)})
+    filtering_parameters.reactions$features_per_cell_max <- round(input$max_features, digits=0)})
 
-  # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    sprintf(fmt='### features_per_cell_filter.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+  # react to the initialisation of the reference min value
+  observeEvent(eventExpr=seurat_object.reactions$n_features_values_min, handlerExpr={
+    message('### features_per_cell_filter.server-observeEvent-seurat_object.reactions$n_features_values_min')
 
-    # create varaibles for shorthand
-    seurat <- seurat_object.reactions$seurat
-    low <- min(seurat@meta.data$nFeature_RNA)
-    high <- max(seurat@meta.data$nFeature_RNA)
+    # create variables for shorthand
+    value <- seurat_object.reactions$n_features_values_min
 
     # update the ui element(s)
-    updateNumericInput(session=session, inputId='min_features', value=low, min=floor(low/50)*50, max=ceiling(high/50)*50)
-    updateNumericInput(session=session, inputId='max_features', value=high, min=floor(low/50)*50, max=ceiling(high/50)*50)
+    updateNumericInput(session=session, inputId='min_features', value=value, min=value)})
 
-    # update the reactive
-    seurat_object.reactions$features_per_cell_min <- low
-    seurat_object.reactions$features_per_cell_max <- high})
+  # react to the initialisation of the reference max value
+  observeEvent(eventExpr=seurat_object.reactions$n_features_values_max, handlerExpr={
+    message('### features_per_cell_filter.server-observeEvent-seurat_object.reactions$n_features_values_max')
+
+    # create variables for shorthand
+    value <- seurat_object.reactions$n_features_values_max
+
+    # update the ui element(s)
+    updateNumericInput(session=session, inputId='max_features', value=value, max=value)})
 }
