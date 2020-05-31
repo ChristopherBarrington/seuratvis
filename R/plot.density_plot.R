@@ -149,7 +149,7 @@ density_plot.server <- function(input, output, session) {
   # reset the brush when n umi variable is changed
   observeEvent(eventExpr=seurat_configuration.reactions$reset_n_umi, handlerExpr={
     sprintf(fmt='### density_plot.server-observeEvent-seurat_configuration.reactions$reset_n_umi [%s]', id) %>% message()
-    session$resetBrush(NS(namespace=id, id='brush'))
+    session$resetBrush(NS(namespace=id, id='brush'))})
 
   # reset the brush when proportion mitochondrial UMI variable is changed
   observeEvent(eventExpr=seurat_configuration.reactions$reset_proportion_mt, handlerExpr={

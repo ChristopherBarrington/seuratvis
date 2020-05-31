@@ -191,7 +191,7 @@ load_a_seurat.server <- function(input, output, session) {
     #! TODO: remove seurat_object.reactions$reference_metrics and cell_filtering_data.reference
     list(n_cells=ncol(seurat),
          n_features=nrow(seurat),
-         total_umi=sum(seurat@meta.data$nCount_RNA),
+         # total_umi=sum(seurat@meta.data$nCount_RNA),
          # median_umi_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
          # median_features_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
          # min_umi_per_cell=min(seurat@meta.data$nCount_RNA), max_umi_per_cell=max(seurat@meta.data$nCount_RNA),
