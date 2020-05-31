@@ -177,7 +177,7 @@ load_a_seurat.server <- function(input, output, session) {
     # load Seurat object from user
     progress$inc(detail='Updating UI with cluster options')
     seurat <- parse(text=input_seurat_expr) %>% eval()
-    seurat <- subset(seurat, subset=nFeature_RNA>0 & nCount_RNA>0)
+    # seurat <- subset(seurat, subset=nFeature_RNA>0 & nCount_RNA>0)
 
     progress$inc(detail='Checking meta.data')
     if(is.null(seurat@meta.data$seurat_clusters))
@@ -193,12 +193,12 @@ load_a_seurat.server <- function(input, output, session) {
          n_features=nrow(seurat),
          total_umi=sum(seurat@meta.data$nCount_RNA),
          median_umi_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
-         median_features_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
+         # median_features_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
          min_umi_per_cell=min(seurat@meta.data$nCount_RNA), max_umi_per_cell=max(seurat@meta.data$nCount_RNA),
-         min_features_per_cell=min(seurat@meta.data$nFeature_RNA), max_features_per_cell=max(seurat@meta.data$nFeature_RNA),
+         # min_features_per_cell=min(seurat@meta.data$nFeature_RNA), max_features_per_cell=max(seurat@meta.data$nFeature_RNA),
          
          total_umi_per_cell_min=min(seurat@meta.data$nCount_RNA), total_umi_per_cell_max=max(seurat@meta.data$nCount_RNA),
-         features_per_cell_min=min(seurat@meta.data$nFeature_RNA), features_per_cell_max=max(seurat@meta.data$nFeature_RNA),
+         # features_per_cell_min=min(seurat@meta.data$nFeature_RNA), features_per_cell_max=max(seurat@meta.data$nFeature_RNA),
          project=Project(seurat)) -> cell_filtering_data.reference
 
     progress$inc(detail='Setting default assay') # keep here for now
@@ -263,12 +263,27 @@ load_a_seurat.server <- function(input, output, session) {
   ## react to the number of features per cell column being set
   observeEvent(eventExpr=input$n_features_picker, handlerExpr={
     req(seurat_object.reactions$seurat)
-    sprintf('!!! load_a_seurat.server-observeEvent-input$n_features_picker [%s]', input$n_features_picker) %>% message()
-    seurat_configuration.reactions$n_features_variable <- input$n_features_picker})
-  
+    sprintf('### load_a_seurat.server-observeEvent-input$n_features_picker [%s]', input$n_features_picker) %>% message()
+
+    # create varaibles for shorthand
+    seurat <- seurat_object.reactions$seurat
+    var <- input$n_features_picker
+    values <- FetchData(object=seurat, vars=var) %>% set_names('n_features')
+    low <- min(values)
+    high <- max(values)
+
+    # trigger update of the ui element(s)
+    seurat_configuration.reactions$reset_n_features %<>% add(1)
+
+    # update the reactive
+    seurat_object.reactions$n_features_values_min <- low
+    seurat_object.reactions$n_features_values_max <- high
+    seurat_object.reactions$n_features_values <- values
+    seurat_configuration.reactions$n_features_variable <- var})
+
   ## react to the number of UMI column being set
   observeEvent(eventExpr=input$n_umi_picker, handlerExpr={
     req(seurat_object.reactions$seurat)
-    sprintf('!!! load_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message()
+    sprintf('### load_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message()
     seurat_configuration.reactions$n_umi_variable <- input$n_umi_picker})
 }

@@ -70,7 +70,7 @@ density_plot.server <- function(input, output, session) {
         theme() -> feature_plot
     } else if(module_env$feature=='nFeature_RNA') {
       # start the density plot
-      FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
+      seurat_object.reactions$n_features_values %>%
         set_names('y') %>%
         ggplot() +
         aes(x=y) +
@@ -139,4 +139,9 @@ density_plot.server <- function(input, output, session) {
       # update the reactive
       filtering_parameters.reactions$max_percent_mitochondria <- high
     }})
+
+  # reset the brush when n features variable is changed
+  observeEvent(eventExpr=seurat_configuration.reactions$reset_n_features, handlerExpr={
+    sprintf(fmt='### density_plot.server-observeEvent-seurat_configuration.reactions$reset_n_features [%s]', id) %>% message()
+    session_server$resetBrush('brush')})
 }

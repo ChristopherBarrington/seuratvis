@@ -74,7 +74,7 @@ boxplot_plot.server <- function(input, output, session) {
       max_y <- filtering_parameters.reactions$features_per_cell_max
       
       # start the boxplot
-      FetchData(seurat_object.reactions$seurat, 'nFeature_RNA') %>%
+      seurat_object.reactions$n_features_values %>%
         set_names('y') %>%
         ggplot() +
         aes(y=y) +

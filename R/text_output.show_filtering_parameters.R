@@ -73,6 +73,7 @@ show_filtering_parameters.server <- function(input, output, session) {
     # make sure required reactives are available
     req(seurat_object.reactions$project)
     req(filtered_cells.reactions$n_cells)
+    req(seurat_configuration.reactions$n_features_variable)
     req(seurat_configuration.reactions$proportion_mt_variable)
 
     message('### show_filtering_parameters.server-observeEvent-reactiveValuesToList(filtering_parameters.reactions)')
@@ -82,17 +83,18 @@ show_filtering_parameters.server <- function(input, output, session) {
     filtered_cells <- reactiveValuesToList(filtered_cells.reactions)
 
     # save formatted filters
-    c(format_subset_conditional(x=thresholds$total_umi_per_cell_min, fmt='nCount_RNA>=%d'),
-      format_subset_conditional(x=thresholds$total_umi_per_cell_max, fmt='nCount_RNA<=%d')) %>%
+    c(format_subset_conditional(x=thresholds$total_umi_per_cell_min, fmt='X>=%d'),
+      format_subset_conditional(x=thresholds$total_umi_per_cell_max, fmt='X<=%d')) %>%
+      str_replace_all(pattern='X', replacement='nCount_RNA') %>%
       group_format_subset_conditional() -> umi_filter
 
-    c(format_subset_conditional(x=thresholds$features_per_cell_min, fmt='nFeature_RNA>=%d'),
-      format_subset_conditional(x=thresholds$features_per_cell_max, fmt='nFeature_RNA<=%d')) %>%
+    c(format_subset_conditional(x=thresholds$features_per_cell_min, fmt='X>=%d'),
+      format_subset_conditional(x=thresholds$features_per_cell_max, fmt='X<=%d')) %>%
+      str_replace_all(pattern='X', replacement=seurat_configuration.reactions$n_features_variable) %>%
       group_format_subset_conditional() -> features_filter
 
-    seurat_configuration.reactions$proportion_mt_variable %>%
-      sprintf(fmt='%s<=%%s') %>%
-      format_subset_conditional(x=thresholds$max_percent_mitochondria) -> mt_filter
+    format_subset_conditional(x=thresholds$max_percent_mitochondria, fmt='X<=%%s') %>%
+      str_replace_all(pattern='X', replacement=seurat_configuration.reactions$proportion_mt_variable) -> mt_filter
 
     all_subset_conditions <- list(umi_filter, features_filter, mt_filter)
     filtering_parameters.reactions$all_subset_conditions <- all_subset_conditions
