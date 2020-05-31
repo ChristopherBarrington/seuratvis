@@ -177,7 +177,6 @@ load_a_seurat.server <- function(input, output, session) {
     # load Seurat object from user
     progress$inc(detail='Updating UI with cluster options')
     seurat <- parse(text=input_seurat_expr) %>% eval()
-    # seurat <- subset(seurat, subset=nFeature_RNA>0 & nCount_RNA>0)
 
     progress$inc(detail='Checking meta.data')
     if(is.null(seurat@meta.data$seurat_clusters))
@@ -189,15 +188,16 @@ load_a_seurat.server <- function(input, output, session) {
 
     progress$inc(detail='Getting summary statistics')
 
+    #! TODO: remove seurat_object.reactions$reference_metrics and cell_filtering_data.reference
     list(n_cells=ncol(seurat),
          n_features=nrow(seurat),
          total_umi=sum(seurat@meta.data$nCount_RNA),
-         median_umi_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
+         # median_umi_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
          # median_features_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
-         min_umi_per_cell=min(seurat@meta.data$nCount_RNA), max_umi_per_cell=max(seurat@meta.data$nCount_RNA),
+         # min_umi_per_cell=min(seurat@meta.data$nCount_RNA), max_umi_per_cell=max(seurat@meta.data$nCount_RNA),
          # min_features_per_cell=min(seurat@meta.data$nFeature_RNA), max_features_per_cell=max(seurat@meta.data$nFeature_RNA),
          
-         total_umi_per_cell_min=min(seurat@meta.data$nCount_RNA), total_umi_per_cell_max=max(seurat@meta.data$nCount_RNA),
+         # total_umi_per_cell_min=min(seurat@meta.data$nCount_RNA), total_umi_per_cell_max=max(seurat@meta.data$nCount_RNA),
          # features_per_cell_min=min(seurat@meta.data$nFeature_RNA), features_per_cell_max=max(seurat@meta.data$nFeature_RNA),
          project=Project(seurat)) -> cell_filtering_data.reference
 
@@ -300,6 +300,7 @@ load_a_seurat.server <- function(input, output, session) {
     seurat_configuration.reactions$reset_n_umi %<>% add(1)
 
     # update the reactives
+    seurat_object.reactions$n_umi <- sum(values)
     seurat_object.reactions$n_umi_values_min <- low
     seurat_object.reactions$n_umi_values_max <- high
     seurat_object.reactions$n_umi_values <- values
