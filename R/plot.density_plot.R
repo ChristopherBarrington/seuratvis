@@ -59,7 +59,7 @@ density_plot.server <- function(input, output, session) {
     feature_plot <- NULL
     if(module_env$feature=='nCount_RNA') {
       # start the density plot
-      FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
+      seurat_object.reactions$n_umi_values %>%
         set_names('y') %>%
         ggplot() +
         aes(x=y) +
@@ -143,5 +143,10 @@ density_plot.server <- function(input, output, session) {
   # reset the brush when n features variable is changed
   observeEvent(eventExpr=seurat_configuration.reactions$reset_n_features, handlerExpr={
     sprintf(fmt='### density_plot.server-observeEvent-seurat_configuration.reactions$reset_n_features [%s]', id) %>% message()
+    session_server$resetBrush('brush')})
+
+  # reset the brush when n umi variable is changed
+  observeEvent(eventExpr=seurat_configuration.reactions$reset_n_umi, handlerExpr={
+    sprintf(fmt='### density_plot.server-observeEvent-seurat_configuration.reactions$reset_n_umi [%s]', id) %>% message()
     session_server$resetBrush('brush')})
 }

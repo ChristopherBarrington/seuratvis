@@ -258,7 +258,8 @@ load_a_seurat.server <- function(input, output, session) {
     # update the reactive
     seurat_object.reactions$proportion_mt_values_max <- high
     seurat_object.reactions$proportion_mt_values <- values
-    seurat_configuration.reactions$proportion_mt_variable <- var})
+    seurat_configuration.reactions$proportion_mt_variable <- var
+    filtering_parameters.reactions$max_percent_mitochondria <- high})
   
   ## react to the number of features per cell column being set
   observeEvent(eventExpr=input$n_features_picker, handlerExpr={
@@ -279,11 +280,30 @@ load_a_seurat.server <- function(input, output, session) {
     seurat_object.reactions$n_features_values_min <- low
     seurat_object.reactions$n_features_values_max <- high
     seurat_object.reactions$n_features_values <- values
-    seurat_configuration.reactions$n_features_variable <- var})
+    seurat_configuration.reactions$n_features_variable <- var
+    filtering_parameters.reactions$features_per_cell_min <- low
+    filtering_parameters.reactions$features_per_cell_max <- high})
 
   ## react to the number of UMI column being set
   observeEvent(eventExpr=input$n_umi_picker, handlerExpr={
     req(seurat_object.reactions$seurat)
     sprintf('### load_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message()
-    seurat_configuration.reactions$n_umi_variable <- input$n_umi_picker})
+
+    # create varaibles for shorthand
+    seurat <- seurat_object.reactions$seurat
+    var <- input$n_umi_picker
+    values <- FetchData(object=seurat, vars=var) %>% set_names('n_umi')
+    low <- min(values)
+    high <- max(values)
+
+    # trigger update of the ui element(s)
+    seurat_configuration.reactions$reset_n_umi %<>% add(1)
+
+    # update the reactives
+    seurat_object.reactions$n_umi_values_min <- low
+    seurat_object.reactions$n_umi_values_max <- high
+    seurat_object.reactions$n_umi_values <- values
+    seurat_configuration.reactions$n_umi_variable <- var
+    filtering_parameters.reactions$total_umi_per_cell_min <- low
+    filtering_parameters.reactions$total_umi_per_cell_max <- high})
 }

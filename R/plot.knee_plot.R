@@ -61,7 +61,7 @@ knee_plot.server <- function(input, output, session) {
       max_value <- filtering_parameters.reactions$total_umi_per_cell_max
       
       # start the knee plot
-      FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
+      seurat_object.reactions$n_umi_values %>%
         set_names('y') %>%
         arrange(desc(y)) %>%
         mutate(x=seq(n()),

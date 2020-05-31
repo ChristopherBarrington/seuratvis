@@ -5,12 +5,17 @@
 module_environments <- new.env()
 module_servers_to_call <- new.env()
 seurat_object.reactions <- reactiveValues()
-filtering_parameters.reactions <- reactiveValues()
 filtered_cells.reactions <- reactiveValues()
 seurat_configuration.reactions <- reactiveValues()
 
+#' Reactive lists for dataset filetering
+#' 
+filtering_parameters.reactions <- reactiveValues()
+filtering_arguments.reactions <- reactiveValues()
+
 #' Reactive list of summary statistics of loaded seurat object
 #! TODO initialise this when an object is loaded
+#'
 reference_metrics.rv <- reactiveValues()
 
 shinyAppServer <- function(input, output, session) {

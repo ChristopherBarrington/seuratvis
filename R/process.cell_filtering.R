@@ -20,9 +20,11 @@ cell_filtering.server <- function(input, output, session) {
     req(seurat_object.reactions$seurat)
 
     req(seurat_object.reactions$n_features_values)
+    req(seurat_object.reactions$n_umi_values)
     req(seurat_object.reactions$proportion_mt_values)
 
     req(seurat_configuration.reactions$n_features_variable)
+    req(seurat_configuration.reactions$n_umi_variable)
 
     # create variables for shorthand
     cell_metadata <- seurat_object.reactions$cell_metadata
@@ -39,7 +41,7 @@ cell_filtering.server <- function(input, output, session) {
 
     n_features_values <- seurat_object.reactions$n_features_values %>% unlist(use.names=FALSE)
     proportion_mt_values <- seurat_object.reactions$proportion_mt_values %>% unlist(use.names=FALSE)
-    n_umi_values <- cell_metadata$nCount_RNA %>% unlist(use.names=FALSE)
+    n_umi_values <- seurat_object.reactions$n_umi_values %>% unlist(use.names=FALSE)
 
     # filter Seurat object
     ({n_features_values %>% between(left=min_features_per_cell, right=max_features_per_cell)} &
@@ -48,7 +50,7 @@ cell_filtering.server <- function(input, output, session) {
       filter(.data=cell_metadata) -> filtered_cell_metadata
 
     filtered_n_features_values <- pluck(filtered_cell_metadata, seurat_configuration.reactions$n_features_variable)
-    filtered_n_umi_values <- pluck(filtered_cell_metadata, 'nCount_RNA')
+    filtered_n_umi_values <- pluck(filtered_cell_metadata, seurat_configuration.reactions$n_umi_variable)
 
     # save values to filtering reactive
     filtered_cells.reactions$n_cells <- nrow(filtered_cell_metadata)

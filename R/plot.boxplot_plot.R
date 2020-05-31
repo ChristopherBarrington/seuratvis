@@ -61,7 +61,7 @@ boxplot_plot.server <- function(input, output, session) {
       max_y <- filtering_parameters.reactions$total_umi_per_cell_max
       
       # start the boxplot
-      FetchData(seurat_object.reactions$seurat, 'nCount_RNA') %>%
+      seurat_object.reactions$n_umi_values %>%
         set_names('y') %>%
         ggplot() +
         aes(y=y) +
