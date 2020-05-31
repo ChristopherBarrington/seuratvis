@@ -86,7 +86,7 @@ boxplot_plot.server <- function(input, output, session) {
       max_y <- filtering_parameters.reactions$max_percent_mitochondria
 
       # start the boxplot
-      seurat_object.reactions$percent_mt %>%
+      seurat_object.reactions$proportion_mt_values %>%
         set_names('y') %>%
         ggplot() +
         aes(y=y) +

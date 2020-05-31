@@ -4,7 +4,6 @@
 #' 
 #' @param id unique name of the element
 #' @param label text label of the element
-#' @param target_var name of column in \code{@meta.data} that is percentage mitochondria
 #' 
 #' @examples
 #' 
@@ -16,7 +15,7 @@
 #' 
 #' @rdname percent_mt_per_cell_filter
 #' 
-percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt', target_var='percent_mt') {
+percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt') {
   message('### features_per_cell_filter.ui')
 
   module <- 'percent_mt_per_cell_filter'
@@ -28,7 +27,6 @@ percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt', target_var=
   # create an environment in the seuratvis namespace
   e <- new.env()
   e$id <- id
-  e$target_var <- target_var
   assign(x=module_ns, val=e, envir=module_environments)
 
 
@@ -38,7 +36,7 @@ percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt', target_var=
 
   # make ui elements
   div(tags$h6('Maximum', style='display: inline;'),
-    numericInput(inputId=ns('max_percent_mt'), label=NULL, value=0, step=0.1, width='100%')) -> high_ui
+    numericInput(inputId=ns(id='max_percent_mt'), label=NULL, value=0, step=0.1, width='100%')) -> high_ui
 
   # return ui element(s)
   tagList(tags$label(label), br(), high_ui)
@@ -56,31 +54,26 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='percent_mt_per_cell_filter') # provides `seuratvis_env`, `server_env` and `module_env`
-  session_server <- get(x='session', env=server_env)
 
   # react to the maximum input element
   observeEvent(eventExpr=input$max_percent_mt, handlerExpr={
     message('### percent_mt_per_cell_filter.server-observeEvent-input$max_percent_mt')
 
     # update the reactive
-    filtering_parameters.reactions$max_percent_mitochondria <- input$max_percent_mt
-    seurat_object.reactions$percent_mt_per_cell_max <- input$max_percent_mt %>% add(0.05) %>% round(digits=1)})
+    value <- input$max_percent_mt
 
-  # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    sprintf(fmt='### percent_mt_per_cell_filter.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    if(value != sprintf(fmt='%.1f', value)) # if the value is not already 1dp formatted, reformat it
+      value %<>% add(0.05) %>% round(digits=1)
 
-    # create varaibles for shorthand
-    seurat <- seurat_object.reactions$seurat
-    var <- module_env$target_var
-    values <- FetchData(object=seurat, vars=var) %>% set_names('percent_mt')
-    high <- max(values$percent_mt) %>% add(0.05) %>% round(digits=1)
+    filtering_parameters.reactions$max_percent_mitochondria <- value})
+
+  # react to the initialisation of the reference value
+  observeEvent(eventExpr=seurat_object.reactions$proportion_mt_values_max, handlerExpr={
+    message('### percent_mt_per_cell_filter.server-observeEvent-seurat_object.reactions$proportion_mt_values_max')
+
+    # create variables for shorthand
+    high <- seurat_object.reactions$proportion_mt_values_max %>% add(0.05) %>% round(digits=1)
 
     # update the ui element(s)
-    updateNumericInput(session=session, inputId='max_percent_mt', value=high, min=0, max=high)
-
-    # update the reactive
-    seurat_object.reactions$percent_mt_per_cell_max <- high
-    seurat_object.reactions$percent_mt_target_var <- var
-    seurat_object.reactions$percent_mt <- values %>% set_names('percent_mt')})
+    updateNumericInput(session=session, inputId='max_percent_mt', value=high, min=0, max=high)})
 }

@@ -32,10 +32,11 @@ density_plot.ui <- function(id, feature) {
   assign(x=module_ns, val=e, envir=module_environments)
 
   # record the server(s) to call
+  module_environments$density_plots$id %<>% c(id) # keep track so other modules can update
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # return ui element(s)
-  plotOutput(outputId=ns(id='density_plot'), brush=brushOpts(id=ns('brush'), direction='x')) %>% withSpinner()
+  plotOutput(outputId=ns(id='density_plot'), brush=brushOpts(id=ns(id='brush'), direction='x')) %>% withSpinner()
 }
 
 #' Produce the ggplot object for a boxplot
@@ -80,7 +81,7 @@ density_plot.server <- function(input, output, session) {
         theme() -> feature_plot
     } else if(module_env$feature=='percent_mt') {
       # start the density plot
-      seurat_object.reactions$percent_mt %>%
+      seurat_object.reactions$proportion_mt_values %>%
         set_names('y') %>%
         ggplot() +
         aes(x=y) +
@@ -105,8 +106,8 @@ density_plot.server <- function(input, output, session) {
 
       # update the ui
       for(id in module_environments$features_per_cell_filters$id) {
-        updateTextInput(session=session_server, inputId=NS(id, 'min_features'), value=low)
-        updateTextInput(session=session_server, inputId=NS(id, 'max_features'), value=high)
+        updateNumericInput(session=session_server, inputId=NS(id, 'min_features'), value=low)
+        updateNumericInput(session=session_server, inputId=NS(id, 'max_features'), value=high)
       }
 
       # update the reactive
@@ -119,8 +120,8 @@ density_plot.server <- function(input, output, session) {
 
       # update the ui
       for(id in module_environments$total_umi_per_cell_filters$id) {
-        updateTextInput(session=session_server, inputId=NS(namespace=id, id='min_umis'), value=low)
-        updateTextInput(session=session_server, inputId=NS(namespace=id, id='max_umis'), value=high)
+        updateNumericInput(session=session_server, inputId=NS(namespace=id, id='min_umis'), value=low)
+        updateNumericInput(session=session_server, inputId=NS(namespace=id, id='max_umis'), value=high)
       }
 
       # update the reactive
@@ -131,10 +132,11 @@ density_plot.server <- function(input, output, session) {
       high <- round(input$brush$xmax+0.05, digits=1)
 
       # update the ui
+      #! TODO remove this dependency, save the value to a reactive anf react to it in the gui module
       for(id in module_environments$percent_mt_per_cell_filters$id)
-        updateTextInput(session=session_server, inputId=NS(namespace=id, id='max_percent_mt'), value=high)
+        updateNumericInput(session=session_server, inputId=NS(namespace=id, id='max_percent_mt'), value=high)
 
       # update the reactive
-      filtering_parameters.reactions$percent_mt_per_cell_max <- high
+      filtering_parameters.reactions$max_percent_mitochondria <- high
     }})
 }

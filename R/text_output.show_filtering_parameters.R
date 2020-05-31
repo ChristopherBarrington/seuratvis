@@ -70,11 +70,12 @@ show_filtering_parameters.server <- function(input, output, session) {
   group_format_subset_conditional <- function(x) x %>% na.omit() %>% paste(collapse=' & ')
 
   observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
-    message('### show_filtering_parameters.server-observeEvent-reactiveValuesToList(filtering_parameters.reactions)')
-
-    # make sure seurat object is loaded
-    req(seurat_object.reactions$seurat)
+    # make sure required reactives are available
+    req(seurat_object.reactions$project)
     req(filtered_cells.reactions$n_cells)
+    req(seurat_configuration.reactions$proportion_mt_variable)
+
+    message('### show_filtering_parameters.server-observeEvent-reactiveValuesToList(filtering_parameters.reactions)')
 
     # create variables for shorthand
     thresholds <- reactiveValuesToList(filtering_parameters.reactions)
@@ -89,7 +90,7 @@ show_filtering_parameters.server <- function(input, output, session) {
       format_subset_conditional(x=thresholds$features_per_cell_max, fmt='nFeature_RNA<=%d')) %>%
       group_format_subset_conditional() -> features_filter
 
-    'percent_mt' %>%
+    seurat_configuration.reactions$proportion_mt_variable %>%
       sprintf(fmt='%s<=%%s') %>%
       format_subset_conditional(x=thresholds$max_percent_mitochondria) -> mt_filter
 
@@ -97,7 +98,7 @@ show_filtering_parameters.server <- function(input, output, session) {
     filtering_parameters.reactions$all_subset_conditions <- all_subset_conditions
 
     # combine all output lines
-    list(project_line={thresholds$project %>% sprintf(fmt='# %s')},
+    list(project_line={seurat_object.reactions$project %>% sprintf(fmt='# %s')},
          n_cells_line={filtered_cells$n_cells %>% comma() %>% sprintf(fmt='# n_cells=%s')},
          n_umi_line={filtered_cells$n_umi %>% comma() %>% sprintf(fmt='# n_umi=%s')},
          filters_line={all_subset_conditions %>% str_c(collapse=' &\n')}) %>%

@@ -92,7 +92,7 @@ knee_plot.server <- function(input, output, session) {
       max_value <- filtering_parameters.reactions$max_percent_mitochondria
 
       # start the knee plot
-      seurat_object.reactions$percent_mt %>%
+      seurat_object.reactions$proportion_mt_values %>%
         set_names('y') %>%
         arrange(desc(y)) %>%
         mutate(x=seq(n()),

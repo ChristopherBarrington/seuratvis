@@ -9,6 +9,10 @@ filtering_parameters.reactions <- reactiveValues()
 filtered_cells.reactions <- reactiveValues()
 seurat_configuration.reactions <- reactiveValues()
 
+#' Reactive list of summary statistics of loaded seurat object
+#! TODO initialise this when an object is loaded
+reference_metrics.rv <- reactiveValues()
+
 shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
