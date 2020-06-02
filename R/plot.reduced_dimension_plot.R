@@ -18,7 +18,7 @@
 reduced_dimension_plot.ui <- function(id, feature) {
   sprintf(fmt='### reduced_dimension_plot.ui [%s-%s]', id, feature) %>% message()
 
-  id %<>% NS(id=feature) # combine the id and feature to allow multiple knee plots per id
+  id %<>% NS(id=feature) # combine the id and feature to allow multiple UMAP plots per id
   module <- 'reduced_dimension_plot'
 
   # make unique id for this object
@@ -97,9 +97,9 @@ reduced_dimension_plot.server <- function(input, output, session) {
           theme_void() +
           theme(legend.position='none', legend.text=element_blank()) -> output_plot
 
-          c_min <- plotting_options.rv$low # TODO: this is dependent on the label names!
+          c_min <- session$ns('low') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
           c_mid <- 'white'
-          c_max <- plotting_options.rv$high # TODO: this is dependent on the label names!
+          c_max <- session$ns('high') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
           range_limits <- seurat_object.reactions$value_range_limits
 
           colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=range_limits, oob=scales::squish)
