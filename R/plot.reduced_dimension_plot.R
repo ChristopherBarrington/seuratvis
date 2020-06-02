@@ -57,6 +57,7 @@ reduced_dimension_plot.server <- function(input, output, session) {
    
     # get feature-specific plotting elements
     output_plot <- NULL
+    include_legend <- FALSE
     if(module_env$feature=='selected_cluster_resolution') {
       # get reduced dimension coordinates and currently selected cluster resolution and make the scatterplot
       cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_cluster_resolution_idents) %>%
@@ -93,9 +94,22 @@ reduced_dimension_plot.server <- function(input, output, session) {
           aes(x=DIMRED_1, y=DIMRED_2, colour=picked_feature_value) +
           geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
           geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
-          scale_colour_gradient(low=input_server$`gene_highlighting-colour_palette-low`, high=input_server$`gene_highlighting-colour_palette-high`, limits=seurat_object.reactions$value_range_limits, oob=scales::squish) +
+          # scale_colour_gradient(low=input_server$`gene_highlighting-colour_palette-low`, high=input_server$`gene_highlighting-colour_palette-high`, limits=seurat_object.reactions$value_range_limits, oob=scales::squish) +
           theme_void() +
-          theme(legend.position='none') -> output_plot
+          theme(legend.position='none', legend.text=element_blank()) -> output_plot
+
+          c_min <- input_server$`gene_highlighting-colour_palette-low`
+          c_max <- input_server$`gene_highlighting-colour_palette-high`
+          range_limits <- seurat_object.reactions$value_range_limits
+
+          colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=range_limits, oob=scales::squish)
+          if(range_limits %>% sign() %>% sum() %>% equals(0)) {
+            colour_gradient <- scale_colour_gradient2(low=c_min, mid='white', high=c_max, limits=range_limits, midpoint=0, oob=scales::squish, labels=0, breaks=0)
+            output_plot <- output_plot + theme(legend.text=element_text())
+          }
+
+          output_plot <- output_plot + colour_gradient
+          include_legend <- TRUE
       } else { # the picked feature is factor-like
         # make the scatterplot and facet by picked feature value
         data %>%
@@ -106,11 +120,19 @@ reduced_dimension_plot.server <- function(input, output, session) {
           facet_wrap(~picked_feature_value, scales='free') +
           guides(colour=guide_legend(override.aes=list(size=3, shape=15))) +
           theme_void() +
-          theme(legend.position='bottom', legend.title=element_blank()) -> output_plot
+          theme() -> output_plot
+        include_legend <- TRUE
       }
     } else {
       sprintf('!!! cannot deal with %s', module_env$feature) %>% stop()
     }
+
+    if(include_legend)
+      output_plot +
+         theme(legend.justification=c(1,0),
+               legend.position=c(1,0),
+               legend.direction='horizontal',
+               legend.title=element_blank()) -> output_plot
 
     output_plot}) -> output$reduced_dimension_plot
 }
