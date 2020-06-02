@@ -84,8 +84,7 @@ update_palette_type.server <- function(input, output, session) {
     palette_type <- ifelse(input[[module_env$full_palette_inputId]], 'square', 'limited')
 
     for(inputId in module_env$selector_inputIds)
-      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette())
-  })
+      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette())})
 }
 
 #' Add a new colour to the colour palette
@@ -97,17 +96,24 @@ add_to_colour_palette.server <- function(input, output, session) {
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='colour_palette') # provides `seuratvis_env`, `server_env` and `module_env`
-  input <- get(x='input', env=server_env)
+  input_server <- get(x='input', env=server_env)
 
   # react to the chosen colour by adding it to the colour palette reactive values
   observe({
     for(inputId in module_env$selector_inputIds) {
-      x <- input[[inputId]]
+      x <- input_server[[inputId]]
       if(x!='' && !startsWith(x=x, prefix='#')) # if x is not in hex format
         x %<>% gplots::col2hex()
       unique(c(colour_palette(), x)) %>% colour_palette()
-    }
-  })
+    }})
+
+  # react to the colour picker input
+  #! TODO: this should not be dependent on the input names...
+  observe({
+    plotting_options.rv$low <- input$`colour_palette-low`})
+
+  observe({
+    plotting_options.rv$high <- input$`colour_palette-high`})
 }
 
 #' Define default colour palette

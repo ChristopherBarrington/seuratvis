@@ -17,6 +17,10 @@ filtering_arguments.reactions <- reactiveValues()
 #! TODO initialise this when an object is loaded
 reference_metrics.rv <- reactiveValues()
 
+#' Plotting reactive values
+#' 
+plotting_options.rv <- reactiveValues()
+
 shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################

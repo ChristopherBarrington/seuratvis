@@ -97,9 +97,9 @@ reduced_dimension_plot.server <- function(input, output, session) {
           theme_void() +
           theme(legend.position='none', legend.text=element_blank()) -> output_plot
 
-          c_min <- input_server$`gene_highlighting-colour_palette-low`
+          c_min <- plotting_options.rv$low # TODO: this is dependent on the label names!
           c_mid <- 'white'
-          c_max <- input_server$`gene_highlighting-colour_palette-high`
+          c_max <- plotting_options.rv$high # TODO: this is dependent on the label names!
           range_limits <- seurat_object.reactions$value_range_limits
 
           colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=range_limits, oob=scales::squish)
