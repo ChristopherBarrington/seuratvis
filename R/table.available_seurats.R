@@ -182,6 +182,12 @@ load_a_seurat.server <- function(input, output, session) {
     if(is.null(seurat@meta.data$seurat_clusters))
       seurat@meta.data$seurat_clusters <- 0
 
+    progress$inc(detail='Setting default assay') # keep here for now
+    selected_assay <- 'RNA'
+    DefaultAssay(seurat) <- selected_assay
+    if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
+      seurat <- NormalizeData(seurat)
+
     progress$inc(detail='Initialising reduced dimension plot')
 
     progress$inc(detail='Counting clusters identified in each set')
@@ -200,12 +206,6 @@ load_a_seurat.server <- function(input, output, session) {
          # total_umi_per_cell_min=min(seurat@meta.data$nCount_RNA), total_umi_per_cell_max=max(seurat@meta.data$nCount_RNA),
          # features_per_cell_min=min(seurat@meta.data$nFeature_RNA), features_per_cell_max=max(seurat@meta.data$nFeature_RNA),
          project=Project(seurat)) -> cell_filtering_data.reference
-
-    progress$inc(detail='Setting default assay') # keep here for now
-    selected_assay <- 'RNA'
-    DefaultAssay(seurat) <- selected_assay
-    if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
-      seurat <- NormalizeData(seurat)
 
     progress$inc(detail='Updating UI elements')
 
