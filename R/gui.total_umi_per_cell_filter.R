@@ -70,21 +70,24 @@ total_umi_per_cell_filter.server <- function(input, output, session) {
 
   # react to the min_umis input element
   observeEvent(eventExpr=input$min_umis, handlerExpr={
-    message('### total_umi_per_cell_filter.server-observeEvent-input$min_umis')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$min_umis [%s]', input$min_umis) %>% message('')
 
     # update the reactive
     filtering_parameters.reactions$total_umi_per_cell_min <- round(input$min_umis, digits=0)})
 
   # react to the max_umis input element
   observeEvent(eventExpr=input$max_umis, handlerExpr={
-    message('### total_umi_per_cell_filter.server-observeEvent-input$max_umis')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$max_umis [%s]', input$max_umis) %>% message('')
 
     # update the reactive
     filtering_parameters.reactions$total_umi_per_cell_max <- round(input$max_umis, digits=0)})
 
   # react to the initialisation of the reference min value
   observeEvent(eventExpr=seurat_object.reactions$n_umi_values_min, handlerExpr={
-    message('### features_per_cell_filter.server-observeEvent-seurat_object.reactions$n_umi_values_min')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat_object.reactions$n_umi_values_min [%s]', seurat_object.reactions$n_umi_values_min) %>% message('')
 
     # create variables for shorthand
     value <- seurat_object.reactions$n_umi_values_min
@@ -94,7 +97,8 @@ total_umi_per_cell_filter.server <- function(input, output, session) {
 
   # react to the initialisation of the reference max value
   observeEvent(eventExpr=seurat_object.reactions$n_umi_values_max, handlerExpr={
-    message('### features_per_cell_filter.server-observeEvent-seurat_object.reactions$n_umi_values_max')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat_object.reactions$n_umi_values_max [%s]', seurat_object.reactions$n_umi_values_max) %>% message('')
 
     # create variables for shorthand
     value <- seurat_object.reactions$n_umi_values_max

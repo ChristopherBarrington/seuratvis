@@ -46,6 +46,9 @@ number_of_cells_text_box.server <- function(input, output, session) {
 
   # make the text box
   renderValueBox(expr={
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %snumber_of_cells_text_box.server-renderValueBox') %>% message('')
+
     # create variables for shorthand
     n_reference <- seurat_object.reactions$reference_metrics$n_cells
     n_filtered <- filtered_cells.reactions$n_cells

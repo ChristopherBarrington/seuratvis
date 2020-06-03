@@ -77,7 +77,8 @@ show_filtering_parameters.server <- function(input, output, session) {
     req(seurat_configuration.reactions$proportion_mt_variable)
     req(filtered_cells.reactions$n_cells)
 
-    message('### show_filtering_parameters.server-observeEvent-reactiveValuesToList(filtering_parameters.reactions)')
+    # send a message
+    sprintf('### %sshow_filtering_parameters.server-observeEvent-reactiveValuesToList(filtering_parameters.reactions)', session$ns('')) %>% message()
 
     # create variables for shorthand
     thresholds <- reactiveValuesToList(filtering_parameters.reactions)

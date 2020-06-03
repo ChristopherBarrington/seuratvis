@@ -56,14 +56,16 @@ point_size_slider.server <- function(input, output, session) {
 
   # react to the point size slider
   observeEvent(eventExpr=input$point_size_slider, handlerExpr={
-    message('### point_size_slider.server-observeEvent-input$point_size_slider')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %spoint_size_slider.server-observeEvent-input$point_size_slider [%s]', input$point_size_slider) %>% message('')
 
     # update the reactive
     seurat_object.reactions$point_size <- input$point_size_slider})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    sprintf(fmt='### point_size_slider.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %spoint_size_slider.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message('')
 
     # update the reactive
     seurat_object.reactions$point_size <- 0.6})

@@ -57,7 +57,8 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
 
   # react to the maximum input element
   observeEvent(eventExpr=input$max_percent_mt, handlerExpr={
-    message('### percent_mt_per_cell_filter.server-observeEvent-input$max_percent_mt')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %spercent_mt_per_cell_filter.server-observeEvent-input$max_percent_mt [%s]', input$max_percent_mt) %>% message('')
 
     # update the reactive
     value <- input$max_percent_mt
@@ -69,7 +70,8 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
 
   # react to the initialisation of the reference value
   observeEvent(eventExpr=seurat_object.reactions$proportion_mt_values_max, handlerExpr={
-    message('### percent_mt_per_cell_filter.server-observeEvent-seurat_object.reactions$proportion_mt_values_max')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %spercent_mt_per_cell_filter.server-observeEvent-seurat_object.reactions [%s]', seurat_object.reactions$proportion_mt_values_max) %>% message('')
 
     # create variables for shorthand
     high <- seurat_object.reactions$proportion_mt_values_max %>% add(0.05) %>% round(digits=1)

@@ -31,7 +31,10 @@ project_name_text_box.ui <- function(id, width=12) {
 project_name_text_box.server <- function(input, output, session) {
   session$ns('') %>% sprintf(fmt='### %sproject_name_text_box.server') %>% message()
 
-  renderValueBox(env=parent.frame(n=2), quoted=FALSE, expr={
+  renderValueBox(expr={
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sproject_name_text_box.server-renderValueBox') %>% message('')
+
     list(value={seurat_object.reactions$seurat %>% Project() %>% reformat_project_name()},
          subtitle='Loaded Seurat object',
          icon=icon('certificate')) %>%

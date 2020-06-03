@@ -44,6 +44,9 @@ number_of_genes_in_assay_text_box.server <- function(input, output, session) {
 
   # make the text box
   renderValueBox(expr={
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %snumber_of_genes_in_assay_text_box.server-renderValueBox') %>% message('')
+
     # get the box subtitle
     switch(module_env$id,
            'Unique features in assay') -> subtitle

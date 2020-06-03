@@ -58,7 +58,8 @@ reduction_method_picker.server <- function(input, output, session) {
 
   # react to the reduction method selection
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
-    message('### reduction_method_picker.server-observeEvent-input$reduction_method_picker')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-input$reduction_method_picker [%s]', input$reduction_method_picker) %>% message('')
 
     # create varaibles for shorthand
     dimred_method <- input$reduction_method_picker
@@ -78,7 +79,8 @@ reduction_method_picker.server <- function(input, output, session) {
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    sprintf(fmt='### reduction_method_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat

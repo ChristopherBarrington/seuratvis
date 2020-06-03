@@ -58,7 +58,8 @@ assay_picker.server <- function(input, output, session) {
 
   # react to the reduction method selection
   observeEvent(eventExpr=input$assay_picker, handlerExpr={
-    sprintf(fmt='### %sassay_picker.server-observeEvent-input$assay_picker [%s]', session$ns(''), input$assay_picker) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sassay_picker.server-observeEvent-input$assay_picker [%s]', input$assay_picker) %>% message('')
 
     # create variables for shorthand
     assay <- input$assay_picker
@@ -77,7 +78,8 @@ assay_picker.server <- function(input, output, session) {
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    sprintf(fmt='### %sassay_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', session$ns(''), seurat_object.reactions$formatted.project.name) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sassay_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat

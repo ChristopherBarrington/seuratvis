@@ -51,7 +51,8 @@ knee_plot.server <- function(input, output, session) {
 
   # render the knee plot
   renderPlot(expr={
-    sprintf(fmt='### knee_plot.server-renderPlot [%s]', id) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sknee_plot.server-renderPlot') %>% message('')
    
     # get feature-specific plotting elements
     feature_plot <- NULL

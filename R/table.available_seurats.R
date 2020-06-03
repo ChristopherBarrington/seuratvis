@@ -167,6 +167,9 @@ load_a_seurat.server <- function(input, output, session) {
     if(is.null(input$seurats_table_rows_selected))
       return(NULL)
 
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$seurats_table_rows_selected [%s]', input$seurats_table_rows_selected) %>% message('')
+
     # row number is saved in the `input` so get the expression to `get` the object from the initial search table
     input_seurat_expr <- server_env$available_seurat_objects %>% pluck('choiceValue') %>% pluck(input$seurats_table_rows_selected)
 
@@ -241,7 +244,8 @@ load_a_seurat.server <- function(input, output, session) {
   observeEvent(eventExpr=input$proportion_mt_picker, handlerExpr={
     req(seurat_object.reactions$seurat)
 
-    sprintf(fmt='### load_a_seurat.server-observeEvent-input$proportion_mt_picker [%s]', input$proportion_mt_picker) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$proportion_mt_picker [%s]', input$proportion_mt_picker) %>% message('')
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
@@ -261,7 +265,9 @@ load_a_seurat.server <- function(input, output, session) {
   ## react to the number of features per cell column being set
   observeEvent(eventExpr=input$n_features_picker, handlerExpr={
     req(seurat_object.reactions$seurat)
-    sprintf('### load_a_seurat.server-observeEvent-input$n_features_picker [%s]', input$n_features_picker) %>% message()
+
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_features_picker [%s]', input$n_features_picker) %>% message('')
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
@@ -284,7 +290,9 @@ load_a_seurat.server <- function(input, output, session) {
   ## react to the number of UMI column being set
   observeEvent(eventExpr=input$n_umi_picker, handlerExpr={
     req(seurat_object.reactions$seurat)
-    sprintf('### load_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message()
+
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message('')
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat

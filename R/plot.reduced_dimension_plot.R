@@ -53,8 +53,9 @@ reduced_dimension_plot.server <- function(input, output, session) {
 
   # render the reduced dimension plot
   renderPlot(expr={
-    sprintf(fmt='### reduced_dimension_plot.server-renderPlot [%s]', id) %>% message()
-   
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message('')
+
     # get feature-specific plotting elements
     output_plot <- NULL
     include_legend <- FALSE

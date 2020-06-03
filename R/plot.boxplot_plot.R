@@ -51,8 +51,9 @@ boxplot_plot.server <- function(input, output, session) {
 
   # render the boxplot
   renderPlot(expr={
-    sprintf(fmt='### boxplot_plot.server-renderPlot [%s]', id) %>% message()
-   
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sboxplot_plot.server-renderPlot') %>% message('')
+
     # get feature-specific plotting elements
     feature_plot <- NULL
     if(module_env$feature=='nCount_RNA') {

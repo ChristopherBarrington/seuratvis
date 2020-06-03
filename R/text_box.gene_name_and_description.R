@@ -32,6 +32,9 @@ picked_feature_and_description_text_box.server <- function(input, output, sessio
   session$ns('') %>% sprintf(fmt='### %spicked_feature_and_description_text_box.server') %>% message()
 
   renderValueBox(expr={
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %spicked_feature_and_description_text_box.server-renderValueBox') %>% message('')
+
     # create variables for shorthand
     picked_feature <- selections.rv[[session$ns('picked_feature')]]
 
@@ -59,7 +62,6 @@ picked_feature_and_description_text_box.server <- function(input, output, sessio
 #' @return a character string of the \code{attribute} from the \code{mart} for the \code{external_gene_name}.
 #' 
 get_formatted_gene_description <- function(external_gene_name, mart) {
-  message('### get_formatted_gene_description')
   tryCatch(expr=getBM(mart=mart, attributes='description', filter='external_gene_name', values=external_gene_name[1]),
            error=function(x) data.frame(description='Could not query biomaRt!')) -> description 
   

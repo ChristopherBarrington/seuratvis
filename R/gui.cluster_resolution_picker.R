@@ -63,9 +63,11 @@ cluster_resolution_picker.server <- function(input, output, session) {
 
   # react to the cluster resolution selection
   observeEvent(eventExpr=input$cluster_resolution_picker, handlerExpr={
-    message('### cluster_resolution_picker.server-observeEvent-input$cluster_resolution_picker')
-
+    # make sure these elements are defined
     req(seurat_object.reactions$seurat)
+
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %scluster_resolution_picker.server-observeEvent-input$cluster_resolution_picker [%s]', input$cluster_resolution_picker) %>% message('')
 
     # create variables for shorthand
     r <- input$cluster_resolution_picker
@@ -82,12 +84,15 @@ cluster_resolution_picker.server <- function(input, output, session) {
 
   # react to the cluster labels switch
   observeEvent(eventExpr=input$label_clusters, handlerExpr={
-    message('### cluster_resolution_picker.server-observeEvent-input$label_clusters')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %scluster_resolution_picker.server-observeEvent-input$label_clusters [%s]', input$label_clusters) %>% message('')
+
     seurat_object.reactions$label_clusters <- input$label_clusters})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    sprintf(fmt='### cluster_resolution_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat

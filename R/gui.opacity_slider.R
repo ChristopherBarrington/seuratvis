@@ -56,15 +56,16 @@ opacity_slider.server <- function(input, output, session) {
 
   # react to the opacity slider
   observeEvent(eventExpr=input$opacity_slider, handlerExpr={
-    message('### opacity_slider.server-observeEvent-input$opacity_slider')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sopacity_slider.server-observeEvent-input$opacity_slider [%s]', input$opacity_slider) %>% message('')
 
     # update the reactive
     seurat_object.reactions$opacity <- input$opacity_slider})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    message('### opacity_slider.server-observeEvent-seurat_object.reactions$seurat')
-    sprintf(fmt='### opacity_slider.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sopacity_slider.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message('')
 
     # update the reactive
     seurat_object.reactions$opacity <- 1})
