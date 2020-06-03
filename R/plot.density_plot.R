@@ -16,7 +16,7 @@
 #' @rdname density_plot
 #' 
 density_plot.ui <- function(id, feature) {
-  sprintf(fmt='### density_plot.ui [%s-%s]', id, feature) %>% message()
+  sprintf(fmt='### %s-density_plot.ui [%s]', id, feature) %>% message()
 
   id %<>% NS(id=feature) # combine the id and feature to allow multiple knee plots per id
   module <- 'density_plot'

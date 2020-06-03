@@ -16,7 +16,7 @@
 #' @rdname reduced_dimension_plo
 #' 
 reduced_dimension_plot.ui <- function(id, feature) {
-  sprintf(fmt='### reduced_dimension_plot.ui [%s-%s]', id, feature) %>% message()
+  sprintf(fmt='### %s-reduced_dimension_plot.ui [%s]', id, feature) %>% message()
 
   id %<>% NS(id=feature) # combine the id and feature to allow multiple UMAP plots per id
   module <- 'reduced_dimension_plot'

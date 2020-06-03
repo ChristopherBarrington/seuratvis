@@ -17,7 +17,7 @@
 #' @rdname total_umi_per_cell_filter
 #' 
 total_umi_per_cell_filter.ui <- function(id, label='UMIs per cell', low=TRUE, high=TRUE) {
-  message('### total_umi_per_cell_filter.ui')
+  sprintf(fmt='### %s-total_umi_per_cell_filter.ui', id) %>% message()
 
   module <- 'total_umi_per_cell_filter'
 

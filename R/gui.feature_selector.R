@@ -16,7 +16,7 @@
 #' @rdname feature_picker
 #' 
 feature_picker.ui <- function(id, label='Feature selection', include_metadata_switch=TRUE) {
-  message('### feature_picker.ui')
+  sprintf(fmt='### %s-feature_picker.ui', id) %>% message()
 
   module <- 'feature_picker'
 

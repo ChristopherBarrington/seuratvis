@@ -21,7 +21,7 @@
 #' @rdname available_seurats
 #' 
 available_seurats.ui <- function(id) {
-  message('### available_seurats.ui')
+  sprintf(fmt='### %s-available_seurats.ui', id) %>% message()
 
   module <- 'available_seurats'
 

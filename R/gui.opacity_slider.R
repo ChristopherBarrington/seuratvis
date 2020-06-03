@@ -16,7 +16,7 @@
 #' @rdname opacity_slider
 #' 
 opacity_slider.ui <- function(id, label='Opacity') {
-  message('### opacity_slider.ui')
+  sprintf(fmt='### %s-opacity_slider.ui', id) %>% message()
 
   module <- 'opacity_slider'
 

@@ -23,7 +23,7 @@
 #' @rdname colour_palette
 #' 
 colour_palette.ui <- function(id, label='Feature value colours', selectors=list(), include_full=FALSE) {
-  message('### colour_palette.ui')
+  sprintf(fmt='### %s-colour_palette.ui', id) %>% message()
 
   module <- 'colour_palette'
 

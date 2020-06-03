@@ -16,7 +16,7 @@
 #' @rdname knee_plot
 #' 
 knee_plot.ui <- function(id, feature) {
-  sprintf(fmt='### knee_plot.ui [%s-%s]', id, feature) %>% message()
+  sprintf(fmt='### %s-knee_plot.ui [%s]', id, feature) %>% message()
 
   id %<>% NS(id=feature) # combine the id and feature to allow multiple knee plots per id
   module <- 'knee_plot'

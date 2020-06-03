@@ -16,6 +16,8 @@
 #' @rdname number_of_reads_per_cell_text_box
 #' 
 number_of_reads_per_cell_text_box.ui <- function(id, width=12, f=median, f_name=deparse(substitute(f))) {
+  sprintf(fmt='### %s-number_of_reads_per_cell_text_box.ui', id) %>% message()
+
   module <- 'number_of_reads_per_cell_text_box'
 
   # make unique id for this object

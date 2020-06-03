@@ -17,7 +17,7 @@
 #' @rdname features_per_cell_filter
 #' 
 features_per_cell_filter.ui <- function(id, label='Features per cell', low=TRUE, high=TRUE) {
-  message('### features_per_cell_filter.ui')
+  sprintf(fmt='### %s-features_per_cell_filter.ui', id) %>% message()
 
   module <- 'features_per_cell_filter'
 

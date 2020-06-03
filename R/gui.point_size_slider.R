@@ -16,7 +16,7 @@
 #' @rdname point_size_slider
 #' 
 point_size_slider.ui <- function(id, label='Point size') {
-  message('### opacity_slider.ui')
+  sprintf(fmt='### %s-point_size_slider.ui', id) %>% message()
 
   module <- 'point_size_slider'
 

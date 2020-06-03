@@ -16,7 +16,7 @@
 #' @rdname boxplot_plot
 #' 
 boxplot_plot.ui <- function(id, feature) {
-  sprintf(fmt='### boxplot_plot.ui [%s-%s]', id, feature) %>% message()
+  sprintf(fmt='### %s-boxplot_plot.ui [%s]', id, feature) %>% message()
 
   id %<>% NS(id=feature) # combine the id and feature to allow multiple knee plots per id
   module <- 'boxplot_plot'

@@ -15,6 +15,8 @@
 #' @rdname project_name_text_box
 #' 
 project_name_text_box.ui <- function(id, width=12) {
+  sprintf(fmt='### %s-project_name_text_box.ui', id) %>% message()
+
   module <- 'project_name_text_box'
 
   # record the server(s) to call

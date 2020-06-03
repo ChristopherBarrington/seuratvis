@@ -17,7 +17,7 @@
 #' #' @rdname total_umi_per_cell_filter
 #' 
 show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', include_copy_buttons=TRUE) {
-  message('### show_filtering_parameters.ui')
+  sprintf(fmt='### %s-show_filtering_parameters.ui', id) %>% message()
 
   module <- 'show_filtering_parameters'
 

@@ -15,7 +15,7 @@
 #' @rdname feature_values_per_cluster_plot
 #' 
 feature_values_per_cluster_plot.ui <- function(id) {
-  sprintf(fmt='### feature_values_per_cluster_plot.ui [%s]', id) %>% message()
+  sprintf(fmt='### %s-feature_values_per_cluster_plot.ui', id) %>% message()
 
   module <- 'feature_values_per_cluster_plot'
 

@@ -15,6 +15,8 @@
 #' @rdname number_of_clusters_text_box
 #' 
 number_of_clusters_text_box.ui <- function(id, width=12) {
+  sprintf(fmt='### %s-number_of_clusters_text_box.ui', id) %>% message()
+
   module <- 'number_of_clusters_text_box'
 
   # make unique id for this object

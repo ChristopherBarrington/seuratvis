@@ -16,7 +16,7 @@
 #' @rdname percent_mt_per_cell_filter
 #' 
 percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt') {
-  message('### features_per_cell_filter.ui')
+  sprintf(fmt='### %s-percent_mt_per_cell_filter.ui', id) %>% message()
 
   module <- 'percent_mt_per_cell_filter'
 

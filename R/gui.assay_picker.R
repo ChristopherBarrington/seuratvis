@@ -16,7 +16,7 @@
 #' @rdname assay_picker
 #' 
 assay_picker.ui <- function(id, label='Assay') {
-  message('### assay_picker.ui')
+  sprintf(fmt='### %s-assay_picker.ui', id) %>% message()
 
   module <- 'assay_picker'
 

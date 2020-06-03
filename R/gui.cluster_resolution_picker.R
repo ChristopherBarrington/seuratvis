@@ -16,7 +16,7 @@
 #' @rdname cluster_resolution_picker
 #' 
 cluster_resolution_picker.ui <- function(id, label='Cluster resolutions', include_label_switch=FALSE) {
-  message('### cluster_resolution_picker.ui')
+  sprintf(fmt='### %s-cluster_resolution_picker.ui', id) %>% message()
 
   module <- 'cluster_resolution_picker'
 

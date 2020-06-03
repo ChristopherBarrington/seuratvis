@@ -16,7 +16,7 @@
 #' @rdname reduction_method_picker
 #' 
 reduction_method_picker.ui <- function(id, label='Reduction method') {
-  message('### reduction_method_picker.ui')
+  sprintf(fmt='### %s-reduction_method_picker.ui', id) %>% message()
 
   module <- 'reduction_method_picker'
 
