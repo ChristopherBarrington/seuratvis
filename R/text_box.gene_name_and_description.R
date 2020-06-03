@@ -27,12 +27,12 @@ picked_feature_and_description_text_box.ui <- function(id, width=12) {
 #' @rdname picked_feature_and_description_text_box
 #' 
 picked_feature_and_description_text_box.server <- function(input, output, session) {
-  renderValueBox(env=parent.frame(n=2), quoted=FALSE, expr={
+  renderValueBox(expr={
     message('### picked_feature_and_description_text_box.server')
 
     # create variables for shorthand
-    picked_feature <- seurat_object.reactions$picked_feature
-
+    picked_feature <- selections.rv[[session$ns('picked_feature')]]
+    
     # get gene description from biomaRt
     Misc(seurat_object.reactions$seurat, slot='mart') %>%
       get_formatted_gene_description(external_gene_name=picked_feature) -> subtitle

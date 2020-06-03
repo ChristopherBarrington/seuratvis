@@ -52,7 +52,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
    
     # get the data to plot
     cbind(seurat_object.reactions$picked_cluster_resolution_idents,
-          seurat_object.reactions$picked_feature_values) %>%
+          selections.rv[[session$ns('picked_feature_values')]]) %>%
       mutate(x={as.character(ident) %>% as.numeric()}) -> data
 
     # if the picked feature has numeric values

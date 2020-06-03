@@ -72,7 +72,7 @@ feature_picker.ui <- function(id, label='Feature selection', include_metadata_sw
 #' @rdname feature_picker
 #' 
 feature_picker.server <- function(input, output, session) {
-  message('### feature_picker.server')
+  sprintf(fmt='### %sfeature_picker.server', session$ns('')) %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='feature_picker') # provides `seuratvis_env`, `server_env` and `module_env`
@@ -80,42 +80,56 @@ feature_picker.server <- function(input, output, session) {
 
   # react to the feature selection
   ## if a feature is selected, copy it to the reactive
-  observeEvent(eventExpr=input$feature_picker_feature_names, handlerExpr={
-    sprintf(fmt='### feature_picker.server-observeEvent-input$feature_picker_feature_names', input$feature_picker_feature_names) %>% message()
+  observeEvent(eventExpr={input$feature_picker_feature_names }, handlerExpr={
+    # make sure these elements are defined
+    req(input$feature_picker_feature_names)
+    
+    # send a message
+    sprintf(fmt='!!! %sfeature_picker.server-observeEvent-input$feature_picker_feature_names [%s]', session$ns(''), input$feature_picker_feature_names) %>% message()
+    
     if(is.null(input$list_metadata) || !input$list_metadata)
-      seurat_object.reactions$picked_feature <- input$feature_picker_feature_names})
+      selections.rv[[session$ns('picked_feature')]] <- input$feature_picker_feature_names})
 
   ## if a metadata column is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_metadata, handlerExpr={
-    sprintf(fmt='### feature_picker.server-observeEvent-input$feature_picker_metadata [%s]', input$feature_picker_metadata) %>% message()
+    # make sure these elements are defined
+    req(input$feature_picker_metadata)
+
+    # send a message
+    sprintf(fmt='### %sfeature_picker.server-observeEvent-input$feature_picker_metadata [%s]', session$ns(''), input$feature_picker_metadata) %>% message()
+    
     if(!is.null(input$list_metadata) && input$list_metadata)
-      seurat_object.reactions$picked_feature <- input$feature_picker_metadata})
+      selections.rv[[session$ns('picked_feature')]] <- input$feature_picker_metadata})
 
   ## if the metadata switch is toggled, set the picked feature
   observeEvent(eventExpr=input$list_metadata, handlerExpr={
-    sprintf(fmt='### feature_picker.server-observeEvent-input$list_metadata [%s]', input$list_metadata) %>% message()
-
     # make sure these elements are defined
-    req(seurat_object.reactions$picked_feature_previous)
+    req(input$list_metadata)
+    req(selections.rv[[session$ns('picked_feature_previous')]])
+
+    # send a message
+    sprintf(fmt='### %sfeature_picker.server-observeEvent-input$list_metadata [%s]', session$ns(''), input$list_metadata) %>% message()
 
     # pick the feature to revert to
     ## if metadata switch is true, get the value of the metadata dropdown
     ## if metadata switch is false, get the previously shown feature (autocomplete_input return empty in this case)
-    picked_feature <- ifelse(input$list_metadata, input$feature_picker_metadata, seurat_object.reactions$picked_feature_previous)
-    seurat_object.reactions$picked_feature_previous <- seurat_object.reactions$picked_feature
+    picked_feature <- ifelse(input$list_metadata, input$feature_picker_metadata, selections.rv[[session$ns('picked_feature_previous')]])
+    selections.rv[[session$ns('picked_feature_previous')]] <- selections.rv[[session$ns('picked_feature_previous')]]
 
     # update the reactive
-    seurat_object.reactions$picked_feature <- picked_feature})
+    selections.rv[[session$ns('picked_feature')]] <- picked_feature})
 
   ## use the selected feature (it may be a feature or metadata)
-  observeEvent(eventExpr=seurat_object.reactions$picked_feature, handlerExpr={  
-    sprintf(fmt='### feature_picker.server-observeEvent-seurat_object.reactions$picked_feature [%s]', seurat_object.reactions$picked_feature) %>% message()
-
+  observeEvent(eventExpr=selections.rv[[session$ns('picked_feature')]], handlerExpr={
     # make sure these elements are defined
     req(seurat_object.reactions$seurat)
+    req(selections.rv[[session$ns('picked_feature')]])
+
+    # send a message
+    sprintf(fmt='### %sfeature_picker.server-observeEvent-seurat_object.reactions$picked_feature [%s]', session$ns(''), selections.rv[[session$ns('picked_feature_previous')]]) %>% message()
 
     # create variables for shorthand
-    picked <- seurat_object.reactions$picked_feature
+    picked <- selections.rv[[session$ns('picked_feature')]]
     seurat <- seurat_object.reactions$seurat
 
     # get the values for the selected feature from the loaded Seurat
@@ -134,26 +148,25 @@ feature_picker.server <- function(input, output, session) {
                       min=min_value, max=max_value, value=c(-Inf,Inf))
 
     # save feature information in the reactive
-    seurat_object.reactions$picked_feature_values <- picked_feature_values
-    seurat_object.reactions$value_range_limits <- c(min_value, max_value)})
+    selections.rv[[session$ns('picked_feature_values')]] <- picked_feature_values
+    selections.rv[[session$ns('value_range_limits')]] <- c(min_value, max_value)})
 
   # react to the colour scale limits
   observeEvent(eventExpr=input$value_range, handlerExpr={
-    input$value_range %>%
-      str_c(collapse=',') %>%
-      sprintf(fmt='### feature_picker.server-observeEvent-input$value_range [%s]') %>%
-      message()
-
     # make sure these elements are defined
-    req(seurat_object.reactions$value_range_limits)
+    req(selections.rv[[session$ns('value_range_limits')]])
+
+    # send a message
+    sprintf(fmt='### %sfeature_picker.server-observeEvent-input$value_range [%s]', session$ns(''), str_c(input$value_range, collapse=',')) %>% message()
 
     # update the reactive
     if(!identical(seurat_object.reactions$value_range_limits, input$value_range))
-      seurat_object.reactions$value_range_limits <- input$value_range})
+      selections.rv[[session$ns('value_range_limits')]] <- input$value_range})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    sprintf(fmt='### feature_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    # send a message
+    sprintf(fmt='### %sfeature_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', session$ns(''), seurat_object.reactions$formatted.project.name) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat
@@ -187,8 +200,9 @@ feature_picker.server <- function(input, output, session) {
                          choices=feature_picker_options$metadata, selected=feature_picker_selected$metadata)
 
     # update the reactive
-    seurat_object.reactions$picked_feature <- picked_feature
-    seurat_object.reactions$picked_feature_previous <- picked_feature
     seurat_object.reactions$feature_picker_features <- feature_picker_options$features
-    seurat_object.reactions$feature_picker_metadata <- feature_picker_options$metadata})
+    seurat_object.reactions$feature_picker_metadata <- feature_picker_options$metadata
+
+    selections.rv[[session$ns('picked_feature')]] <- picked_feature
+    selections.rv[[session$ns('picked_feature_previous')]] <- picked_feature})
 }

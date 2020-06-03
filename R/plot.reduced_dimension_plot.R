@@ -82,7 +82,8 @@ reduced_dimension_plot.server <- function(input, output, session) {
       }
     } else if(module_env$feature=='picked_feature_values') {
       # get reduced dimension coordinates and the picked feature
-      cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_feature_values) %>%
+      cbind(seurat_object.reactions$dimred,
+            selections.rv[[{session$ns('picked_feature_values') %>% str_replace('-.*-', '-')}]]) %>%
         rename(picked_feature_value=value) -> data
 
       # if the picked feature has numeric values
@@ -100,7 +101,7 @@ reduced_dimension_plot.server <- function(input, output, session) {
           c_min <- session$ns('low') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
           c_mid <- 'white'
           c_max <- session$ns('high') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
-          range_limits <- seurat_object.reactions$value_range_limits
+          range_limits <- selections.rv[[{session$ns('value_range_limits') %>% str_replace('-.*-', '-')}]]
 
           colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=range_limits, oob=scales::squish)
           if(range_limits %>% sign() %>% Reduce(f='*') %>% equals(-1)) {
