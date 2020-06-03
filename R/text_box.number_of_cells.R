@@ -39,6 +39,8 @@ number_of_cells_text_box.ui <- function(id, width=12) {
 #' @rdname number_of_cells_text_box
 #' 
 number_of_cells_text_box.server <- function(input, output, session) {
+  session$ns('') %>% sprintf(fmt='### %snumber_of_cells_text_box.server') %>% message()
+
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='number_of_cells_text_box') # provides `seuratvis_env`, `server_env` and `module_env`
 

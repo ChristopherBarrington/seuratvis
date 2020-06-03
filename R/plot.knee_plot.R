@@ -43,7 +43,7 @@ knee_plot.ui <- function(id, feature) {
 #' @rdname knee_plot
 #'
 knee_plot.server <- function(input, output, session) {
-  message('### knee_plot.server')
+  session$ns('') %>% sprintf(fmt='### %sknee_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='knee_plot') # provides `seuratvis_env`, `server_env` and `module_env`

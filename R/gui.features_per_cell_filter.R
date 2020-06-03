@@ -61,7 +61,7 @@ features_per_cell_filter.ui <- function(id, label='Features per cell', low=TRUE,
 #' @rdname features_per_cell_filter
 #'
 features_per_cell_filter.server <- function(input, output, session) {
-  message('### features_per_cell_filter.server')
+  session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='features_per_cell_filter') # provides `seuratvis_env`, `server_env` and `module_env`

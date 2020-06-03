@@ -43,7 +43,7 @@ reduced_dimension_plot.ui <- function(id, feature) {
 #' @rdname reduced_dimension_plo
 #'
 reduced_dimension_plot.server <- function(input, output, session) {
-    sprintf('### reduced_dimension_plot.server') %>% message()
+  session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='reduced_dimension_plot') # provides `seuratvis_env`, `server_env` and `module_env`

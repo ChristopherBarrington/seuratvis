@@ -44,7 +44,7 @@ density_plot.ui <- function(id, feature) {
 #' @rdname density_plot
 #'
 density_plot.server <- function(input, output, session) {
-  sprintf('### density_plot.server') %>% message()
+  session$ns('') %>% sprintf(fmt='### %sdensity_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='density_plot') # provides `seuratvis_env`, `server_env` and `module_env`

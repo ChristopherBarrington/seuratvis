@@ -29,9 +29,9 @@ picked_feature_and_description_text_box.ui <- function(id, width=12) {
 #' @rdname picked_feature_and_description_text_box
 #' 
 picked_feature_and_description_text_box.server <- function(input, output, session) {
-  renderValueBox(expr={
-    message('### picked_feature_and_description_text_box.server')
+  session$ns('') %>% sprintf(fmt='### %spicked_feature_and_description_text_box.server') %>% message()
 
+  renderValueBox(expr={
     # create variables for shorthand
     picked_feature <- selections.rv[[session$ns('picked_feature')]]
 

@@ -72,7 +72,7 @@ feature_picker.ui <- function(id, label='Feature selection', include_metadata_sw
 #' @rdname feature_picker
 #' 
 feature_picker.server <- function(input, output, session) {
-  sprintf(fmt='### %sfeature_picker.server', session$ns('')) %>% message()
+  session$ns('') %>% sprintf(fmt='### %sfeature_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='feature_picker') # provides `seuratvis_env`, `server_env` and `module_env`

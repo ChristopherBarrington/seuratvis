@@ -73,7 +73,7 @@ colour_palette.ui <- function(id, label='Feature value colours', selectors=list(
 #' @rdname colour_palette
 #' 
 update_palette_type.server <- function(input, output, session) {
-  message('### update_palette_type.server')
+  session$ns('') %>% sprintf(fmt='### %supdate_palette_type.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='colour_palette') # provides `seuratvis_env`, `server_env` and `module_env`
@@ -96,7 +96,7 @@ update_palette_type.server <- function(input, output, session) {
 #' @rdname colour_palette
 #' 
 add_to_colour_palette.server <- function(input, output, session) {
-  message('### add_to_colour_palette.server')
+  session$ns('') %>% sprintf(fmt='### %sadd_to_colour_palette.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='colour_palette') # provides `seuratvis_env`, `server_env` and `module_env`

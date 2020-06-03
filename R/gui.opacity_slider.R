@@ -48,7 +48,7 @@ opacity_slider.ui <- function(id, label='Opacity') {
 #' @rdname opacity_slider
 #' 
 opacity_slider.server <- function(input, output, session) {
-  message('### opacity_slider.server')
+  session$ns('') %>% sprintf(fmt='### %sopacity_slider.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='opacity_slider') # provides `seuratvis_env`, `server_env` and `module_env`

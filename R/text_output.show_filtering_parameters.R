@@ -60,7 +60,7 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
 #' @rdname show_filtering_parameters
 #' 
 show_filtering_parameters.server <- function(input, output, session) {
-  message('### show_filtering_parameters.server')
+  session$ns('') %>% sprintf(fmt='### %sshow_filtering_parameters.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='show_filtering_parameters') # provides `seuratvis_env`, `server_env` and `module_env`

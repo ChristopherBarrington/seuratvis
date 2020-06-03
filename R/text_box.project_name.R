@@ -29,6 +29,8 @@ project_name_text_box.ui <- function(id, width=12) {
 #' @rdname project_name_text_box
 #' 
 project_name_text_box.server <- function(input, output, session) {
+  session$ns('') %>% sprintf(fmt='### %sproject_name_text_box.server') %>% message()
+
   renderValueBox(env=parent.frame(n=2), quoted=FALSE, expr={
     list(value={seurat_object.reactions$seurat %>% Project() %>% reformat_project_name()},
          subtitle='Loaded Seurat object',

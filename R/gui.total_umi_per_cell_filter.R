@@ -62,7 +62,7 @@ total_umi_per_cell_filter.ui <- function(id, label='UMIs per cell', low=TRUE, hi
 #' @rdname total_umi_per_cell_filter
 #'
 total_umi_per_cell_filter.server <- function(input, output, session) {
-  message('### total_umi_per_cell_filter.server')
+  session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='total_umi_per_cell_filter') # provides `seuratvis_env`, `server_env` and `module_env`

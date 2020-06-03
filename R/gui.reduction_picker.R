@@ -50,7 +50,7 @@ reduction_method_picker.ui <- function(id, label='Reduction method') {
 #' @rdname reduction_method_picker
 #' 
 reduction_method_picker.server <- function(input, output, session) {
-  message('### reduction_method_picker.server')
+  session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='reduction_method_picker') # provides `seuratvis_env`, `server_env` and `module_env`

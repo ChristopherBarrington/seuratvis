@@ -55,7 +55,7 @@ cluster_resolution_picker.ui <- function(id, label='Cluster resolutions', includ
 #' @rdname cluster_resolution_picker
 #' 
 cluster_resolution_picker.server <- function(input, output, session) {
-  message('### cluster_resolution_picker.server')
+  session$ns('') %>% sprintf(fmt='### %scluster_resolution_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='cluster_resolution_picker') # provides `seuratvis_env`, `server_env` and `module_env`

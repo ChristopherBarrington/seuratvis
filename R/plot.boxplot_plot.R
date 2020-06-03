@@ -43,7 +43,7 @@ boxplot_plot.ui <- function(id, feature) {
 #' @rdname boxplot_plot
 #'
 boxplot_plot.server <- function(input, output, session) {
-  sprintf('### boxplot_plot.server') %>% message()
+  session$ns('') %>% sprintf(fmt='### %sboxplot_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='boxplot_plot') # provides `seuratvis_env`, `server_env` and `module_env`

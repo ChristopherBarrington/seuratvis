@@ -56,7 +56,7 @@ available_seurats.ui <- function(id) {
 #' @rdname available_seurats
 #' 
 available_seurats.server <- function(input, output, session) {
-  message('### available_seurats.server')
+  session$ns('') %>% sprintf(fmt='### %savailable_seurats.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='available_seurats') # provides `seuratvis_env`, `server_env` and `module_env`
@@ -156,7 +156,7 @@ available_seurats.server <- function(input, output, session) {
 #' @rdname available_seurats
 #' 
 load_a_seurat.server <- function(input, output, session) {
-  message('### load_a_seurat.server')
+  session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='available_seurats') # provides `seuratvis_env`, `server_env` and `module_env`

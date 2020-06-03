@@ -48,7 +48,7 @@ point_size_slider.ui <- function(id, label='Point size') {
 #' @rdname point_size_slider
 #' 
 point_size_slider.server <- function(input, output, session) {
-  message('### point_size_slider.server')
+  session$ns('') %>% sprintf(fmt='### %spoint_size_slider.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='point_size_slider') # provides `seuratvis_env`, `server_env` and `module_env`
