@@ -164,8 +164,8 @@ load_a_seurat.server <- function(input, output, session) {
 
   # react to a row being selected in the available Seurats table
   observeEvent(eventExpr=input$seurats_table_rows_selected, handlerExpr={
-    if(is.null(input$seurats_table_rows_selected))
-      return(NULL)
+    # make sure these elements are defined
+    req(input$seurats_table_rows_selected)
 
     # send a message
     session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$seurats_table_rows_selected [%s]', input$seurats_table_rows_selected) %>% message('')
@@ -173,29 +173,16 @@ load_a_seurat.server <- function(input, output, session) {
     # row number is saved in the `input` so get the expression to `get` the object from the initial search table
     input_seurat_expr <- server_env$available_seurat_objects %>% pluck('choiceValue') %>% pluck(input$seurats_table_rows_selected)
 
-    progress <- shiny::Progress$new(session=session, min=0, max=9/10)
-    on.exit(progress$close())
-    progress$set(value=0, message='Loading environment')
-
     # load Seurat object from user
-    progress$inc(detail='Updating UI with cluster options')
     seurat <- parse(text=input_seurat_expr) %>% eval()
 
-    progress$inc(detail='Checking meta.data')
     if(is.null(seurat@meta.data$seurat_clusters))
       seurat@meta.data$seurat_clusters <- 0
 
-    progress$inc(detail='Setting default assay') # keep here for now
     selected_assay <- 'RNA'
     DefaultAssay(seurat) <- selected_assay
     if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
       seurat <- NormalizeData(seurat)
-
-    progress$inc(detail='Initialising reduced dimension plot')
-
-    progress$inc(detail='Counting clusters identified in each set')
-
-    progress$inc(detail='Getting summary statistics')
 
     #! TODO: remove seurat_object.reactions$reference_metrics and cell_filtering_data.reference
     list(n_cells=ncol(seurat),
@@ -210,9 +197,6 @@ load_a_seurat.server <- function(input, output, session) {
          # features_per_cell_min=min(seurat@meta.data$nFeature_RNA), features_per_cell_max=max(seurat@meta.data$nFeature_RNA),
          project=Project(seurat)) -> cell_filtering_data.reference
 
-    progress$inc(detail='Updating UI elements')
-
-    progress$inc(detail='Saving variables')
     available_assays <- Assays(seurat)
     available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
 
@@ -242,6 +226,7 @@ load_a_seurat.server <- function(input, output, session) {
   # react when the configuration options are changed
   ## react to the percent mitochondria column being set
   observeEvent(eventExpr=input$proportion_mt_picker, handlerExpr={
+    # make sure these elements are defined
     req(seurat_object.reactions$seurat)
 
     # send a message
@@ -264,6 +249,7 @@ load_a_seurat.server <- function(input, output, session) {
   
   ## react to the number of features per cell column being set
   observeEvent(eventExpr=input$n_features_picker, handlerExpr={
+    # make sure these elements are defined
     req(seurat_object.reactions$seurat)
 
     # send a message
@@ -289,6 +275,7 @@ load_a_seurat.server <- function(input, output, session) {
 
   ## react to the number of UMI column being set
   observeEvent(eventExpr=input$n_umi_picker, handlerExpr={
+    # make sure these elements are defined
     req(seurat_object.reactions$seurat)
 
     # send a message

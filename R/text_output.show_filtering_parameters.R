@@ -70,7 +70,7 @@ show_filtering_parameters.server <- function(input, output, session) {
   group_format_subset_conditional <- function(x) x %>% na.omit() %>% paste(collapse=' & ')
 
   observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
-    # make sure required reactives are available
+    # make sure these elements are defined
     req(seurat_object.reactions$project)
     req(seurat_configuration.reactions$n_features_variable)
     req(seurat_configuration.reactions$n_umi_variable)

@@ -14,9 +14,7 @@ cell_filtering.server <- function(input, output, session) {
 
   # react to the filtering parameters being changed
   observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
-    message('### cell_filtering.server-observeEvent-reactiveValuesToList(filtered_cells.reactions)')
-
-    # make sure seurat object is loaded
+    # make sure these elements are defined
     req(seurat_object.reactions$seurat)
 
     req(seurat_object.reactions$n_features_values)
@@ -25,6 +23,9 @@ cell_filtering.server <- function(input, output, session) {
 
     req(seurat_configuration.reactions$n_features_variable)
     req(seurat_configuration.reactions$n_umi_variable)
+
+    # send a message
+    message('### cell_filtering.server-observeEvent-reactiveValuesToList(filtered_cells.reactions)')
 
     # create variables for shorthand
     cell_metadata <- seurat_object.reactions$cell_metadata
