@@ -25,6 +25,15 @@ plotting_options.rv <- reactiveValues()
 #' 
 ui_element_ids.env <- new.env()
 
+#' Reactive list of UI element selections
+#' 
+#' @details
+#' Elements of the list can be accessed with \code{session$ns('feature')}.
+#' 
+#' @param `-picked_feature` name of picked feature from a tab
+#' 
+selections.rv <- reactiveValues()
+
 shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
