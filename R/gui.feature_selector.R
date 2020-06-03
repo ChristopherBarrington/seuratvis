@@ -30,6 +30,11 @@ feature_picker.ui <- function(id, label='Feature selection', include_metadata_sw
   e$include_metadata_switch <- include_metadata_switch
   assign(x=module_ns, val=e, envir=module_environments)
 
+  # track the re-used UI elements in each namespace
+  get0(env=ui_element_ids.env, x=NS(namespace=module, id='feature_picker_feature_names')) %>%
+    append(ns(id='feature_picker_feature_names')) %>%
+    assign(env=ui_element_ids.env, x=NS(namespace=module, id='feature_picker_feature_names'))
+
   # record the server(s) to call
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
@@ -78,8 +83,7 @@ feature_picker.server <- function(input, output, session) {
   observeEvent(eventExpr=input$feature_picker_feature_names, handlerExpr={
     sprintf(fmt='### feature_picker.server-observeEvent-input$feature_picker_feature_names', input$feature_picker_feature_names) %>% message()
     if(is.null(input$list_metadata) || !input$list_metadata)
-      seurat_object.reactions$picked_feature <- input$feature_picker_feature_names
-    })
+      seurat_object.reactions$picked_feature <- input$feature_picker_feature_names})
 
   ## if a metadata column is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_metadata, handlerExpr={

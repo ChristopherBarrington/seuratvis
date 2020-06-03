@@ -21,6 +21,10 @@ reference_metrics.rv <- reactiveValues()
 #' 
 plotting_options.rv <- reactiveValues()
 
+#' UI elements by module
+#' 
+ui_element_ids.env <- new.env()
+
 shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
