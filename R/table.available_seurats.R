@@ -231,15 +231,6 @@ load_a_seurat.server <- function(input, output, session) {
     available_assays <- Assays(seurat)
     available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
 
-    # copy the important stuff into the reaction values
-    seurat_object.reactions$active_object_expr <- input_seurat_expr
-    seurat_object.reactions$seurat <- seurat
-    seurat_object.reactions$mart <- seurat@misc$mart
-    seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
-    seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
-    seurat_object.reactions$cell_metadata <- seurat@meta.data
-    seurat_object.reactions$project <- Project(seurat)
-
     # update ui elements
     ## get the numeric metadata variables
     sapply(seurat@meta.data, is.numeric) %>% subset(x=colnames(seurat@meta.data)) -> choices
@@ -252,7 +243,16 @@ load_a_seurat.server <- function(input, output, session) {
     ## define the choices and default in the input ui elements
     updateSelectizeInput(session=session, inputId='n_features_picker', choices=choices, selected=n_features_picker_default)
     updateSelectizeInput(session=session, inputId='n_umi_picker', choices=choices, selected=n_umi_picker_default)
-    updateSelectizeInput(session=session, inputId='proportion_mt_picker', choices=choices, selected=proportion_mt_picker_default)})
+    updateSelectizeInput(session=session, inputId='proportion_mt_picker', choices=choices, selected=proportion_mt_picker_default)
+
+    # copy the important stuff into the reaction values
+    seurat_object.reactions$active_object_expr <- input_seurat_expr
+    seurat_object.reactions$mart <- seurat@misc$mart
+    seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
+    seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
+    seurat_object.reactions$cell_metadata <- seurat@meta.data
+    seurat_object.reactions$project <- Project(seurat)
+    seurat_object.reactions$seurat <- seurat})
 
   # react when the configuration options are changed
   ## react to the percent mitochondria column being set
