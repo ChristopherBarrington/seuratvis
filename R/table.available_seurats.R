@@ -79,6 +79,12 @@ available_seurats.server <- function(input, output, session) {
   collapse_strings <- function(x, replacement='-', sep=', ')
     ifelse(length(x)==0 | (length(x)==1 && x==''), replacement, str_c(x, collapse=sep))
 
+  if(nrow(server_env$available_seurat_objects)==0) {
+    #! TODO: use confirmSweetAlert to send a message to an observer to `stop('no seurats loaded!')` the app
+    sendSweetAlert(session=session, type='error', html=FALSE, title='We have a problem!', text='No Seurat objects found!', btn_labels='OK')
+    return(NULL)
+  }
+
   server_env$available_seurat_objects %>%
     dplyr::select(-choiceName) %>%
     plyr::adply(.margins=1, function(params) {
