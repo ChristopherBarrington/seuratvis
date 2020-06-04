@@ -24,9 +24,6 @@ cell_filtering.server <- function(input, output, session) {
     req(seurat_configuration.reactions$n_features_variable)
     req(seurat_configuration.reactions$n_umi_variable)
 
-    # send a message
-    message('### cell_filtering.server-observeEvent-reactiveValuesToList(filtered_cells.reactions)')
-
     # create variables for shorthand
     cell_metadata <- seurat_object.reactions$cell_metadata
     min_umi_per_cell <- filtering_parameters.reactions$total_umi_per_cell_min
@@ -39,6 +36,9 @@ cell_filtering.server <- function(input, output, session) {
             min_features_per_cell>0 & max_features_per_cell>0 &
             max_percent_mitochondria>0))
       return(NULL)
+
+    # send a message
+    message('### cell_filtering.server-observeEvent-reactiveValuesToList(filtered_cells.reactions)')
 
     n_features_values <- seurat_object.reactions$n_features_values %>% unlist(use.names=FALSE)
     proportion_mt_values <- seurat_object.reactions$proportion_mt_values %>% unlist(use.names=FALSE)

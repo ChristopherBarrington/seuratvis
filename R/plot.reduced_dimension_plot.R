@@ -40,7 +40,7 @@ reduced_dimension_plot.ui <- function(id, feature) {
 
 #' Produce the ggplot object for a scatterplot
 #' 
-#' @imports ggrepel
+#' @import ggrepel
 #' 
 #' @rdname reduced_dimension_plot
 #'

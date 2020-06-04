@@ -143,7 +143,7 @@ density_plot.server <- function(input, output, session) {
     }})
 
   # reset the brush when n features variable is changed
-  #' TODO: these should not require the NS() call ...
+  #! TODO: these should not require the NS() call ...
   observeEvent(eventExpr=seurat_configuration.reactions$reset_n_features, handlerExpr={
     # send a message
     session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-observeEvent-seurat_configuration.reactions$reset_n_features [%s]', seurat_configuration.reactions$reset_n_features) %>% message('')

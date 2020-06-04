@@ -63,5 +63,6 @@ shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
   # any code to exectue when the session ends
-  session$onSessionEnded(function() {message('### session ended')})
+  session$onSessionEnded(function() {
+    message('### session ended')})
 }
