@@ -256,9 +256,10 @@ load_a_seurat.server <- function(input, output, session) {
 
   # react when the configuration options are changed
   ## react to the percent mitochondria column being set
-  observeEvent(eventExpr=input$proportion_mt_picker, handlerExpr={
+  observeEvent(eventExpr=c(input$proportion_mt_picker, seurat_object.reactions$seurat), handlerExpr={
     # make sure these elements are defined
     req(seurat_object.reactions$seurat)
+    req(input$proportion_mt_picker)
 
     # send a message
     session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$proportion_mt_picker [%s]', input$proportion_mt_picker) %>% message('')
@@ -279,9 +280,10 @@ load_a_seurat.server <- function(input, output, session) {
     filtering_parameters.reactions$max_percent_mitochondria <- high})
   
   ## react to the number of features per cell column being set
-  observeEvent(eventExpr=input$n_features_picker, handlerExpr={
+  observeEvent(eventExpr=c(input$n_features_picker, seurat_object.reactions$seurat), handlerExpr={
     # make sure these elements are defined
     req(seurat_object.reactions$seurat)
+    req(input$n_features_picker)
 
     # send a message
     session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_features_picker [%s]', input$n_features_picker) %>% message('')
@@ -305,9 +307,10 @@ load_a_seurat.server <- function(input, output, session) {
     filtering_parameters.reactions$features_per_cell_max <- high})
 
   ## react to the number of UMI column being set
-  observeEvent(eventExpr=input$n_umi_picker, handlerExpr={
+  observeEvent(eventExpr=c(input$n_umi_picker, seurat_object.reactions$seurat), handlerExpr={
     # make sure these elements are defined
     req(seurat_object.reactions$seurat)
+    req(input$n_umi_picker)
 
     # send a message
     session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message('')
