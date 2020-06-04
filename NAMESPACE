@@ -3,6 +3,7 @@
 export(seuratvis)
 import(DT)
 import(colourpicker)
+import(ggrepel)
 import(scales)
 import(shiny)
 importFrom(biomaRt,getBM)

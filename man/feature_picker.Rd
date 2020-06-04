@@ -19,7 +19,7 @@ feature_picker.server(input, output, session)
 \item{label}{text label of the element}
 }
 \description{
-Provides a method to select genes/features of a dataset
+Provides a method to select genes/features/metadata of a dataset
 }
 \details{
 Updates the Seurat object reactive values.
