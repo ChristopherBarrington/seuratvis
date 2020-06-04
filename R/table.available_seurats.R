@@ -176,6 +176,31 @@ load_a_seurat.server <- function(input, output, session) {
     # send a message
     session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$seurats_table_rows_selected [%s]', input$seurats_table_rows_selected) %>% message('')
 
+    # empty out the reactives
+    for(i in names(seurat_object.reactions))
+      seurat_object.reactions[[i]] <- NULL
+
+    for(i in names(filtering_parameters.reactions))
+      filtering_parameters.reactions[[i]] <- NULL
+
+    for(i in names(filtered_cells.reactions))
+      filtered_cells.reactions[[i]] <- NULL
+
+    for(i in names(seurat_configuration.reactions))
+      seurat_configuration.reactions[[i]] <- NULL
+
+    for(i in names(filtering_arguments.reactions))
+      filtering_arguments.reactions[[i]] <- NULL
+
+    for(i in names(reference_metrics.rv))
+      reference_metrics.rv[[i]] <- NULL
+
+    for(i in names(plotting_options.rv))
+      plotting_options.rv[[i]] <- NULL
+
+    for(i in names(selections.rv))
+      selections.rv[[i]] <- NULL
+
     # row number is saved in the `input` so get the expression to `get` the object from the initial search table
     input_seurat_expr <- server_env$available_seurat_objects %>% pluck('choiceValue') %>% pluck(input$seurats_table_rows_selected)
 
