@@ -40,7 +40,9 @@ reduced_dimension_plot.ui <- function(id, feature) {
 
 #' Produce the ggplot object for a scatterplot
 #' 
-#' @rdname reduced_dimension_plo
+#' @imports ggrepel
+#' 
+#' @rdname reduced_dimension_plot
 #'
 reduced_dimension_plot.server <- function(input, output, session) {
   session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server') %>% message()
@@ -56,76 +58,69 @@ reduced_dimension_plot.server <- function(input, output, session) {
     # send a message
     session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message('')
 
+    # make a base plot
+    cbind(seurat_object.reactions$dimred,
+          seurat_object.reactions$picked_cluster_resolution_idents,
+          {selections.rv[[{session$ns('picked_feature_values') %>% str_replace('-.*-', '-')}]] %>% rename(picked_feature_value=value)}) %>%
+      arrange(picked_feature_value) %>%
+      ggplot() +
+      aes(x=DIMRED_1, y=DIMRED_2) +
+      geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
+      geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
+      theme_void() +
+      theme(legend.position='none', legend.text=element_blank()) -> output_plot
+
     # get feature-specific plotting elements
-    output_plot <- NULL
     include_legend <- FALSE
     if(module_env$feature=='selected_cluster_resolution') {
       # get reduced dimension coordinates and currently selected cluster resolution and make the scatterplot
-      cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_cluster_resolution_idents) %>%
-        ggplot() +
-        aes(x=DIMRED_1, y=DIMRED_2, colour=ident) +
-        geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
-        geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
-        theme_void() +
-        theme(legend.position='none') -> output_plot
+      output_plot +
+        aes(colour=ident) -> output_plot
 
       # if labels should be added, add them
       if(seurat_object.reactions$label_clusters) {
-        cbind(seurat_object.reactions$dimred, seurat_object.reactions$picked_cluster_resolution_idents) %>%
+        output_plot$data %>%
           group_by(ident) %>%
           summarise(DIMRED_1=mean(DIMRED_1), DIMRED_2=mean(DIMRED_2)) -> data_labels
 
         output_plot +
-          ggrepel::geom_label_repel(data=data_labels,
-                                    mapping=aes(label=ident),
-                                    colour='black',
-                                    size=12/(14/5)) -> output_plot
+          geom_label_repel(data=data_labels,
+                           mapping=aes(label=ident),
+                           colour='black',
+                           size=12/(14/5)) -> output_plot
       }
+      include_legend <- FALSE
     } else if(module_env$feature=='picked_feature_values') {
-      # get reduced dimension coordinates and the picked feature
-      cbind(seurat_object.reactions$dimred,
-            selections.rv[[{session$ns('picked_feature_values') %>% str_replace('-.*-', '-')}]]) %>%
-        rename(picked_feature_value=value) -> data
-
       # if the picked feature has numeric values
-      if(is.numeric(data$picked_feature_value)) {
+      if(is.numeric(output_plot$data$picked_feature_value)) {
         # make the scatterplot
-        data %>%
-          arrange(picked_feature_value) %>%
-          ggplot() +
-          aes(x=DIMRED_1, y=DIMRED_2, colour=picked_feature_value) +
-          geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
-          geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
-          theme_void() +
-          theme(legend.position='none', legend.text=element_blank()) -> output_plot
+        output_plot +
+          aes(colour=picked_feature_value) -> output_plot
 
-          c_min <- session$ns('low') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
-          c_mid <- 'white'
-          c_max <- session$ns('high') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
-          range_limits <- selections.rv[[{session$ns('value_range_limits') %>% str_replace('-.*-', '-')}]]
+        c_min <- session$ns('low') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
+        c_mid <- 'white'
+        c_max <- session$ns('high') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
+        c_range_limits <- selections.rv[[{session$ns('value_range_limits') %>% str_replace('-.*-', '-')}]]
 
-          colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=range_limits, oob=scales::squish)
-          if(range_limits %>% sign() %>% Reduce(f='*') %>% equals(-1)) {
-            colour_gradient <- scale_colour_gradientn(colours=c(low=c_min, mid=c_mid, high=c_max), 
-                                                      values={range_limits %>% c(0) %>% sort() %>% scales::rescale()},
-                                                      limits=range_limits, breaks=0)
-            output_plot <- output_plot + theme(legend.text=element_text())
-          }
+        colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=c_range_limits, oob=scales::squish)
+        if(c_range_limits %>% sign() %>% Reduce(f='*') %>% equals(-1)) {
+          colour_gradient <- scale_colour_gradientn(colours=c(low=c_min, mid=c_mid, high=c_max), 
+                                                    values={c_range_limits %>% c(0) %>% sort() %>% scales::rescale()},
+                                                    limits=c_range_limits, breaks=0)
+          output_plot <- output_plot + theme(legend.text=element_text())
+        }
 
-          output_plot <- output_plot + colour_gradient
-          include_legend <- TRUE
+        output_plot <- output_plot + colour_gradient
+        include_legend <- TRUE
       } else { # the picked feature is factor-like
         # make the scatterplot and facet by picked feature value
-        data %>%
-          arrange(picked_feature_value) %>%
-          ggplot() +
-          aes(x=DIMRED_1, y=DIMRED_2, colour=picked_feature_value) +
-          geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
-          facet_wrap(~picked_feature_value, scales='free') +
-          guides(colour=guide_legend(override.aes=list(size=3, shape=15))) +
-          theme_void() +
-          theme() -> output_plot
-        include_legend <- TRUE
+        output_plot +
+          aes(colour=picked_feature_value) +
+          facet_wrap(~picked_feature_value, scales='fixed') +
+          theme(panel.background=element_rect(fill=NA, colour='black'),
+                strip.background=element_rect(fill=NA, colour='black'),
+                legend.position='none') -> output_plot
+        include_legend <- FALSE
       }
     } else {
       sprintf('!!! cannot deal with %s', module_env$feature) %>% stop()
