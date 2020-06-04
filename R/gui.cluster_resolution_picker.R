@@ -110,6 +110,7 @@ cluster_resolution_picker.server <- function(input, output, session) {
       summarise(N=length(unique(ID))) %>%
       deframe() -> clusters_per_resolution
 
+    seurat_object.reactions$label_clusters <- TRUE
     seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
     seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution['seurat_clusters']
     seurat_object.reactions$picked_cluster_resolution_idents <- FetchData(object=seurat, vars='seurat_clusters') %>% set_names('ident')})
