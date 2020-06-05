@@ -33,7 +33,6 @@ opacity_slider.ui <- function(id, label='Opacity') {
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # make ui elements
-  ## if a label switch is required, make one
   sliderInput(inputId=ns(id='opacity_slider'), label=label, min=0.1, max=1, step=0.1, value=1) -> slider
 
   # return ui element(s)
