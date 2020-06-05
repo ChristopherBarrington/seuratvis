@@ -63,6 +63,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
         # filter(value>0) %>%
         group_by(ident, x) %>%
         summarise(q25=quantile(value, 0.25), q75=quantile(value, 0.75), median=median(value)) %>%
+        mutate(is_selected_cluster_id=ident %in% selections.rv[[{session$ns('cluster_id_picker') %>% str_replace('-.*-', '-')}]]) %>%
         mutate(iqr=q75-q25, lower=q25-1.5*iqr, upper=q75+1.5*iqr) -> cluster_data_summary
 
       cluster_data_summary %>%
@@ -71,7 +72,8 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
         aes(x=x, y=y, colour=ident) +
         labs(y='Feature value (median ± 1.5x IQR)') +
         geom_line(size=1) +
-        geom_point(mapping=aes(y=median), colour='black', shape=20, size=3) -> feature_plot
+        geom_point(mapping=aes(y=median, fill=is_selected_cluster_id), shape=21, size=3, colour='black') +
+        scale_fill_manual(values=c(`FALSE`='grey90', `TRUE`='darkorange1')) -> feature_plot
     } else { # the picked feature is factor-like
       # make a frequency bar plot
       data %>%

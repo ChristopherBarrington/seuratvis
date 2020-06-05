@@ -62,6 +62,7 @@ reduced_dimension_plot.server <- function(input, output, session) {
     cbind(seurat_object.reactions$dimred,
           seurat_object.reactions$picked_cluster_resolution_idents,
           {selections.rv[[{session$ns('picked_feature_values') %>% str_replace('-.*-', '-')}]] %>% rename(picked_feature_value=value)}) %>%
+      mutate(is_selected_cluster_id=ident %in% selections.rv[[{session$ns('cluster_id_picker') %>% str_replace('-.*-', '-')}]]) %>%
       arrange(picked_feature_value) %>%
       ggplot() +
       aes(x=DIMRED_1, y=DIMRED_2) +
@@ -122,6 +123,14 @@ reduced_dimension_plot.server <- function(input, output, session) {
                 legend.position='none') -> output_plot
         include_legend <- FALSE
       }
+    } else if(module_env$feature=='selected_cluster_ids') {
+      output_plot +
+        aes(colour=is_selected_cluster_id, alpha=is_selected_cluster_id) +
+        scale_colour_manual(values=c(`FALSE`='grey90', `TRUE`='darkorange1')) +
+        scale_alpha_manual(values=c(`FALSE`=0.1, `TRUE`=1)) -> output_plot
+      output_plot$data %<>% arrange(is_selected_cluster_id)
+      output_plot$layers[[3]]$aes_params$alpha <- NULL
+      include_legend <- FALSE
     } else {
       sprintf('!!! cannot deal with %s', module_env$feature) %>% stop()
     }
