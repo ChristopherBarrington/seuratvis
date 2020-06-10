@@ -14,9 +14,7 @@ cell_filtering.server <- function(input, output, session) {
 
   # react to the filtering parameters being changed
   observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
-    message('### cell_filtering.server-observeEvent-reactiveValuesToList(filtered_cells.reactions)')
-
-    # make sure seurat object is loaded
+    # make sure these elements are defined
     req(seurat_object.reactions$seurat)
 
     req(seurat_object.reactions$n_features_values)
@@ -38,6 +36,9 @@ cell_filtering.server <- function(input, output, session) {
             min_features_per_cell>0 & max_features_per_cell>0 &
             max_percent_mitochondria>0))
       return(NULL)
+
+    # send a message
+    message('### cell_filtering.server-observeEvent-reactiveValuesToList(filtered_cells.reactions)')
 
     n_features_values <- seurat_object.reactions$n_features_values %>% unlist(use.names=FALSE)
     proportion_mt_values <- seurat_object.reactions$proportion_mt_values %>% unlist(use.names=FALSE)

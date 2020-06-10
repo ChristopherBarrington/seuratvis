@@ -5,11 +5,7 @@
 \alias{percent_mt_per_cell_filter.server}
 \title{Specify maximum mitochondrial proportion}
 \usage{
-percent_mt_per_cell_filter.ui(
-  id,
-  label = "Proportion Mt",
-  target_var = "percent_mt"
-)
+percent_mt_per_cell_filter.ui(id, label = "Proportion Mt")
 
 percent_mt_per_cell_filter.server(input, output, session)
 }
@@ -17,8 +13,6 @@ percent_mt_per_cell_filter.server(input, output, session)
 \item{id}{unique name of the element}
 
 \item{label}{text label of the element}
-
-\item{target_var}{name of column in \code{@meta.data} that is percentage mitochondria}
 }
 \description{
 Provides a way to define limit on proportion of mitochondrial UMI per cell

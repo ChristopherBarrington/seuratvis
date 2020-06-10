@@ -29,8 +29,5 @@ find_seurat_objects <- function() {
       }}) %>%
     arrange(choiceName) -> available_objects # add varaibles for where to find the objects and what to call them
 
-  if(nrow(available_objects)==0)
-    available_objects <- rbind(available_objects, data.frame(choiceValue=NA, env=NA, value=NA, choiceName='No Seurat objects found!'))
-
   available_objects
 }

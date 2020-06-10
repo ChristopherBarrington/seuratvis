@@ -16,7 +16,7 @@
 #' @rdname opacity_slider
 #' 
 opacity_slider.ui <- function(id, label='Opacity') {
-  message('### opacity_slider.ui')
+  sprintf(fmt='### %s-opacity_slider.ui', id) %>% message()
 
   module <- 'opacity_slider'
 
@@ -33,7 +33,6 @@ opacity_slider.ui <- function(id, label='Opacity') {
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # make ui elements
-  ## if a label switch is required, make one
   sliderInput(inputId=ns(id='opacity_slider'), label=label, min=0.1, max=1, step=0.1, value=1) -> slider
 
   # return ui element(s)
@@ -48,7 +47,7 @@ opacity_slider.ui <- function(id, label='Opacity') {
 #' @rdname opacity_slider
 #' 
 opacity_slider.server <- function(input, output, session) {
-  message('### opacity_slider.server')
+  session$ns('') %>% sprintf(fmt='### %sopacity_slider.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='opacity_slider') # provides `seuratvis_env`, `server_env` and `module_env`
@@ -56,15 +55,16 @@ opacity_slider.server <- function(input, output, session) {
 
   # react to the opacity slider
   observeEvent(eventExpr=input$opacity_slider, handlerExpr={
-    message('### opacity_slider.server-observeEvent-input$opacity_slider')
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sopacity_slider.server-observeEvent-input$opacity_slider [%s]', input$opacity_slider) %>% message('')
 
     # update the reactive
     seurat_object.reactions$opacity <- input$opacity_slider})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    message('### opacity_slider.server-observeEvent-seurat_object.reactions$seurat')
-    sprintf(fmt='### opacity_slider.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sopacity_slider.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message('')
 
     # update the reactive
     seurat_object.reactions$opacity <- 1})

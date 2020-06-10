@@ -17,6 +17,23 @@ filtering_arguments.reactions <- reactiveValues()
 #! TODO initialise this when an object is loaded
 reference_metrics.rv <- reactiveValues()
 
+#' Plotting reactive values
+#' 
+plotting_options.rv <- reactiveValues()
+
+#' UI elements by module
+#' 
+ui_element_ids.env <- new.env()
+
+#' Reactive list of UI element selections
+#' 
+#' @details
+#' Elements of the list can be accessed with \code{session$ns('feature')}.
+#' 
+#' @param `-picked_feature` name of picked feature from a tab
+#' 
+selections.rv <- reactiveValues()
+
 shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
@@ -46,5 +63,6 @@ shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
   # any code to exectue when the session ends
-  session$onSessionEnded(function() {message('### session ended')})
+  session$onSessionEnded(function() {
+    message('### session ended')})
 }

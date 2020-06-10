@@ -16,7 +16,7 @@
 #' @rdname knee_plot
 #' 
 knee_plot.ui <- function(id, feature) {
-  sprintf(fmt='### knee_plot.ui [%s-%s]', id, feature) %>% message()
+  sprintf(fmt='### %s-knee_plot.ui [%s]', id, feature) %>% message()
 
   id %<>% NS(id=feature) # combine the id and feature to allow multiple knee plots per id
   module <- 'knee_plot'
@@ -43,7 +43,7 @@ knee_plot.ui <- function(id, feature) {
 #' @rdname knee_plot
 #'
 knee_plot.server <- function(input, output, session) {
-  message('### knee_plot.server')
+  session$ns('') %>% sprintf(fmt='### %sknee_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='knee_plot') # provides `seuratvis_env`, `server_env` and `module_env`
@@ -51,7 +51,8 @@ knee_plot.server <- function(input, output, session) {
 
   # render the knee plot
   renderPlot(expr={
-    sprintf(fmt='### knee_plot.server-renderPlot [%s]', id) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sknee_plot.server-renderPlot') %>% message('')
    
     # get feature-specific plotting elements
     feature_plot <- NULL

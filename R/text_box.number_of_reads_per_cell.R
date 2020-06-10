@@ -16,6 +16,8 @@
 #' @rdname number_of_reads_per_cell_text_box
 #' 
 number_of_reads_per_cell_text_box.ui <- function(id, width=12, f=median, f_name=deparse(substitute(f))) {
+  sprintf(fmt='### %s-number_of_reads_per_cell_text_box.ui', id) %>% message()
+
   module <- 'number_of_reads_per_cell_text_box'
 
   # make unique id for this object
@@ -38,11 +40,16 @@ number_of_reads_per_cell_text_box.ui <- function(id, width=12, f=median, f_name=
 #' @rdname number_of_reads_per_cell_text_box
 #' 
 number_of_reads_per_cell_text_box.server <- function(input, output, session) {
+  session$ns('') %>% sprintf(fmt='### %snumber_of_reads_per_cell_text_box.server') %>% message()
+
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='number_of_reads_per_cell_text_box') # provides `seuratvis_env`, `server_env` and `module_env`
 
   # make the text box
   renderValueBox(expr={
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %snumber_of_reads_per_cell_text_box.server-renderValueBox') %>% message('')
+
     # get summarised values
     n_reference <- seurat_object.reactions$n_umi_values %>% unlist() %>% module_env$summary_function()
     n_filtered <- filtered_cells.reactions$n_umi_values %>% module_env$summary_function()

@@ -15,6 +15,8 @@
 #' @rdname project_name_text_box
 #' 
 project_name_text_box.ui <- function(id, width=12) {
+  sprintf(fmt='### %s-project_name_text_box.ui', id) %>% message()
+
   module <- 'project_name_text_box'
 
   # record the server(s) to call
@@ -27,7 +29,12 @@ project_name_text_box.ui <- function(id, width=12) {
 #' @rdname project_name_text_box
 #' 
 project_name_text_box.server <- function(input, output, session) {
-  renderValueBox(env=parent.frame(n=2), quoted=FALSE, expr={
+  session$ns('') %>% sprintf(fmt='### %sproject_name_text_box.server') %>% message()
+
+  renderValueBox(expr={
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sproject_name_text_box.server-renderValueBox') %>% message('')
+
     list(value={seurat_object.reactions$seurat %>% Project() %>% reformat_project_name()},
          subtitle='Loaded Seurat object',
          icon=icon('certificate')) %>%

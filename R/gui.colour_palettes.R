@@ -23,16 +23,20 @@
 #' @rdname colour_palette
 #' 
 colour_palette.ui <- function(id, label='Feature value colours', selectors=list(), include_full=FALSE) {
-  message('### colour_palette.ui')
+  sprintf(fmt='### %s-colour_palette.ui', id) %>% message()
 
   module <- 'colour_palette'
 
   # make unique id for this object
   module_ns <- ns <- NS(namespace=id, id=module)
-  ns %<>% NS() # now namespace will be eg: `id-module-element`
+  ns <- NS(namespace=id)
 
   # record the server(s) to call
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', c('update_palette_type', 'add_to_colour_palette'))) %>% assign(env=module_servers_to_call, x=id)
+
+  # colour label names should be one of 'low', 'mid' or 'high'
+  if(any(! sapply(selectors, pluck, 'inputId') %in% c('low','mid','high')))
+    stop("!!! inputID to colour_palette.ui show be one of 'low', 'mid' or 'high'")
 
   # for each selector, make a list UI element arguments
   defaults <- list(value=sample(x=default_colour_palette(), size=1), showColour='both', palette='limited', allowedCols=default_colour_palette(), allowTransparent=FALSE, returnName=TRUE)
@@ -69,7 +73,7 @@ colour_palette.ui <- function(id, label='Feature value colours', selectors=list(
 #' @rdname colour_palette
 #' 
 update_palette_type.server <- function(input, output, session) {
-  message('### update_palette_type.server')
+  session$ns('') %>% sprintf(fmt='### %supdate_palette_type.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='colour_palette') # provides `seuratvis_env`, `server_env` and `module_env`
@@ -84,8 +88,7 @@ update_palette_type.server <- function(input, output, session) {
     palette_type <- ifelse(input[[module_env$full_palette_inputId]], 'square', 'limited')
 
     for(inputId in module_env$selector_inputIds)
-      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette())
-  })
+      updateColourInput(session=session, inputId=inputId, palette=palette_type, value=input[[inputId]], allowedCols=colour_palette())})
 }
 
 #' Add a new colour to the colour palette
@@ -93,21 +96,28 @@ update_palette_type.server <- function(input, output, session) {
 #' @rdname colour_palette
 #' 
 add_to_colour_palette.server <- function(input, output, session) {
-  message('### add_to_colour_palette.server')
+  session$ns('') %>% sprintf(fmt='### %sadd_to_colour_palette.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='colour_palette') # provides `seuratvis_env`, `server_env` and `module_env`
-  input <- get(x='input', env=server_env)
+  input_server <- get(x='input', env=server_env)
 
   # react to the chosen colour by adding it to the colour palette reactive values
   observe({
     for(inputId in module_env$selector_inputIds) {
-      x <- input[[inputId]]
+      x <- input_server[[inputId]]
       if(x!='' && !startsWith(x=x, prefix='#')) # if x is not in hex format
         x %<>% gplots::col2hex()
       unique(c(colour_palette(), x)) %>% colour_palette()
-    }
-  })
+    }})
+
+  # react to the colour picker input
+  #! TODO: this should not be dependent on the input names...
+  observe({
+    plotting_options.rv$colours[[session$ns(id='low')]] <- input$low})
+
+  observe({
+    plotting_options.rv$colours[[session$ns(id='high')]] <- input$high})
 }
 
 #' Define default colour palette

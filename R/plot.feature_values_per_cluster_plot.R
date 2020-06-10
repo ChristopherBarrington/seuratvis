@@ -15,7 +15,7 @@
 #' @rdname feature_values_per_cluster_plot
 #' 
 feature_values_per_cluster_plot.ui <- function(id) {
-  sprintf(fmt='### feature_values_per_cluster_plot.ui [%s]', id) %>% message()
+  sprintf(fmt='### %s-feature_values_per_cluster_plot.ui', id) %>% message()
 
   module <- 'feature_values_per_cluster_plot'
 
@@ -40,7 +40,7 @@ feature_values_per_cluster_plot.ui <- function(id) {
 #' @rdname feature_values_per_cluster_plot
 #'
 feature_values_per_cluster_plot.server <- function(input, output, session) {
-  message('### feature_values_per_cluster_plot.server')
+  session$ns('') %>% sprintf(fmt='### %sfeature_values_per_cluster_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='feature_values_per_cluster_plot') # provides `seuratvis_env`, `server_env` and `module_env`
@@ -48,11 +48,12 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
 
   # render the knee plot
   renderPlot(expr={
-    sprintf(fmt='### feature_values_per_cluster_plot.server-renderPlot [%s]', id) %>% message()
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sfeature_values_per_cluster_plot.server-renderPlot') %>% message('')
    
     # get the data to plot
     cbind(seurat_object.reactions$picked_cluster_resolution_idents,
-          seurat_object.reactions$picked_feature_values) %>%
+          selections.rv[[session$ns('picked_feature_values')]]) %>%
       mutate(x={as.character(ident) %>% as.numeric()}) -> data
 
     # if the picked feature has numeric values
@@ -62,6 +63,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
         # filter(value>0) %>%
         group_by(ident, x) %>%
         summarise(q25=quantile(value, 0.25), q75=quantile(value, 0.75), median=median(value)) %>%
+        mutate(is_selected_cluster_id=ident %in% selections.rv[[{session$ns('cluster_id_picker') %>% str_replace('-.*-', '-')}]]) %>%
         mutate(iqr=q75-q25, lower=q25-1.5*iqr, upper=q75+1.5*iqr) -> cluster_data_summary
 
       cluster_data_summary %>%
@@ -70,7 +72,8 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
         aes(x=x, y=y, colour=ident) +
         labs(y='Feature value (median ± 1.5x IQR)') +
         geom_line(size=1) +
-        geom_point(mapping=aes(y=median), colour='black', shape=20, size=3) -> feature_plot
+        geom_point(mapping=aes(y=median, fill=is_selected_cluster_id), shape=21, size=3, colour='black') +
+        scale_fill_manual(values=c(`FALSE`='grey90', `TRUE`='darkorange1')) -> feature_plot
     } else { # the picked feature is factor-like
       # make a frequency bar plot
       data %>%
@@ -84,7 +87,5 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
     feature_plot +
         labs(x='Cluster identifier') +
         theme_bw() +
-        theme(legend.position='none', panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())
-
-    }) -> output$feature_values_per_cluster_plot
+        theme(legend.position='none', panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())}) -> output$feature_values_per_cluster_plot
 }

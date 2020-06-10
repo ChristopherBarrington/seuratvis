@@ -15,6 +15,8 @@
 #' @rdname picked_feature_and_description_text_box
 #' 
 picked_feature_and_description_text_box.ui <- function(id, width=12) {
+  sprintf(fmt='### %s-picked_feature_and_description_text_box.ui', id) %>% message()
+
   module <- 'picked_feature_and_description_text_box'
 
   # record the server(s) to call
@@ -27,11 +29,14 @@ picked_feature_and_description_text_box.ui <- function(id, width=12) {
 #' @rdname picked_feature_and_description_text_box
 #' 
 picked_feature_and_description_text_box.server <- function(input, output, session) {
-  renderValueBox(env=parent.frame(n=2), quoted=FALSE, expr={
-    message('### picked_feature_and_description_text_box.server')
+  session$ns('') %>% sprintf(fmt='### %spicked_feature_and_description_text_box.server') %>% message()
+
+  renderValueBox(expr={
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %spicked_feature_and_description_text_box.server-renderValueBox') %>% message('')
 
     # create variables for shorthand
-    picked_feature <- seurat_object.reactions$picked_feature
+    picked_feature <- selections.rv[[session$ns('picked_feature')]]
 
     # get gene description from biomaRt
     Misc(seurat_object.reactions$seurat, slot='mart') %>%
@@ -57,7 +62,6 @@ picked_feature_and_description_text_box.server <- function(input, output, sessio
 #' @return a character string of the \code{attribute} from the \code{mart} for the \code{external_gene_name}.
 #' 
 get_formatted_gene_description <- function(external_gene_name, mart) {
-  message('### get_formatted_gene_description')
   tryCatch(expr=getBM(mart=mart, attributes='description', filter='external_gene_name', values=external_gene_name[1]),
            error=function(x) data.frame(description='Could not query biomaRt!')) -> description 
   

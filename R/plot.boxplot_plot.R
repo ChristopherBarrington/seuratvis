@@ -16,7 +16,7 @@
 #' @rdname boxplot_plot
 #' 
 boxplot_plot.ui <- function(id, feature) {
-  sprintf(fmt='### boxplot_plot.ui [%s-%s]', id, feature) %>% message()
+  sprintf(fmt='### %s-boxplot_plot.ui [%s]', id, feature) %>% message()
 
   id %<>% NS(id=feature) # combine the id and feature to allow multiple knee plots per id
   module <- 'boxplot_plot'
@@ -43,7 +43,7 @@ boxplot_plot.ui <- function(id, feature) {
 #' @rdname boxplot_plot
 #'
 boxplot_plot.server <- function(input, output, session) {
-  sprintf('### boxplot_plot.server') %>% message()
+  session$ns('') %>% sprintf(fmt='### %sboxplot_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='boxplot_plot') # provides `seuratvis_env`, `server_env` and `module_env`
@@ -51,8 +51,9 @@ boxplot_plot.server <- function(input, output, session) {
 
   # render the boxplot
   renderPlot(expr={
-    sprintf(fmt='### boxplot_plot.server-renderPlot [%s]', id) %>% message()
-   
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sboxplot_plot.server-renderPlot') %>% message('')
+
     # get feature-specific plotting elements
     feature_plot <- NULL
     if(module_env$feature=='nCount_RNA') {

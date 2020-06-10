@@ -17,7 +17,7 @@
 #' #' @rdname total_umi_per_cell_filter
 #' 
 show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', include_copy_buttons=TRUE) {
-  message('### show_filtering_parameters.ui')
+  sprintf(fmt='### %s-show_filtering_parameters.ui', id) %>% message()
 
   module <- 'show_filtering_parameters'
 
@@ -60,7 +60,7 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
 #' @rdname show_filtering_parameters
 #' 
 show_filtering_parameters.server <- function(input, output, session) {
-  message('### show_filtering_parameters.server')
+  session$ns('') %>% sprintf(fmt='### %sshow_filtering_parameters.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='show_filtering_parameters') # provides `seuratvis_env`, `server_env` and `module_env`
@@ -70,14 +70,15 @@ show_filtering_parameters.server <- function(input, output, session) {
   group_format_subset_conditional <- function(x) x %>% na.omit() %>% paste(collapse=' & ')
 
   observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
-    # make sure required reactives are available
+    # make sure these elements are defined
     req(seurat_object.reactions$project)
     req(seurat_configuration.reactions$n_features_variable)
     req(seurat_configuration.reactions$n_umi_variable)
     req(seurat_configuration.reactions$proportion_mt_variable)
     req(filtered_cells.reactions$n_cells)
 
-    message('### show_filtering_parameters.server-observeEvent-reactiveValuesToList(filtering_parameters.reactions)')
+    # send a message
+    sprintf('### %sshow_filtering_parameters.server-observeEvent-reactiveValuesToList(filtering_parameters.reactions)', session$ns('')) %>% message()
 
     # create variables for shorthand
     thresholds <- reactiveValuesToList(filtering_parameters.reactions)
