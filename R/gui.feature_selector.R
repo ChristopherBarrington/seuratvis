@@ -85,7 +85,7 @@ feature_picker.server <- function(input, output, session) {
     req(input$feature_picker_feature_names)
     
     # send a message
-    sprintf(fmt='!!! %sfeature_picker.server-observeEvent-input$feature_picker_feature_names [%s]', session$ns(''), input$feature_picker_feature_names) %>% message()
+    sprintf(fmt='### %sfeature_picker.server-observeEvent-input$feature_picker_feature_names [%s]', session$ns(''), input$feature_picker_feature_names) %>% message()
     
     if(is.null(input$list_metadata) || !input$list_metadata)
       selections.rv[[session$ns('picked_feature')]] <- input$feature_picker_feature_names})
