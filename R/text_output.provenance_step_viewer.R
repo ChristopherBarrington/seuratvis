@@ -51,6 +51,7 @@ provenance_step_viewer.ui <- function(id) {
 #' Picks analysis step from the \code{misc@provenance} slot of the Seurat object.
 #' 
 #' @imports shinyAce
+#' @importFrom purrr set_names
 #' 
 #' @rdname provenance_step_viewer
 #' 
@@ -84,7 +85,10 @@ provenance_step_viewer.server <- function(input, output, session) {
     seurat <- seurat_object.reactions$seurat
 
     # get the analysis steps
-    analysis_steps <- seurat@misc$provenance %>% names()
+    seurat@misc$provenance %>%
+      names() %>%
+      purrr::set_names() %>%
+      purrr::set_names(function(x) str_c(seq_along(x), x, sep=': ')) -> analysis_steps
     picked_analysis_step <- analysis_steps[1]
 
     # update the ui element(s)
