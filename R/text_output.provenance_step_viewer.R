@@ -4,7 +4,7 @@
 #' 
 #' @param id unique name of the ekement
 #' 
-#' @imports shinyAce
+#' @import shinyAce
 #' 
 #' @rdname provenance_step_viewer
 #' 
@@ -50,7 +50,7 @@ provenance_step_viewer.ui <- function(id) {
 #' @details
 #' Picks analysis step from the \code{misc@provenance} slot of the Seurat object.
 #' 
-#' @imports shinyAce
+#' @import shinyAce
 #' @importFrom purrr set_names
 #' 
 #' @rdname provenance_step_viewer
