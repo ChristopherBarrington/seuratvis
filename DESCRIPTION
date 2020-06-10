@@ -14,7 +14,8 @@ biocViews:
 Imports:
   biomaRt,
   ggrepel,
-  gtools
+  gtools,
+  shinyAce
 Depends:
   shiny,
   shinydashboard,

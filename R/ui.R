@@ -10,6 +10,7 @@ shinyAppUI <- function(...) {
   eval(.ui_tab.cell_filtering())
   eval(.ui_tab.feature_highlighting())
   eval(.ui_tab.feature_highlighting_cluster_selection())
+  eval(.ui_tab.provenance_viewer())
   eval(.ui_tab.configure_seurat())
   eval(.ui_tab.sidebar_links())
 
@@ -18,11 +19,13 @@ shinyAppUI <- function(...) {
   dashboard_header <- dashboardHeader(title=logo)
 
   # dashboard body definition
-  css <- 'table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'
+  tags$head(tags$style(HTML(text='table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'))) -> cssDT
+  tags$style(type = "text/css", "#provenance_text {height: calc(100vh - 80px) !important;}") -> cssAce
+
   append(contents,
          list()) %>%
     do.call(what=tabItems) %>%
-    dashboardBody(rclipboardSetup(), tags$head(tags$style(HTML(css)))) -> dashboard_body
+    dashboardBody(rclipboardSetup(), cssDT, cssAce) -> dashboard_body
 
   # sidebar definition
   append(menus, 
