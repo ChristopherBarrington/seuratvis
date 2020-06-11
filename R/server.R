@@ -38,6 +38,7 @@ shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
   # scour the session for Seurat objects and populate the UI --------------------------------------
+  #! TODO: this is not the right place for this. maybe a call to utils::globalVariables() in seuratvis() ... ?
   available_seurat_objects <- find_seurat_objects() # has to be here to access the global environment ... ?
 
   # ###############################################################################################
