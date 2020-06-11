@@ -84,14 +84,14 @@ reduction_method_picker.server <- function(input, output, session) {
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
-    reductions <- Reductions(seurat)
+    reductions <- Reductions(seurat) %>% str_subset(pattern=regex(pattern='3D', ignore_case=TRUE), negate=TRUE)
 
     if(length(reductions)==0)
       return(NULL)
 
     # update the ui element(s)
     updateSelectInput(session=session, inputId='reduction_method_picker',
-                      choices=Reductions(seurat),
+                      choices=reductions,
                       selected=Seurat:::DefaultDimReduc(seurat))
 
     # initialise the dimension reduced map
