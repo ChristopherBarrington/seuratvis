@@ -95,13 +95,12 @@ reduction_method_picker.server <- function(input, output, session) {
 
     # update the ui element(s)
     updateSelectInput(session=session, inputId='reduction_method_picker',
-                      choices=Reductions(seurat),
-                      selected=Seurat:::DefaultDimReduc(seurat))
+                      choices=reductions,
+                      selected=preferred_choice(x=reductions, preferences=c('umap','tsne','pca')))
 
     # initialise the dimension reduced map
     seurat@reductions[[Seurat:::DefaultDimReduc(seurat)]]@cell.embeddings[,1:2] %>%
         as.data.frame() %>%
         set_names(c('DIMRED_1','DIMRED_2')) %>%
-        cbind(seurat@meta.data) -> seurat_object.reactions$dimred
-  })
+        cbind(seurat@meta.data) -> seurat_object.reactions$dimred})
 }
