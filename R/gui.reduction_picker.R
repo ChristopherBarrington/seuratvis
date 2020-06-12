@@ -68,8 +68,8 @@ reduction_method_picker.server <- function(input, output, session) {
     seurat_object.reactions$selected_reduction_method <- dimred_method
 
     # update other reduction method pickers
-    for(nsid in module_environments$reduction_method_pickers$ns)
-      updateSelectInput(session=session_server, inputId=nsid, selected=dimred_method)
+    # for(nsid in module_environments$reduction_method_pickers$ns)
+    #   updateSelectInput(session=session_server, inputId=nsid, selected=dimred_method)
 
     # pull out the reduction and put a data.frame in the seurat object reactions
     seurat <- seurat_object.reactions$seurat
