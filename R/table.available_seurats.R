@@ -102,7 +102,7 @@ available_seurats.server <- function(input, output, session) {
                  assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% collapse_strings()},
                  nfeatures=nrow(x),
                  reductions={Reductions(x) %>% collapse_strings()},
-                 guessed_sex={FetchData(x, vars=c('SRY','Sry')) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon('mars')), as.character(icon('venus')))})}) %>%
+                 guessed_sex={FetchData(x, vars=c('SRY','Sry')) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))})}) %>%
     mutate(dimensions=as.integer(dimensions),
            object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
