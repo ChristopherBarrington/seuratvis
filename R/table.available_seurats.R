@@ -65,6 +65,7 @@ available_seurats.server <- function(input, output, session) {
   c(Project='project',
     Environment='environment',
     `Object name`='object',
+    `Guessed sex`='guessed_sex',
     `Number of cells`='ncells',
     `Total UMI`='numi',
     `Median UMI`='median_umi',
@@ -100,7 +101,8 @@ available_seurats.server <- function(input, output, session) {
                  active_assay=DefaultAssay(x),
                  assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% collapse_strings()},
                  nfeatures=nrow(x),
-                 reductions={Reductions(x) %>% collapse_strings()})}) %>%
+                 reductions={Reductions(x) %>% collapse_strings()},
+                 guessed_sex={FetchData(x, vars=c('SRY','Sry')) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))})}) %>%
     mutate(dimensions=as.integer(dimensions),
            object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
@@ -108,7 +110,8 @@ available_seurats.server <- function(input, output, session) {
   # identify columns to format in the `datatable` `columnDefs` argument
   formatted_colnames <- c(names(column_order), colnames(data_to_show)[! colnames(data_to_show) %in% column_order])
   list(hide={seq(length(column_order)+1, ncol(data_to_show))},
-       center={sapply(data_to_show, class) %>% str_which('logical')}) %>%
+       center={c(sapply(data_to_show, class) %>% str_which('logical'),
+                 str_which(column_order, 'guessed_sex'))}) %>%
     lapply(subtract, e2=1) -> columnDef_targets
 
   # make and format the `datatable`
@@ -125,7 +128,8 @@ available_seurats.server <- function(input, output, session) {
                     style='bootstrap4',
                     class='stripe',
                     selection=list(mode='single',
-                                   selected=input$seurats_table_rows_selected)) %>%
+                                   selected=input$seurats_table_rows_selected),
+                    escape=FALSE) %>%
       formatStyle(columns='ncells',
                   background=styleColorBar(data=c(0,max(data_to_show$ncells)), color='#3CB96A'),
                   backgroundSize='98% 50%',
