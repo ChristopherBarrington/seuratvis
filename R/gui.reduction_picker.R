@@ -76,6 +76,8 @@ reduction_method_picker.server <- function(input, output, session) {
         as.data.frame() %>%
         set_names(c('DIMRED_1','DIMRED_2')) %>%
         cbind(seurat@meta.data) -> seurat_object.reactions$dimred})
+    selections.rv[[session$ns('selected_reduction_method')]] <- dimred_method
+    selections.rv[[session$ns('dimred')]] <- dimred})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
