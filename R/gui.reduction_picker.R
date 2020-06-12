@@ -4,6 +4,7 @@
 #' 
 #' @param id unique name of the element
 #' @param label text label of the element
+#' @param regex a value passed to \code{str_subset} to filter the reductions in the Seurat
 #' 
 #' @examples
 #' 
@@ -15,7 +16,7 @@
 #'
 #' @rdname reduction_method_picker
 #' 
-reduction_method_picker.ui <- function(id, label='Reduction method') {
+reduction_method_picker.ui <- function(id, label='Reduction method', regex='') {
   sprintf(fmt='### %s-reduction_method_picker.ui', id) %>% message()
 
   module <- 'reduction_method_picker'
@@ -27,6 +28,7 @@ reduction_method_picker.ui <- function(id, label='Reduction method') {
   # create an environment in the seuratvis namespace
   e <- new.env()
   e$id <- id
+  e$regex <- regex
   assign(x=module_ns, val=e, envir=module_environments)
 
   # record the server(s) to call
@@ -86,7 +88,7 @@ reduction_method_picker.server <- function(input, output, session) {
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
-    reductions <- Reductions(seurat)
+    reductions <- Reductions(seurat) %>% str_subset(pattern=module_env$regex)
 
     if(length(reductions)==0)
       return(NULL)
