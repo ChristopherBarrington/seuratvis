@@ -21,11 +21,12 @@ shinyAppUI <- function(...) {
   # dashboard body definition
   tags$head(tags$style(HTML(text='table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'))) -> cssDT
   tags$style(type = "text/css", "#provenance_text {height: calc(100vh - 80px) !important;}") -> cssAce
+  tags$style(type='text/css', '.boy, .girl {font-size: x-large} .boy {color: #347DC1} .girl {color: #CC6594') -> cssSex
 
   append(contents,
          list()) %>%
     do.call(what=tabItems) %>%
-    dashboardBody(rclipboardSetup(), cssDT, cssAce) -> dashboard_body
+    dashboardBody(rclipboardSetup(), cssDT, cssAce, cssSex) -> dashboard_body
 
   # sidebar definition
   append(menus, 
