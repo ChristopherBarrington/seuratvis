@@ -24,7 +24,7 @@ jackstraw_pvalue_plot.ui <- function(id) {
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # return ui element(s)
-  tagList(plotOutput(outputId=ns(id='jackstraw_pvalue_plot')) %>% withSpinner(), textOutput(outputId=ns('notice')))
+  plotOutput(outputId=ns(id='jackstraw_pvalue_plot')) %>% withSpinner())
 }
 
 #' Produce the ggplot object for a JackStraw pvalue plot
@@ -58,12 +58,11 @@ jackstraw_pvalue_plot.server <- function(input, output, session) {
     as.data.frame(Seurat::JS(object=seurat[[reduction_name]], slot='overall')) %>% 
       ggplot() +
       aes(x=PC, y=-log10(Score)) +
+      labs(x='Principle component', y='-log10(score)') +
       geom_smooth() +
       geom_point(shape=4) +
       theme_bw() +
       theme(legend.background=element_blank(),
             legend.justification=c(1,1),
             legend.position=c(1,1))}) -> output$jackstraw_pvalue_plot
-
-  renderText({input[[session$ns('principle_component_picker')]]}) -> output$notice
 }
