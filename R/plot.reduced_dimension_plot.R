@@ -58,16 +58,23 @@ reduced_dimension_plot.server <- function(input, output, session) {
     # send a message
     session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message('')
 
+    # collect args from selections.rv
+    c('dimred', 'picked_feature_values', 'cluster_id_picker', 'point_size', 'opacity', 'value_range_limits') %>%
+      purrr::set_names() %>%
+      sapply(session$ns) %>%
+      sapply(parse_ns_label) %>% print() %>%
+      lapply(function(x) selections.rv[[x]]) -> args
+lapply(args, head) %>% print()
     # make a base plot
-    cbind(selections.rv[[session$ns('dimred') %>% str_replace('-.*-', '-')]],
+    cbind(args$dimred,
           seurat_object.reactions$picked_cluster_resolution_idents,
-          {selections.rv[[{session$ns('picked_feature_values') %>% str_replace('-.*-', '-')}]] %>% rename(picked_feature_value=value)}) %>%
-      mutate(is_selected_cluster_id=ident %in% selections.rv[[{session$ns('cluster_id_picker') %>% str_replace('-.*-', '-')}]]) %>%
+          {args$picked_feature_values %>% rename(picked_feature_value=value)}) %>%
+      mutate(is_selected_cluster_id=ident %in% args$cluster_id_picker) %>%
       arrange(picked_feature_value) %>%
       ggplot() +
       aes(x=DIMRED_1, y=DIMRED_2) +
       geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
-      geom_point(size=seurat_object.reactions$point_size, alpha=seurat_object.reactions$opacity) +
+      geom_point(size=args$point_size, alpha=args$opacity) +
       theme_void() +
       theme(legend.position='none', legend.text=element_blank()) -> output_plot
 
@@ -98,10 +105,10 @@ reduced_dimension_plot.server <- function(input, output, session) {
         output_plot +
           aes(colour=picked_feature_value) -> output_plot
 
-        c_min <- session$ns('low') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
+        c_min <- session$ns('low') %>% parse_ns_label() %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
         c_mid <- 'white'
-        c_max <- session$ns('high') %>% str_replace('-.*-', '-') %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
-        c_range_limits <- selections.rv[[{session$ns('value_range_limits') %>% str_replace('-.*-', '-')}]]
+        c_max <- session$ns('high') %>% parse_ns_label() %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
+        c_range_limits <- args$value_range_limits
 
         colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=c_range_limits, oob=scales::squish)
         if(c_range_limits %>% sign() %>% Reduce(f='*') %>% equals(-1)) {
