@@ -10,7 +10,7 @@
 
     # assemble tab content
     content <- tabItem(tabName=NS(namespace=tab, id='tab'),
-                       h1('View !the functions used to create this Seurat object'),
+                       h1('View the functions used to create this Seurat object'),
                        fluidRow(project_name_text_box.ui(id=tab, width=6),
                                 number_of_reads_text_box.ui(id=tab, width=3),
                                 number_of_cells_text_box.ui(id=tab, width=3)),
