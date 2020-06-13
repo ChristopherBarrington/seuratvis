@@ -56,9 +56,13 @@ pca_heatmap.server <- function(input, output, session) {
 
     # render the heatmap
     #! TODO: make this a nice ggplot
-    DefaultAssay(object=seurat) <- DefaultAssay(object=seurat[[reduction_name]])
-    DimHeatmap(object=seurat, reduction=reduction_name,
-               dims=as.numeric(selected_component),
-               disp.min=-2.5, disp.max=2.5, slot='scale.data',
-               cells=2000, balanced=TRUE, fast=FALSE)}) -> output$pca_heatmap
+    if(!DefaultAssay(object=object[['pca']]) %in% Assays(seurat)) {
+      ggplot()+aes()+annotate(geom='text', label='Nothing to see here', x=0, y=0)+theme_void()
+    } else {
+      DefaultAssay(object=seurat) <- DefaultAssay(object=seurat[[reduction_name]])
+      DimHeatmap(object=seurat, reduction=reduction_name,
+                 dims=as.numeric(selected_component),
+                 disp.min=-2.5, disp.max=2.5,
+                 cells=2000, balanced=TRUE, fast=FALSE)
+    }}) -> output$pca_heatmap
 }
