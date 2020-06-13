@@ -59,7 +59,7 @@ reduced_dimension_plot.server <- function(input, output, session) {
     session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message('')
 
     # make a base plot
-    cbind(seurat_object.reactions$dimred,
+    cbind(selections.rv[[session$ns('dimred') %>% str_replace('-.*-', '-')]],
           seurat_object.reactions$picked_cluster_resolution_idents,
           {selections.rv[[{session$ns('picked_feature_values') %>% str_replace('-.*-', '-')}]] %>% rename(picked_feature_value=value)}) %>%
       mutate(is_selected_cluster_id=ident %in% selections.rv[[{session$ns('cluster_id_picker') %>% str_replace('-.*-', '-')}]]) %>%

@@ -4,6 +4,7 @@
 #' 
 #' @param id unique name of the element
 #' @param label text label of the element
+#' @param regex a value passed to \code{str_subset} to filter the reductions in the Seurat
 #' 
 #' @examples
 #' 
@@ -15,7 +16,7 @@
 #'
 #' @rdname reduction_method_picker
 #' 
-reduction_method_picker.ui <- function(id, label='Reduction method') {
+reduction_method_picker.ui <- function(id, label='Reduction method', regex='') {
   sprintf(fmt='### %s-reduction_method_picker.ui', id) %>% message()
 
   module <- 'reduction_method_picker'
@@ -27,6 +28,7 @@ reduction_method_picker.ui <- function(id, label='Reduction method') {
   # create an environment in the seuratvis namespace
   e <- new.env()
   e$id <- id
+  e$regex <- regex
   assign(x=module_ns, val=e, envir=module_environments)
 
   # record the server(s) to call
@@ -58,24 +60,32 @@ reduction_method_picker.server <- function(input, output, session) {
 
   # react to the reduction method selection
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
+    # make sure these elements are defined
+    req(input$reduction_method_picker)
+    req(seurat_object.reactions$seurat)
+
     # send a message
     session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-input$reduction_method_picker [%s]', input$reduction_method_picker) %>% message('')
 
     # create varaibles for shorthand
+    seurat <- seurat_object.reactions$seurat
     dimred_method <- input$reduction_method_picker
-    seurat_object.reactions$selected_reduction_method <- dimred_method
 
     # update other reduction method pickers
-    for(nsid in module_environments$reduction_method_pickers$ns)
-      updateSelectInput(session=session_server, inputId=nsid, selected=dimred_method)
+    # for(nsid in module_environments$reduction_method_pickers$ns)
+    #   updateSelectInput(session=session_server, inputId=nsid, selected=dimred_method)
 
-    # pull out the reduction and put a data.frame in the seurat object reactions
-    seurat <- seurat_object.reactions$seurat
-    if(dimred_method!='' && !is.null(seurat))
-      seurat@reductions[[dimred_method]]@cell.embeddings[,1:2] %>%
-        as.data.frame() %>%
-        set_names(c('DIMRED_1','DIMRED_2')) %>%
-        cbind(seurat@meta.data) -> seurat_object.reactions$dimred})
+    # pull out the reduction
+    seurat@reductions[[dimred_method]]@cell.embeddings[,1:2] %>% #! TODO: make this use Embeddings()
+      as.data.frame() %>%
+      set_names(c('DIMRED_1','DIMRED_2')) %>%
+      cbind(seurat@meta.data) -> dimred
+
+    # update the reactive(s)
+    seurat_object.reactions$selected_reduction_method <- dimred_method
+    selections.rv[[session$ns('selected_reduction_method')]] <- dimred_method
+    seurat_object.reactions$dimred <- dimred
+    selections.rv[[session$ns('dimred')]] <- dimred})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
@@ -92,12 +102,11 @@ reduction_method_picker.server <- function(input, output, session) {
     # update the ui element(s)
     updateSelectInput(session=session, inputId='reduction_method_picker',
                       choices=reductions,
-                      selected=Seurat:::DefaultDimReduc(seurat))
+                      selected=preferred_choice(x=reductions, preferences=c('umap','tsne','pca')))
 
     # initialise the dimension reduced map
     seurat@reductions[[Seurat:::DefaultDimReduc(seurat)]]@cell.embeddings[,1:2] %>%
         as.data.frame() %>%
         set_names(c('DIMRED_1','DIMRED_2')) %>%
-        cbind(seurat@meta.data) -> seurat_object.reactions$dimred
-  })
+        cbind(seurat@meta.data) -> seurat_object.reactions$dimred})
 }

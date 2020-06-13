@@ -8,6 +8,7 @@ shinyAppUI <- function(...) {
   ## get the menu tabs and contents
   #! TODO: can this automatically get all `.ui_tab.` functions and run them?
   eval(.ui_tab.cell_filtering())
+  eval(.ui_tab.dimension_parameter_choice())
   eval(.ui_tab.feature_highlighting())
   eval(.ui_tab.feature_highlighting_cluster_selection())
   eval(.ui_tab.findmarkers_table())
