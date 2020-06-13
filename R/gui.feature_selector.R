@@ -148,20 +148,7 @@ feature_picker.server <- function(input, output, session) {
                       min=min_value, max=max_value, value=c(-Inf,Inf))
 
     # save feature information in the reactive
-    selections.rv[[session$ns('picked_feature_values')]] <- picked_feature_values
-    selections.rv[[session$ns('value_range_limits')]] <- c(min_value, max_value)})
-
-  # react to the colour scale limits
-  observeEvent(eventExpr=input$value_range, handlerExpr={
-    # make sure these elements are defined
-    req(selections.rv[[session$ns('value_range_limits')]])
-
-    # send a message
-    sprintf(fmt='### %sfeature_picker.server-observeEvent-input$value_range [%s]', session$ns(''), str_c(input$value_range, collapse=',')) %>% message()
-
-    # update the reactive
-    if(!identical(seurat_object.reactions$value_range_limits, input$value_range))
-      selections.rv[[session$ns('value_range_limits')]] <- input$value_range})
+    selections.rv[[session$ns('picked_feature_values')]] <- picked_feature_values})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={

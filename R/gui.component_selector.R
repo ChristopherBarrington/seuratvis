@@ -60,28 +60,7 @@ principle_component_picker.server <- function(input, output, session) {
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='principle_component_picker') # provides `seuratvis_env`, `server_env` and `module_env`
   session_server <- get(x='session', env=server_env)
-
-  # react to the component selection
-  ## if a component is selected, copy it to the reactive
-  observeEvent(eventExpr={input$principle_component_picker}, ignoreInit=TRUE, handlerExpr={
-    # make sure these elements are defined
-    req(selections.rv[[session$ns('picked_component')]])
-
-    # send a message
-    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-input$principle_component_picker[%s]', session$ns(''), input$principle_component_picker) %>% message()
-    
-    selections.rv[[session$ns('picked_component')]] <- input$principle_component_picker})
-
-  # react to the colour scale limits
-  observeEvent(eventExpr=input$principle_components_slider, handlerExpr={
-    # make sure these elements are defined
-    req(selections.rv[[session$ns('value_range_limits')]])
-
-    # send a message
-    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-input$principle_components_slider [%s]', session$ns(''), str_c(input$principle_components_slider, collapse=',')) %>% message()
-
-    # update the reactive
-    selections.rv[[session$ns('picked_components_range')]] <- input$principle_components_slider})
+  input_server <- get(x='input', env=server_env)
 
   # update UI when reduction type is changed
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
@@ -112,9 +91,5 @@ principle_component_picker.server <- function(input, output, session) {
     ## slider to limit range of components
     updateSliderInput(session=session, inputId='principle_components_slider', min=-1)
     updateSliderInput(session=session, inputId='principle_components_slider',
-                      min=min_value, max=max_value, value=min_value+5)
-
-    # update the reactive
-    selections.rv[[session$ns('picked_component')]] <- min_value
-    selections.rv[[session$ns('picked_components_range')]] <- c(min_value, max_value)})
+                      min=min_value, max=max_value, value=min_value+5)})
 }

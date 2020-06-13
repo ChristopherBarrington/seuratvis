@@ -74,20 +74,8 @@ cluster_resolution_picker.server <- function(input, output, session) {
     seurat <- seurat_object.reactions$seurat
 
     # save cluster information in the reactive
-    seurat_object.reactions$selected_cluster_resolution <- r
     seurat_object.reactions$selected_clusters_per_resolution <- seurat_object.reactions$clusters_per_resolution[r]
     seurat_object.reactions$picked_cluster_resolution_idents <- FetchData(object=seurat, vars=r) %>% set_names('ident')})
-
-    # update other cluster resolution pickers
-    for(nsid in module_environments$cluster_resolution_pickers$ns)
-      updateSelectInput(session=session_server, inputId=nsid, selected=input$cluster_resolution_picker)})
-
-  # react to the cluster labels switch
-  observeEvent(eventExpr=input$label_clusters, handlerExpr={
-    # send a message
-    session$ns('') %>% sprintf(fmt='### %scluster_resolution_picker.server-observeEvent-input$label_clusters [%s]', input$label_clusters) %>% message('')
-
-    seurat_object.reactions$label_clusters <- input$label_clusters})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
@@ -110,7 +98,6 @@ cluster_resolution_picker.server <- function(input, output, session) {
       summarise(N=length(unique(ID))) %>%
       deframe() -> clusters_per_resolution
 
-    seurat_object.reactions$label_clusters <- TRUE
     seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
     seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution['seurat_clusters']
     seurat_object.reactions$picked_cluster_resolution_idents <- FetchData(object=seurat, vars='seurat_clusters') %>% set_names('ident')})
