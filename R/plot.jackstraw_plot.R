@@ -56,45 +56,22 @@ jackstraw_plot.server <- function(input, output, session) {
     min_component <- min(components_range)
     max_component <- max(components_range)
 
-
-
-
-
-
-
-
-      Seurat::JS(object=seurat[[reduction_name]], slot='empirical') %>%
-        as.data.frame() %>%
-        rownames_to_column('Contig') %>%
-        gather(key='PC', value='Value', -Contig) %>%
-        mutate(PC={stringr::str_remove(PC, '^PC') %>% as.numeric()}) %>%
-        filter(dplyr::between(PC, left=min_component, right=max_component)) %>%
-        left_join(y=as.data.frame(Seurat::JS(object=seurat[[reduction_name]], slot='overall')), by='PC') %>%
-        mutate(PC_colour=sprintf('PC %d: %1.3g', PC, Score),
-               project_name=Project(seurat)) %>%
-        mutate(PC_colour=factor(PC_colour, levels={unique(PC_colour) %>% str_sort(numeric=TRUE)})) %>%
-        ggplot() +
-        aes(sample=Value, colour=PC_colour) +
-        labs(x='Theoretical [runif(1000)]', y='Empirical', colour='PC pvalue') +
-        stat_qq(distribution=qunif, alpha=0.5) +
-        geom_abline(intercept=0, slope=1, linetype='dashed') +
-        coord_flip() +
-        theme_bw() +
-        theme(legend.position='none')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    }) -> output$jackstraw_plot
+    Seurat::JS(object=seurat[[reduction_name]], slot='empirical') %>%
+      as.data.frame() %>%
+      rownames_to_column('Contig') %>%
+      gather(key='PC', value='Value', -Contig) %>%
+      mutate(PC={stringr::str_remove(PC, '^PC') %>% as.numeric()}) %>%
+      filter(dplyr::between(PC, left=min_component, right=max_component)) %>%
+      left_join(y=as.data.frame(Seurat::JS(object=seurat[[reduction_name]], slot='overall')), by='PC') %>%
+      mutate(PC_colour=sprintf('PC %d: %1.3g', PC, Score),
+             project_name=Project(seurat)) %>%
+      mutate(PC_colour=factor(PC_colour, levels={unique(PC_colour) %>% str_sort(numeric=TRUE)})) %>%
+      ggplot() +
+      aes(sample=Value, colour=PC_colour) +
+      labs(x='Theoretical [runif(1000)]', y='Empirical', colour='PC pvalue') +
+      stat_qq(distribution=qunif, alpha=0.5) +
+      geom_abline(intercept=0, slope=1, linetype='dashed') +
+      coord_flip() +
+      theme_bw() +
+      theme(legend.position='none')}) -> output$jackstraw_plot
 }
