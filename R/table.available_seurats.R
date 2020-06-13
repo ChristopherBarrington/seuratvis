@@ -35,7 +35,7 @@ available_seurats.ui <- function(id) {
   assign(x=module_ns, val=e, envir=module_environments)
 
   # record the server(s) to call
-  get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', c('available_seurats', 'load_a_seurat'))) %>% assign(env=module_servers_to_call, x=id)
+  # get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', c('available_seurats', 'load_a_seurat'))) %>% assign(env=module_servers_to_call, x=id)
 
   # make ui elements to pick columns to use
   selectizeInput_defaults <- list(choices=NULL, selected=NULL, multiple=FALSE)

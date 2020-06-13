@@ -53,6 +53,10 @@ shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
   # call servers for modules
+  ## special case to load the seurat handler tab's server first
+  callModule(module=available_seurats.server, id='load_dataset')
+  callModule(module=load_a_seurat.server, id='load_dataset')
+
   ## modules listed in the module_servers_to_call environment
   module_servers_to_call %<>% as.list()
   for(id in names(module_servers_to_call))

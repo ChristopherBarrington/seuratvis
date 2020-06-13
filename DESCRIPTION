@@ -15,11 +15,11 @@ Remotes:
   ChristopherBarrington/esquisse
 Imports:
   biomaRt,
-  esquisse,
   ggrepel,
   gtools,
   shinyAce
 Depends:
+  esquisse,
   shiny,
   shinydashboard,
   rclipboard,
