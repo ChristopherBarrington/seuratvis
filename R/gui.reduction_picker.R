@@ -61,7 +61,6 @@ reduction_method_picker.server <- function(input, output, session) {
   # react to the reduction method selection
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
     # make sure these elements are defined
-    req(input$reduction_method_picker)
     req(seurat_object.reactions$seurat)
 
     # send a message
@@ -70,10 +69,6 @@ reduction_method_picker.server <- function(input, output, session) {
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
     dimred_method <- input$reduction_method_picker
-
-    # update other reduction method pickers
-    # for(nsid in module_environments$reduction_method_pickers$ns)
-    #   updateSelectInput(session=session_server, inputId=nsid, selected=dimred_method)
 
     # pull out the reduction
     seurat@reductions[[dimred_method]]@cell.embeddings[,1:2] %>% #! TODO: make this use Embeddings()
@@ -100,11 +95,5 @@ reduction_method_picker.server <- function(input, output, session) {
     # update the ui element(s)
     updateSelectInput(session=session, inputId='reduction_method_picker',
                       choices=reductions,
-                      selected=preferred_choice(x=reductions, preferences=c('umap','tsne','pca')))
-
-    # initialise the dimension reduced map
-    seurat@reductions[[Seurat:::DefaultDimReduc(seurat)]]@cell.embeddings[,1:2] %>%
-        as.data.frame() %>%
-        set_names(c('DIMRED_1','DIMRED_2')) %>%
-        cbind(seurat@meta.data) -> seurat_object.reactions$dimred})
+                      selected=preferred_choice(x=reductions, preferences=c('umap','tsne','pca')))})
 }
