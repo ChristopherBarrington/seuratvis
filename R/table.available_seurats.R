@@ -86,10 +86,20 @@ available_seurats.server <- function(input, output, session) {
     return(NULL)
   }
 
+  # make the data.frame for the detected Seurat objects
   server_env$available_seurat_objects %>%
     dplyr::select(-choiceName) %>%
-    plyr::adply(.margins=1, function(params) {
+    plyr::adply(.margins=1, .parallel=FALSE, function(params) { #! TODO: parallelise this doMC does not work on Windows though!
       x <- eval(parse(text=params$choiceValue))
+      
+      # choose a gene to look for to identify male dataset
+      x@misc$mart@dataset %>%
+        str_remove(pattern='_.*') %>%
+        switch(hsapiens='SRY',
+               mmusculus='Sry',
+               'SRY') -> boy_gene
+
+      # make the data.frame for this Seurat
       data.frame(project=reformat_project_name(Project(x)),
                  environment=if_else(params$env=='globalenv()', 'RGlobal', as.character(params$env)),
                  ncells=ncol(x),
@@ -102,7 +112,7 @@ available_seurats.server <- function(input, output, session) {
                  assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% collapse_strings()},
                  nfeatures=nrow(x),
                  reductions={Reductions(x) %>% collapse_strings()},
-                 guessed_sex={FetchData(x, vars=c('SRY','Sry')) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))})}) %>%
+                 guessed_sex={FetchData(x, vars=boy_gene) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))})}) %>%
     mutate(dimensions=as.integer(dimensions),
            object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
@@ -178,7 +188,7 @@ load_a_seurat.server <- function(input, output, session) {
     req(input$seurats_table_rows_selected)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$seurats_table_rows_selected [%s]', input$seurats_table_rows_selected) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$seurats_table_rows_selected [%s]', input$seurats_table_rows_selected) %>% message()
 
     # empty out the reactives
     for(i in names(seurat_object.reactions))
