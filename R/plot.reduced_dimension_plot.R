@@ -62,11 +62,19 @@ reduced_dimension_plot.server <- function(input, output, session) {
     session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message()
 
     # collect args from selections.rv
-    c('dimred', 'picked_feature_values', 'cluster_id_picker', 'point_size', 'opacity', 'value_range_limits') %>%
+    c('dimred', 'picked_feature_values') %>%
       purrr::set_names() %>%
       sapply(session$ns) %>%
       sapply(parse_ns_label) %>%
       lapply(function(x) selections.rv[[x]]) -> args
+
+    # because multiple plots are using the same `input` tag...
+    #! TODO: could make each umap type a different module?? ie differnet ui id tags? in different servers perhaps?
+    args$opacity <- input_server[[session$ns('opacity_slider') %>% parse_ns_label()]]
+    args$point_size <- input_server[[session$ns('point_size_slider') %>% parse_ns_label()]]
+    args$value_range_limits <- input_server[[session$ns('value_range') %>% parse_ns_label()]]
+    args$cluster_id_picker <- input_server[[session$ns('cluster_id_picker') %>% parse_ns_label()]]
+    args$label_clusters <- input_server[[session$ns('label_clusters') %>% parse_ns_label()]]
 
     # make a base plot
     cbind(args$dimred,
@@ -89,7 +97,7 @@ reduced_dimension_plot.server <- function(input, output, session) {
         aes(colour=ident) -> output_plot
 
       # if labels should be added, add them
-      if(seurat_object.reactions$label_clusters) {
+      if(args$label_clusters) {
         output_plot$data %>%
           group_by(ident) %>%
           summarise(DIMRED_1=mean(DIMRED_1), DIMRED_2=mean(DIMRED_2)) -> data_labels
