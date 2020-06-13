@@ -87,6 +87,7 @@ cluster_resolution_picker.server <- function(input, output, session) {
 
     # update the ui element(s)
     cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
+    updateSelectInput(session=session, inputId='cluster_resolution_picker', choices='-spoof-')
     updateSelectInput(session=session, inputId='cluster_resolution_picker',
                       choices=cluster_options, selected='seurat_clusters')
 
