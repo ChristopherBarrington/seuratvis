@@ -63,11 +63,6 @@ assay_picker.server <- function(input, output, session) {
 
     # create variables for shorthand
     assay <- input$assay_picker
-    seurat_object.reactions$selected_assay <- assay
-
-    # update other reduction method pickers
-    for(nsid in module_environments$assay_pickers$ns)
-      updateSelectInput(session=session_server, inputId=nsid, selected=assay)
 
     # set the default assay for the reactive seurat object
     if(assay!='' && !is.null(seurat_object.reactions$seurat))

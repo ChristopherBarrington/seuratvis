@@ -24,7 +24,7 @@ jackstraw_pvalue_plot.ui <- function(id) {
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # return ui element(s)
-  plotOutput(outputId=ns(id='jackstraw_pvalue_plot')) %>% withSpinner())
+  plotOutput(outputId=ns(id='jackstraw_pvalue_plot')) %>% withSpinner()
 }
 
 #' Produce the ggplot object for a JackStraw pvalue plot

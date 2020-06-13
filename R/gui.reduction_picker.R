@@ -4,7 +4,7 @@
 #' 
 #' @param id unique name of the element
 #' @param label text label of the element
-#' @param regex a value passed to \code{str_subset} to filter the reductions in the Seurat
+#' @param regex a value passed to \code{str_subset()} in a \code{regex()} to filter the reductions in the Seurat
 #' 
 #' @examples
 #' 
@@ -16,7 +16,7 @@
 #'
 #' @rdname reduction_method_picker
 #' 
-reduction_method_picker.ui <- function(id, label='Reduction method', regex='') {
+reduction_method_picker.ui <- function(id, label='Reduction method', regex='.*') {
   sprintf(fmt='### %s-reduction_method_picker.ui', id) %>% message()
 
   module <- 'reduction_method_picker'
@@ -60,13 +60,12 @@ reduction_method_picker.server <- function(input, output, session) {
 
   # react to the reduction method selection
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
-    print('----------------------------------------------')
     # make sure these elements are defined
     req(seurat_object.reactions$seurat)
     req(input$reduction_method_picker)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-input$reduction_method_picker [%s]', input$reduction_method_picker) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-input$reduction_method_picker [%s]', input$reduction_method_picker) %>% message()
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
@@ -89,7 +88,9 @@ reduction_method_picker.server <- function(input, output, session) {
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
-    reductions <- Reductions(seurat) %>% str_subset(pattern=regex(pattern='3D', ignore_case=TRUE), negate=TRUE)
+    Reductions(seurat) %>%
+      str_subset(pattern=regex(pattern=module_env$regex)) %>%
+      str_subset(pattern=regex(pattern='3D', ignore_case=TRUE), negate=TRUE) -> reductions
 
     if(length(reductions)==0)
       return(NULL)

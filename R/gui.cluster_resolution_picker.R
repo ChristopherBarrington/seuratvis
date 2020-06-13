@@ -67,7 +67,7 @@ cluster_resolution_picker.server <- function(input, output, session) {
     req(seurat_object.reactions$seurat)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %scluster_resolution_picker.server-observeEvent-input$cluster_resolution_picker [%s]', input$cluster_resolution_picker) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %scluster_resolution_picker.server-observeEvent-input$cluster_resolution_picker [%s]', input$cluster_resolution_picker) %>% message()
 
     # create variables for shorthand
     r <- input$cluster_resolution_picker
@@ -76,7 +76,7 @@ cluster_resolution_picker.server <- function(input, output, session) {
     # save cluster information in the reactive
     seurat_object.reactions$selected_cluster_resolution <- r
     seurat_object.reactions$selected_clusters_per_resolution <- seurat_object.reactions$clusters_per_resolution[r]
-    seurat_object.reactions$picked_cluster_resolution_idents <- FetchData(object=seurat, vars=r) %>% set_names('ident')
+    seurat_object.reactions$picked_cluster_resolution_idents <- FetchData(object=seurat, vars=r) %>% set_names('ident')})
 
     # update other cluster resolution pickers
     for(nsid in module_environments$cluster_resolution_pickers$ns)

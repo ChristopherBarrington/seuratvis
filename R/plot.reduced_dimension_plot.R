@@ -55,8 +55,11 @@ reduced_dimension_plot.server <- function(input, output, session) {
 
   # render the reduced dimension plot
   renderPlot(expr={
+
+    req(selections.rv[[session$ns('dimred') %>% parse_ns_label()]])
+
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message()
 
     # collect args from selections.rv
     c('dimred', 'picked_feature_values', 'cluster_id_picker', 'point_size', 'opacity', 'value_range_limits') %>%
