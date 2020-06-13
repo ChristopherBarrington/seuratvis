@@ -41,6 +41,6 @@
                        fluidRow(boxes$jackstraw, boxes$jackstraw_pvalues))
 
     # assign variables in the parent environment
-    menuItem(text='Dataset dimensionality', tabName=NS(namespace=tab, id='tab'), icon=icon('bar-chart')) %>% list() %>% append(x=menus) -> menus
+    menuItem(text='Dataset dimensionality', tabName=NS(namespace=tab, id='tab'), icon=icon('bar-chart'), badgeLabel='!', badgeColor='red') %>% list() %>% append(x=menus) -> menus
     contents %<>% append(list(content))})
 }
