@@ -44,7 +44,7 @@ filter_FindMarkersResults.server <- function(input, output, session) {
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
-    values <- FetchData(seurat, c('UMAP_1', 'UMAP_2', 'tSNA_1', 'tSNA_2', str_subset(colnames(seurat@meta.data), '_snn_res.')))
+    values <- FetchData(seurat, c('UMAP_1', 'UMAP_2', 'tSNE_1', 'tSNE_2', str_subset(colnames(seurat@meta.data), '_snn_res.')))
     seurat@misc$FindMarkersResults %>%
       pluck('wilcox') %>%
       mutate(p_adj_group={p_val_adj %>% cut(breaks=c(0, 0.1/100, 1/100, 5/100, 10/100, 100/100), labels=c('<0.1%','<1%','<5%','<10%','NS'), include.lowest=TRUE, right=TRUE)}) %>%
