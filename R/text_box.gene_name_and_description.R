@@ -36,7 +36,7 @@ picked_feature_and_description_text_box.server <- function(input, output, sessio
     session$ns('') %>% sprintf(fmt='### %spicked_feature_and_description_text_box.server-renderValueBox') %>% message('')
 
     # create variables for shorthand
-    picked_feature <- selections.rv[[session$ns('picked_feature')]]
+    picked_feature <- input$picked_feature
 
     # get gene description from biomaRt
     Misc(seurat_object.reactions$seurat, slot='mart') %>%

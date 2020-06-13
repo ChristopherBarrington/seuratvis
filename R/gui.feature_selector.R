@@ -39,10 +39,8 @@ feature_picker.ui <- function(id, label='Feature selection', include_metadata_sw
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # make ui elements
-  ## if a label switch is required, make one
-  metadata_switch <- NULL
-  if(include_metadata_switch)
-      materialSwitch(inputId=ns(id='list_metadata'), label='Show metadata', value=FALSE, right=FALSE, status='success') -> metadata_switch
+  ## a metadata switch
+  materialSwitch(inputId=ns(id='list_metadata'), label='Show metadata', value=FALSE, right=FALSE, status='success') -> metadata_switch
 
   ## feature names autocomplete box
   autocomplete_input(id=ns(id='feature_picker_feature_names'), label='Feature name', options=NULL, value=NULL, placeholder='Feature') %>%
@@ -56,12 +54,16 @@ feature_picker.ui <- function(id, label='Feature selection', include_metadata_sw
   sliderInput(inputId=ns(id='value_range'), label='Colour range limits',
               min=0, max=1, step=0.1, value=c(-Inf,Inf)) -> value_range
 
+  ## hidden text box to serve app
+  textInput(inputId=ns('picked_feature'), label='picked feature') -> picked_feature_text_input
+
   # return ui element(s)
   # tagList(dropdown, metadata_switch, value_range)
   tagList(feature_names_picker,
-          metadata_picker,
+          if(include_metadata_switch) metadata_picker,
           metadata_switch,
-          value_range)
+          value_range,
+          hidden(picked_feature_text_input))
 }
 
 #' React to a feature choice
@@ -77,6 +79,7 @@ feature_picker.server <- function(input, output, session) {
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='feature_picker') # provides `seuratvis_env`, `server_env` and `module_env`
   session_server <- get(x='session', env=server_env)
+  previously_picked_feature <- reactiveVal()
 
   # react to the feature selection
   ## if a feature is selected, copy it to the reactive
@@ -87,8 +90,9 @@ feature_picker.server <- function(input, output, session) {
     # send a message
     sprintf(fmt='### %sfeature_picker.server-observeEvent-input$feature_picker_feature_names [%s]', session$ns(''), input$feature_picker_feature_names) %>% message()
     
+    # update hidden ui element
     if(is.null(input$list_metadata) || !input$list_metadata)
-      selections.rv[[session$ns('picked_feature')]] <- input$feature_picker_feature_names})
+      updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_feature_names)})
 
   ## if a metadata column is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_metadata, handlerExpr={
@@ -97,15 +101,14 @@ feature_picker.server <- function(input, output, session) {
 
     # send a message
     sprintf(fmt='### %sfeature_picker.server-observeEvent-input$feature_picker_metadata [%s]', session$ns(''), input$feature_picker_metadata) %>% message()
-    
+
+    # update hidden ui element
     if(!is.null(input$list_metadata) && input$list_metadata)
-      selections.rv[[session$ns('picked_feature')]] <- input$feature_picker_metadata})
+      updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_metadata)})
 
   ## if the metadata switch is toggled, set the picked feature
-  observeEvent(eventExpr=input$list_metadata, handlerExpr={
+  observeEvent(eventExpr=input$list_metadata, ignoreInit=TRUE, handlerExpr={
     # make sure these elements are defined
-    req(input$list_metadata)
-    req(selections.rv[[session$ns('picked_feature_previous')]])
 
     # send a message
     sprintf(fmt='### %sfeature_picker.server-observeEvent-input$list_metadata [%s]', session$ns(''), input$list_metadata) %>% message()
@@ -113,30 +116,34 @@ feature_picker.server <- function(input, output, session) {
     # pick the feature to revert to
     ## if metadata switch is true, get the value of the metadata dropdown
     ## if metadata switch is false, get the previously shown feature (autocomplete_input return empty in this case)
-    picked_feature <- ifelse(input$list_metadata, input$feature_picker_metadata, selections.rv[[session$ns('picked_feature_previous')]])
-    selections.rv[[session$ns('picked_feature_previous')]] <- selections.rv[[session$ns('picked_feature_previous')]]
+    picked_feature <- ifelse(input$list_metadata, input$feature_picker_metadata, previously_picked_feature())
+    previously_picked_feature(input$picked_feature)
 
-    # update the reactive
-    selections.rv[[session$ns('picked_feature')]] <- picked_feature})
+    # update hidden ui element
+    updateTextInput(session=session, inputId='picked_feature', value=picked_feature)})
 
   ## use the selected feature (it may be a feature or metadata)
-  observeEvent(eventExpr=selections.rv[[session$ns('picked_feature')]], handlerExpr={
+  observeEvent(eventExpr=input$picked_feature, handlerExpr={
     # make sure these elements are defined
     req(seurat_object.reactions$seurat)
-    req(selections.rv[[session$ns('picked_feature')]])
 
     # send a message
-    sprintf(fmt='### %sfeature_picker.server-observeEvent-seurat_object.reactions$picked_feature [%s]', session$ns(''), selections.rv[[session$ns('picked_feature_previous')]]) %>% message()
+    sprintf(fmt='### %sfeature_picker.server-observeEvent-input$picked_feature [%s]', session$ns(''), input$picked_feature) %>% message()
 
     # create variables for shorthand
-    picked <- selections.rv[[session$ns('picked_feature')]]
+    picked <- input$picked_feature
     seurat <- seurat_object.reactions$seurat
 
     # get the values for the selected feature from the loaded Seurat
     picked_feature_values <- FetchData(object=seurat, vars=picked) %>% set_names('value')
 
+    # save feature information in the reactive
+    #! TODO: this invalidates the features per cluster boxplot but not the umap
+    selections.rv[[session$ns('picked_feature_values')]] <- picked_feature_values
+
     # update the ui element(s)
     ## slider to limit colour range
+    #! TODO: this invalidates the umaps but not the features per cluster boxplot
     min_value <- 0
     max_value <- 1
     if(class(picked_feature_values$value)=='numeric') {
@@ -145,10 +152,7 @@ feature_picker.server <- function(input, output, session) {
     }
 
     updateSliderInput(session=session, inputId='value_range',
-                      min=min_value, max=max_value, value=c(-Inf,Inf))
-
-    # save feature information in the reactive
-    selections.rv[[session$ns('picked_feature_values')]] <- picked_feature_values})
+                      min=min_value, max=max_value, value=c(-Inf,Inf))})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
@@ -166,30 +170,28 @@ feature_picker.server <- function(input, output, session) {
     ## pick a random feature and metadata column
     feature_picker_options %>% lapply(sample, size=1) -> feature_picker_selected
 
-    ## get the values of the random features
-    feature_picker_selected %>% lapply(FetchData, object=seurat) %>% lapply(set_names, nm='value') -> feature_picker_data
-
     # pick a feature to display: features or metadata
     picked_feature <- feature_picker_selected$features
-    picked_feature_values <- feature_picker_data$features
-    if(!is.null(input$list_metadata) && input$list_metadata) {
+    if(!is.null(input$list_metadata) && input$list_metadata)
       picked_feature <- feature_picker_selected$metadata
-      picked_feature_values <- feature_picker_data$metadata
-    }
 
     # update the ui element(s)
     ## feature names autocomplete box
+    update_autocomplete_input(session=session, id='feature_picker_feature_names', options='-spoof-')
     update_autocomplete_input(session=session, id='feature_picker_feature_names',
                               options=feature_picker_options$features, value=feature_picker_selected$features)
     
     ## metadata names dropdown box
+    updateSelectizeInput(session=session, inputId='feature_picker_metadata', choices='-spoof-')
     updateSelectizeInput(session=session, inputId='feature_picker_metadata',
                          choices=feature_picker_options$metadata, selected=feature_picker_selected$metadata)
+
+    ## hidden picked feature text input
+    updateTextInput(session=session, inputId='picked_feature', value='-spoof-')
+    updateTextInput(session=session, inputId='picked_feature', value=picked_feature)
 
     # update the reactive
     seurat_object.reactions$feature_picker_features <- feature_picker_options$features
     seurat_object.reactions$feature_picker_metadata <- feature_picker_options$metadata
-
-    selections.rv[[session$ns('picked_feature')]] <- picked_feature
-    selections.rv[[session$ns('picked_feature_previous')]] <- picked_feature})
+    previously_picked_feature(picked_feature)})
 }
