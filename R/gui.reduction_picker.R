@@ -96,6 +96,7 @@ reduction_method_picker.server <- function(input, output, session) {
       return(NULL)
 
     # update the ui element(s)
+    updateSelectInput(session=session, inputId='reduction_method_picker', choices='-spoof-') # to force the `observeEvent` to execute
     updateSelectInput(session=session, inputId='reduction_method_picker',
                       choices=reductions,
                       selected=preferred_choice(x=reductions, preferences=c('umap','tsne','pca')))})

@@ -80,6 +80,7 @@ assay_picker.server <- function(input, output, session) {
     seurat <- seurat_object.reactions$seurat
 
     # update the ui element(s)
+    updateSelectInput(session=session, inputId='assay_picker', choices='-spoof-')
     updateSelectInput(session=session, inputId='assay_picker',
                       choices=Assays(seurat), selected=DefaultAssay(seurat))})
 }

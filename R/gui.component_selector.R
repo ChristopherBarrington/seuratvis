@@ -105,10 +105,12 @@ principle_component_picker.server <- function(input, output, session) {
 
     # update the ui element(s)
     ## principle components drop down box
+    updateSelectizeInput(session=session, inputId='principle_component_picker', choices='-spoof-')
     updateSelectizeInput(session=session, inputId='principle_component_picker',
                          choices=principle_component_picker_options, selected=min_value)
     
     ## slider to limit range of components
+    updateSliderInput(session=session, inputId='principle_components_slider', min=-1)
     updateSliderInput(session=session, inputId='principle_components_slider',
                       min=min_value, max=max_value, value=min_value+5)
 
