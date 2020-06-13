@@ -94,7 +94,7 @@ reduction_method_picker.server <- function(input, output, session) {
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat
-    reductions <- Reductions(seurat) %>% str_subset(pattern=module_env$regex)
+    reductions <- Reductions(seurat) %>% str_subset(pattern=regex(pattern='3D', ignore_case=TRUE), negate=TRUE)
 
     if(length(reductions)==0)
       return(NULL)

@@ -86,6 +86,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
     # add the shared plotting elements
     feature_plot +
         labs(x='Cluster identifier') +
+        scale_x_continuous(breaks=seq(from=0, to=100, by=2), minor_breaks=seq(from=1, to=99, by=2), sec.axis=dup_axis(name=NULL)) +
         theme_bw() +
-        theme(legend.position='none', panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())}) -> output$feature_values_per_cluster_plot
+        theme(legend.position='none')}) -> output$feature_values_per_cluster_plot
 }
