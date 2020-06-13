@@ -62,9 +62,9 @@ reduced_dimension_plot.server <- function(input, output, session) {
     c('dimred', 'picked_feature_values', 'cluster_id_picker', 'point_size', 'opacity', 'value_range_limits') %>%
       purrr::set_names() %>%
       sapply(session$ns) %>%
-      sapply(parse_ns_label) %>% print() %>%
+      sapply(parse_ns_label) %>%
       lapply(function(x) selections.rv[[x]]) -> args
-lapply(args, head) %>% print()
+
     # make a base plot
     cbind(args$dimred,
           seurat_object.reactions$picked_cluster_resolution_idents,
