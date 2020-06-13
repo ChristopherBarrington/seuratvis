@@ -95,7 +95,7 @@ available_seurats.server <- function(input, output, session) {
                  ncells=ncol(x),
                  numi=sum(x@meta.data$nCount_RNA),
                  median_umi=median(x@meta.data$nCount_RNA),
-                 dimensions=ifelse(is.null(x@misc$n_dimensions), -1, x@misc$n_dimensions),
+                 dimensions=ifelse(is.null(x@misc$n_dimensions$pca), -1, x@misc$n_dimensions$pca),
                  filtered=!is.null(x@misc$cells_filtered) && x@misc$cells_filtered,
                  integrated=!is.null(x@misc$integrated_dataset) && x@misc$integrated_dataset,
                  active_assay=DefaultAssay(x),
