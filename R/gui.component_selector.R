@@ -69,7 +69,7 @@ principle_component_picker.server <- function(input, output, session) {
     req(input$reduction_method_picker)
 
     # send a message
-    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-selections.rv[[session$ns(selected_reduction_method)]] [%s]', session$ns(''), seurat_object.reactions$formatted.project.name) %>% message()
+    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-input$reduction_method_picker [%s]', session$ns(''), seurat_object.reactions$formatted.project.name) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat
