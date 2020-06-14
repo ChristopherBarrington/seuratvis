@@ -75,7 +75,7 @@ seurat_object.server <- function(input, output, session, seurat, ...) {
     req(input$proportion_mt_picker)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$proportion_mt_picker [%s]', input$proportion_mt_picker) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$proportion_mt_picker [%s]', input$proportion_mt_picker) %>% message()
 
     # create varaibles for shorthand
     seurat <- seurat.rv$object
@@ -98,7 +98,7 @@ seurat_object.server <- function(input, output, session, seurat, ...) {
     req(input$n_features_picker)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_features_picker [%s]', input$n_features_picker) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_features_picker [%s]', input$n_features_picker) %>% message()
 
     # create varaibles for shorthand
     seurat <- seurat.rv$object
@@ -123,7 +123,7 @@ seurat_object.server <- function(input, output, session, seurat, ...) {
     req(input$n_umi_picker)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message()
 
     # create varaibles for shorthand
     seurat <- seurat.rv$object

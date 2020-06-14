@@ -45,7 +45,7 @@ elbow_plot.server <- function(input, output, session, ...) {
     req(seurat_object.reactions$seurat)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %selbow_plot.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %selbow_plot.server-renderPlot') %>% message()
    
     # make variables for shorthand    
     seurat <- seurat_object.reactions$seurat

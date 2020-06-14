@@ -71,7 +71,7 @@ total_umi_per_cell_filter.server <- function(input, output, session, seurat, cel
   # react to the min_umis input element
   observeEvent(eventExpr=input$min_umis, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$min_umis [%s]', input$min_umis) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$min_umis [%s]', input$min_umis) %>% message()
 
     # update the reactive
     cell_filtering$total_umi_per_cell_min <- round(input$min_umis, digits=0)
@@ -80,7 +80,7 @@ total_umi_per_cell_filter.server <- function(input, output, session, seurat, cel
   # react to the max_umis input element
   observeEvent(eventExpr=input$max_umis, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$max_umis [%s]', input$max_umis) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$max_umis [%s]', input$max_umis) %>% message()
 
     # update the reactive
     cell_filtering$total_umi_per_cell_max <- round(input$max_umis, digits=0)
@@ -89,7 +89,7 @@ total_umi_per_cell_filter.server <- function(input, output, session, seurat, cel
   # react to the initialisation of the reference min value
   observeEvent(eventExpr=seurat$n_umi_values_min, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat$n_umi_values_min [%s]', seurat$n_umi_values_min) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat$n_umi_values_min [%s]', seurat$n_umi_values_min) %>% message()
 
     # create variables for shorthand
     value <- seurat$n_umi_values_min
@@ -100,7 +100,7 @@ total_umi_per_cell_filter.server <- function(input, output, session, seurat, cel
   # react to the initialisation of the reference max value
   observeEvent(eventExpr=seurat$n_umi_values_max, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat$n_umi_values_max [%s]', seurat$n_umi_values_max) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat$n_umi_values_max [%s]', seurat$n_umi_values_max) %>% message()
 
     # create variables for shorthand
     value <- seurat$n_umi_values_max

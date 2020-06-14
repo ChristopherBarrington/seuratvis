@@ -54,7 +54,7 @@ density_plot.server <- function(input, output, session, seurat, cell_filtering, 
   # render the density plot
   renderPlot(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-renderPlot') %>% message()
 
     # get feature-specific plotting elements
     feature_plot <- NULL
@@ -99,7 +99,7 @@ density_plot.server <- function(input, output, session, seurat, cell_filtering, 
   #! TODO: these should not need session servers?
   observeEvent(eventExpr=input$brush, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-observeEvent-input$brush [%s]', input$brush) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-observeEvent-input$brush [%s]', input$brush) %>% message()
 
     # update feature-specific reactives and ui elements
     if(module_env$feature=='nFeature_RNA') {
@@ -147,21 +147,21 @@ density_plot.server <- function(input, output, session, seurat, cell_filtering, 
   #! TODO: these should not require the NS() call ...
   observeEvent(eventExpr=seurat$reset_n_features, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-observeEvent-seurat$reset_n_features [%s]', seurat$reset_n_features) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-observeEvent-seurat$reset_n_features [%s]', seurat$reset_n_features) %>% message()
     
     session$resetBrush(NS(namespace=id, id= 'brush'))})
 
   # reset the brush when n umi variable is changed
   observeEvent(eventExpr=seurat$reset_n_umi, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-observeEvent-seurat$reset_n_umi [%s]', seurat$reset_n_umi) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-observeEvent-seurat$reset_n_umi [%s]', seurat$reset_n_umi) %>% message()
     
     session$resetBrush(NS(namespace=id, id='brush'))})
 
   # reset the brush when proportion mitochondrial UMI variable is changed
   observeEvent(eventExpr=seurat$reset_proportion_mt, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-observeEvent-seurat$reset_proportion_mt [%s]', seurat$reset_proportion_mt) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sdensity_plot.server-observeEvent-seurat$reset_proportion_mt [%s]', seurat$reset_proportion_mt) %>% message()
     
     session$resetBrush(NS(namespace=id, id='brush'))})
 }

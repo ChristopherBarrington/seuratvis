@@ -48,7 +48,7 @@ number_of_reads_per_cell_text_box.server <- function(input, output, session, seu
   # make the text box
   renderValueBox(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %snumber_of_reads_per_cell_text_box.server-renderValueBox') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %snumber_of_reads_per_cell_text_box.server-renderValueBox') %>% message()
 
     # get summarised values
     n_reference <- seurat$n_umi_values %>% unlist() %>% module_env$summary_function()

@@ -52,7 +52,7 @@ boxplot_plot.server <- function(input, output, session, seurat, cell_filtering, 
   # render the boxplot
   renderPlot(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sboxplot_plot.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sboxplot_plot.server-renderPlot') %>% message()
 
     # get feature-specific plotting elements
     feature_plot <- NULL

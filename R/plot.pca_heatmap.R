@@ -47,7 +47,7 @@ pca_heatmap.server <- function(input, output, session, ...) {
     req(input$principle_component_picker)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %spca_heatmap.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %spca_heatmap.server-renderPlot') %>% message()
    
     # make variables for shorthand    
     seurat <- seurat_object.reactions$seurat

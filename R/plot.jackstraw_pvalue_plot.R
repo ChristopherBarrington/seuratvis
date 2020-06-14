@@ -48,7 +48,7 @@ jackstraw_pvalue_plot.server <- function(input, output, session, ...) {
     req(input$reduction_method_picker)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sjackstraw_pvalue_plot.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sjackstraw_pvalue_plot.server-renderPlot') %>% message()
    
     # make variables for shorthand    
     seurat <- seurat_object.reactions$seurat
