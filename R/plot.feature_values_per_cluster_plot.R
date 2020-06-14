@@ -50,7 +50,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
   renderPlot(expr={
     # send a message
     session$ns('') %>% sprintf(fmt='### %sfeature_values_per_cluster_plot.server-renderPlot') %>% message('')
-   
+
     # get the data to plot
     cbind(seurat_object.reactions$picked_cluster_resolution_idents,
           selections.rv[[session$ns('picked_feature_values')]]) %>%
