@@ -63,7 +63,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
         # filter(value>0) %>%
         group_by(ident, x) %>%
         summarise(q25=quantile(value, 0.25), q75=quantile(value, 0.75), median=median(value)) %>%
-        mutate(is_selected_cluster_id=ident %in% selections.rv[[{session$ns('cluster_id_picker') %>% str_replace('-.*-', '-')}]]) %>%
+        mutate(is_selected_cluster_id=ident %in% input$cluster_id_picker) %>%
         mutate(iqr=q75-q25, lower=q25-1.5*iqr, upper=q75+1.5*iqr) -> cluster_data_summary
 
       cluster_data_summary %>%

@@ -57,14 +57,6 @@ cluster_id_picker.server <- function(input, output, session) {
   collect_environments(id=parent.frame()$id, module='cluster_id_picker') # provides `seuratvis_env`, `server_env` and `module_env`
   session_server <- get(x='session', env=server_env)
 
-  # react to the checkbox/radiobutton input
-  observeEvent(eventExpr=input$cluster_id_picker, handlerExpr={
-    # send a message
-    session$ns('') %>% sprintf(fmt='### %scluster_id_picker.server-observeEvent-input$cluster_id_picker [%s]', str_c(input$cluster_id_picker, collapse=',')) %>% message('')
-
-    # update the reactive
-    selections.rv[[session$ns('cluster_id_picker')]] <- input$cluster_id_picker})
-
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$picked_cluster_resolution_idents, handlerExpr={
     # send a message
