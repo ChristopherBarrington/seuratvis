@@ -78,7 +78,6 @@ reduction_method_picker.server <- function(input, output, session) {
       cbind(seurat@meta.data) -> dimred
 
     # update the reactive(s)
-    selections.rv[[session$ns('selected_reduction_method')]] <- dimred_method
     selections.rv[[session$ns('dimred')]] <- dimred})
 
   # update UI when Seurat object is loaded
