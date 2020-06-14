@@ -35,7 +35,7 @@ cluster_id_picker.ui <- function(id, label='Cluster selection') {
   # make ui elements
   pickerInput(inputId=ns(id='cluster_id_picker'), label=label, choices=NULL, multiple=TRUE,
               options=list(`actions-box`=TRUE, header='Cluster selection', title='Cluster selection',
-                           `selected-text-format`='count>3', `count-selected-text`='{0} clusters')) -> input
+                           `selected-text-format`='count>5', `count-selected-text`='{0} cluster(s)')) -> input
 
   # return ui element(s)
   tagList(input)
