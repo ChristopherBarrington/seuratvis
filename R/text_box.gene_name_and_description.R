@@ -28,19 +28,18 @@ picked_feature_and_description_text_box.ui <- function(id, width=12) {
 
 #' @rdname picked_feature_and_description_text_box
 #' 
-picked_feature_and_description_text_box.server <- function(input, output, session) {
+picked_feature_and_description_text_box.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %spicked_feature_and_description_text_box.server') %>% message()
 
   renderValueBox(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %spicked_feature_and_description_text_box.server-renderValueBox') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %spicked_feature_and_description_text_box.server-renderValueBox') %>% message()
 
     # create variables for shorthand
     picked_feature <- input$picked_feature
 
     # get gene description from biomaRt
-    Misc(seurat_object.reactions$seurat, slot='mart') %>%
-      get_formatted_gene_description(external_gene_name=picked_feature) -> subtitle
+    get_formatted_gene_description(external_gene_name=picked_feature, mart=seurat$mart) -> subtitle
 
     # create output object
     list(value=picked_feature,

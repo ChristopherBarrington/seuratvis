@@ -54,7 +54,7 @@ principle_component_picker.ui <- function(id, label='Principle component selecti
 #' 
 #' @rdname principle_component_picker
 #' 
-principle_component_picker.server <- function(input, output, session) {
+principle_component_picker.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sprinciple_component_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -69,7 +69,7 @@ principle_component_picker.server <- function(input, output, session) {
     req(input$reduction_method_picker)
 
     # send a message
-    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-input$reduction_method_picker [%s]', session$ns(''), seurat_object.reactions$formatted.project.name) %>% message()
+    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-input$reduction_method_picker [%s]', session$ns(''), seurat$formatted_project) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat

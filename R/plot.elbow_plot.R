@@ -31,7 +31,7 @@ elbow_plot.ui <- function(id) {
 #' 
 #' @rdname elbow_plot
 #'
-elbow_plot.server <- function(input, output, session) {
+elbow_plot.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %selbow_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object

@@ -33,7 +33,7 @@ jackstraw_plot.ui <- function(id) {
 #' 
 #' @rdname jackstraw_plot
 #'
-jackstraw_plot.server <- function(input, output, session) {
+jackstraw_plot.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %sjackstraw_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object

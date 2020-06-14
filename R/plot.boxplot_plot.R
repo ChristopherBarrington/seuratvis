@@ -42,7 +42,7 @@ boxplot_plot.ui <- function(id, feature) {
 #' 
 #' @rdname boxplot_plot
 #'
-boxplot_plot.server <- function(input, output, session) {
+boxplot_plot.server <- function(input, output, session, seurat, cell_filtering, ...) {
   session$ns('') %>% sprintf(fmt='### %sboxplot_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -58,11 +58,11 @@ boxplot_plot.server <- function(input, output, session) {
     feature_plot <- NULL
     if(module_env$feature=='nCount_RNA') {
       # get thresholds of total UMI
-      min_y <- filtering_parameters.reactions$total_umi_per_cell_min
-      max_y <- filtering_parameters.reactions$total_umi_per_cell_max
+      min_y <- cell_filtering$total_umi_per_cell_min
+      max_y <- cell_filtering$total_umi_per_cell_max
       
       # start the boxplot
-      seurat_object.reactions$n_umi_values %>%
+      seurat$n_umi_values %>%
         set_names('y') %>%
         ggplot() +
         aes(y=y) +
@@ -71,11 +71,11 @@ boxplot_plot.server <- function(input, output, session) {
         scale_y_continuous(labels=function(y) scales::comma(y, accuracy=1)) -> feature_plot
     } else if(module_env$feature=='nFeature_RNA') {
       # get thresholds of detected features
-      min_y <- filtering_parameters.reactions$features_per_cell_min
-      max_y <- filtering_parameters.reactions$features_per_cell_max
+      min_y <- cell_filtering$features_per_cell_min
+      max_y <- cell_filtering$features_per_cell_max
       
       # start the boxplot
-      seurat_object.reactions$n_features_values %>%
+      seurat$n_features_values %>%
         set_names('y') %>%
         ggplot() +
         aes(y=y) +
@@ -84,10 +84,10 @@ boxplot_plot.server <- function(input, output, session) {
         scale_y_continuous(labels=function(y) scales::comma(y, accuracy=1)) -> feature_plot
     } else if(module_env$feature=='percent_mt') {
       # get max fraction Mt UMI
-      max_y <- filtering_parameters.reactions$max_percent_mitochondria
+      max_y <- cell_filtering$max_percent_mitochondria
 
       # start the boxplot
-      seurat_object.reactions$proportion_mt_values %>%
+      seurat$proportion_mt_values %>%
         set_names('y') %>%
         ggplot() +
         aes(y=y) +

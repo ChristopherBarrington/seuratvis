@@ -44,20 +44,18 @@ reduced_dimension_plot.ui <- function(id, feature) {
 #' 
 #' @rdname reduced_dimension_plot
 #'
-reduced_dimension_plot.server <- function(input, output, session) {
+reduced_dimension_plot.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='reduced_dimension_plot') # provides `seuratvis_env`, `server_env` and `module_env`
-  id <- parent.frame()$id
+  tab <- parent.frame()$id
+  tab %<>% str_remove('-.+?$') #! TODO: do not know why this can't be on one line with previous...?
   session_server <- get(x='session', env=server_env)
   input_server <- get(x='input', env=server_env)
 
   # render the reduced dimension plot
   renderPlot(expr={
-
-    req(selections.rv[[session$ns('dimred') %>% parse_ns_label()]])
-
     # send a message
     session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message()
 
@@ -69,8 +67,8 @@ reduced_dimension_plot.server <- function(input, output, session) {
     args$value_range_limits <- input_server[[session$ns('value_range') %>% parse_ns_label()]]
     args$cluster_id_picker <- input_server[[session$ns('cluster_id_picker') %>% parse_ns_label()]]
     args$label_clusters <- input_server[[session$ns('label_clusters') %>% parse_ns_label()]]
-    args$picked_feature_values <- isolate(selections.rv[[session$ns('picked_feature_values') %>% parse_ns_label()]])
-    args$dimred <- selections.rv[[session$ns('dimred') %>% parse_ns_label()]]
+    args$picked_feature_values <- isolate(seurat$picked_feature_values[[tab]])
+    args$dimred <- seurat$dimred[[tab]]
 
     # make a base plot
     cbind(args$dimred,
@@ -112,9 +110,9 @@ reduced_dimension_plot.server <- function(input, output, session) {
         output_plot +
           aes(colour=picked_feature_value) -> output_plot
 
-        c_min <- session$ns('low') %>% parse_ns_label() %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
+        c_min <- input_server[[session$ns('low') %>% parse_ns_label()]] #! TODO: should these be input[[NS(tab,'low']]
         c_mid <- 'white'
-        c_max <- session$ns('high') %>% parse_ns_label() %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
+        c_max <- input_server[[session$ns('high') %>% parse_ns_label()]] #! TODO: should these be input[[NS(tab,'high']]
         c_range_limits <- args$value_range_limits
 
         colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=c_range_limits, oob=scales::squish)

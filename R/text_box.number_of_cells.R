@@ -38,7 +38,7 @@ number_of_cells_text_box.ui <- function(id, width=12) {
 #' 
 #' @rdname number_of_cells_text_box
 #' 
-number_of_cells_text_box.server <- function(input, output, session) {
+number_of_cells_text_box.server <- function(input, output, session, seurat, cell_filtering, ...) {
   session$ns('') %>% sprintf(fmt='### %snumber_of_cells_text_box.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -47,13 +47,14 @@ number_of_cells_text_box.server <- function(input, output, session) {
   # make the text box
   renderValueBox(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %snumber_of_cells_text_box.server-renderValueBox') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %snumber_of_cells_text_box.server-renderValueBox') %>% message()
 
     # create variables for shorthand
-    n_reference <- seurat_object.reactions$reference_metrics$n_cells
-    n_filtered <- filtered_cells.reactions$n_cells
+    n_reference <- seurat$n_cells
+    n_filtered <- cell_filtering$n_cells
 
     # get the box subtitle
+    #! TODO: use a type argument to ui function to make separate servers and avoid using module_env?
     switch(module_env$id,
            cell_filtering=sprintf(fmt='Cells remaining (%.1f%%)', n_filtered/n_reference*100),
            'Cells in map') -> subtitle

@@ -51,12 +51,14 @@ reduction_method_picker.ui <- function(id, label='Reduction method', regex='.*')
 #' 
 #' @rdname reduction_method_picker
 #' 
-reduction_method_picker.server <- function(input, output, session) {
+reduction_method_picker.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='reduction_method_picker') # provides `seuratvis_env`, `server_env` and `module_env`
   session_server <- get(x='session', env=server_env)
+  tab <- parent.frame()$id
+  seurat$dimred <- list()
 
   # react to the reduction method selection
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
@@ -68,22 +70,22 @@ reduction_method_picker.server <- function(input, output, session) {
     session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-input$reduction_method_picker [%s]', input$reduction_method_picker) %>% message()
 
     # create varaibles for shorthand
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat_object.reactions$seurat
     dimred_method <- input$reduction_method_picker
 
     # pull out the reduction
-    Embeddings(object=seurat, reduction=dimred_method)[,1:2] %>%
+    Embeddings(object=object, reduction=dimred_method)[,1:2] %>%
       as.data.frame() %>%
       set_names(c('DIMRED_1','DIMRED_2')) %>%
-      cbind(seurat@meta.data) -> dimred
+      cbind(object@meta.data) -> dimred
 
     # update the reactive(s)
-    selections.rv[[session$ns('dimred')]] <- dimred})
+    seurat$dimred[[tab]] <- dimred})
 
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat$formatted_project) %>% message()
 
     # create varaibles for shorthand
     seurat <- seurat_object.reactions$seurat

@@ -36,7 +36,7 @@ number_of_clusters_text_box.ui <- function(id, width=12) {
 
 #' @rdname number_of_clusters_text_box
 #' 
-number_of_clusters_text_box.server <- function(input, output, session) {
+number_of_clusters_text_box.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %snumber_of_clusters_text_box.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -46,7 +46,7 @@ number_of_clusters_text_box.server <- function(input, output, session) {
   # make the text box
   renderValueBox(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %snumber_of_clusters_text_box.server-renderValueBox') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %snumber_of_clusters_text_box.server-renderValueBox') %>% message()
 
     # get the box subtitle
     switch(module_env$id,

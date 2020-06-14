@@ -55,7 +55,7 @@ provenance_step_viewer.ui <- function(id) {
 #' 
 #' @rdname provenance_step_viewer
 #' 
-provenance_step_viewer.server <- function(input, output, session) {
+provenance_step_viewer.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sprovenance_step_viewer.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -79,7 +79,7 @@ provenance_step_viewer.server <- function(input, output, session) {
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
     # send a message
-    sprintf(fmt='### %sprovenance_step_viewer.server-observeEvent-seurat_object.reactions$seurat [%s]', session$ns(''), seurat_object.reactions$formatted.project.name) %>% message()
+    sprintf(fmt='### %sprovenance_step_viewer.server-observeEvent-seurat_object.reactions$seurat [%s]', session$ns(''), seurat$formatted_project) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat

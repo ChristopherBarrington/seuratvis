@@ -47,6 +47,6 @@ point_size_slider.ui <- function(id, label='Point size') {
 #' 
 #' @rdname point_size_slider
 #' 
-point_size_slider.server <- function(input, output, session) {
+point_size_slider.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %spoint_size_slider.server') %>% message()
 }

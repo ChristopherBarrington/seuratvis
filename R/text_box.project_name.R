@@ -28,19 +28,16 @@ project_name_text_box.ui <- function(id, width=12) {
 
 #' @rdname project_name_text_box
 #' 
-project_name_text_box.server <- function(input, output, session) {
+project_name_text_box.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sproject_name_text_box.server') %>% message()
 
   renderValueBox(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sproject_name_text_box.server-renderValueBox') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sproject_name_text_box.server-renderValueBox') %>% message()
 
-    list(value={seurat_object.reactions$seurat %>% Project() %>% reformat_project_name()},
+    list(value=seurat$formatted_project,
          subtitle='Loaded Seurat object',
          icon=icon('certificate')) %>%
     modifyList(x=text_box_defaults()) %>%
     do.call(what=valueBox)}) -> output$project_name_text_box
 }
-
-reformat_project_name <- function(x)
-  x %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()

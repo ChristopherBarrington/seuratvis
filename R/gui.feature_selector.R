@@ -73,13 +73,15 @@ feature_picker.ui <- function(id, label='Feature selection', include_metadata_sw
 #' 
 #' @rdname feature_picker
 #' 
-feature_picker.server <- function(input, output, session) {
+feature_picker.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sfeature_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='feature_picker') # provides `seuratvis_env`, `server_env` and `module_env`
   session_server <- get(x='session', env=server_env)
   previously_picked_feature <- reactiveVal()
+  tab <- parent.frame()$id
+  seurat$picked_feature_values <- list()
 
   # react to the feature selection
   ## if a feature is selected, copy it to the reactive
@@ -132,14 +134,14 @@ feature_picker.server <- function(input, output, session) {
 
     # create variables for shorthand
     picked <- input$picked_feature
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
 
     # get the values for the selected feature from the loaded Seurat
-    picked_feature_values <- FetchData(object=seurat, vars=picked) %>% set_names('value')
+    picked_feature_values <- FetchData(object=object, vars=picked) %>% set_names('value')
 
     # save feature information in the reactive
     #! TODO: this invalidates the features per cluster boxplot but not the umap
-    selections.rv[[session$ns('picked_feature_values')]] <- picked_feature_values
+    seurat$picked_feature_values[[tab]] <- picked_feature_values
 
     # update the ui element(s)
     ## slider to limit colour range
@@ -157,7 +159,7 @@ feature_picker.server <- function(input, output, session) {
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
     # send a message
-    sprintf(fmt='### %sfeature_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', session$ns(''), seurat_object.reactions$formatted.project.name) %>% message()
+    sprintf(fmt='### %sfeature_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', session$ns(''), seurat$formatted_project) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat
@@ -191,7 +193,5 @@ feature_picker.server <- function(input, output, session) {
     updateTextInput(session=session, inputId='picked_feature', value=picked_feature)
 
     # update the reactive
-    seurat_object.reactions$feature_picker_features <- feature_picker_options$features
-    seurat_object.reactions$feature_picker_metadata <- feature_picker_options$metadata
     previously_picked_feature(picked_feature)})
 }

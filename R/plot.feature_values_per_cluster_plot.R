@@ -39,12 +39,12 @@ feature_values_per_cluster_plot.ui <- function(id) {
 #' 
 #' @rdname feature_values_per_cluster_plot
 #'
-feature_values_per_cluster_plot.server <- function(input, output, session) {
+feature_values_per_cluster_plot.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sfeature_values_per_cluster_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='feature_values_per_cluster_plot') # provides `seuratvis_env`, `server_env` and `module_env`
-  id <- parent.frame()$id
+  tab <- parent.frame()$id
 
   # render the knee plot
   renderPlot(expr={
@@ -53,7 +53,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
 
     # get the data to plot
     cbind(seurat_object.reactions$picked_cluster_resolution_idents,
-          selections.rv[[session$ns('picked_feature_values')]]) %>%
+          seurat$picked_feature_values[[tab]]) %>%
       mutate(x={as.character(ident) %>% as.numeric()}) -> data
 
     # if the picked feature has numeric values

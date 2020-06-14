@@ -31,7 +31,7 @@ pca_heatmap.ui <- function(id) {
 #' 
 #' @rdname pca_heatmap
 #'
-pca_heatmap.server <- function(input, output, session) {
+pca_heatmap.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %spca_heatmap.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -56,13 +56,12 @@ pca_heatmap.server <- function(input, output, session) {
 
     # render the heatmap
     #! TODO: make this a nice ggplot
-    if(!DefaultAssay(object=object[['pca']]) %in% Assays(seurat)) {
+    if(!DefaultAssay(object=seurat[['pca']]) %in% Assays(seurat)) {
       ggplot()+aes()+annotate(geom='text', label='Nothing to see here', x=0, y=0)+theme_void()
     } else {
       DefaultAssay(object=seurat) <- DefaultAssay(object=seurat[[reduction_name]])
       DimHeatmap(object=seurat, reduction=reduction_name,
                  dims=as.numeric(selected_component),
                  disp.min=-2.5, disp.max=2.5,
-                 cells=2000, balanced=TRUE, fast=FALSE)
-    }}) -> output$pca_heatmap
+                 cells=2000, balanced=TRUE, fast=FALSE)}}) -> output$pca_heatmap
 }

@@ -5,34 +5,10 @@
 module_environments <- new.env()
 module_servers_to_call <- new.env()
 seurat_object.reactions <- reactiveValues()
-filtered_cells.reactions <- reactiveValues()
-seurat_configuration.reactions <- reactiveValues()
-
-#' Reactive lists for dataset filetering
-#' 
-filtering_parameters.reactions <- reactiveValues()
-filtering_arguments.reactions <- reactiveValues()
-
-#' Reactive list of summary statistics of loaded seurat object
-#! TODO initialise this when an object is loaded
-reference_metrics.rv <- reactiveValues()
-
-#' Plotting reactive values
-#' 
-plotting_options.rv <- reactiveValues()
 
 #' UI elements by module
 #' 
 ui_element_ids.env <- new.env()
-
-#' Reactive list of UI element selections
-#' 
-#' @details
-#' Elements of the list can be accessed with \code{session$ns('feature')}.
-#' 
-#' @param `-picked_feature` name of picked feature from a tab
-#' 
-selections.rv <- reactiveValues()
 
 shinyAppServer <- function(input, output, session) {
 
@@ -55,16 +31,18 @@ shinyAppServer <- function(input, output, session) {
   # call servers for modules
   ## special case to load the seurat handler tab's server first
   callModule(module=available_seurats.server, id='load_dataset')
-  callModule(module=load_a_seurat.server, id='load_dataset')
+  seurat <- callModule(module=seurat_object.server, id='load_dataset')  # callModule(module=load_a_seurat.server, id='load_dataset')
+
+  ## load the filter_seurat module
+  cell_filtering <- callModule(module=cell_filtering.server, id='seuratvis', seurat=seurat)
 
   ## modules listed in the module_servers_to_call environment
   module_servers_to_call %<>% as.list()
   for(id in names(module_servers_to_call))
-    for(server in module_servers_to_call[[id]])
-      callModule(module=get(x=server), id=id)
-
-  ## load the filter_seurat module
-  callModule(module=cell_filtering.server, id='seuratvis')
+    for(server in module_servers_to_call[[id]]) {
+      if(TRUE) print(server)
+      callModule(module=get(x=server), id=id, seurat=seurat, cell_filtering=cell_filtering)
+    }
 
   # ###############################################################################################
   # any code to exectue when the session ends

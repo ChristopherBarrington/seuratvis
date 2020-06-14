@@ -46,6 +46,6 @@ opacity_slider.ui <- function(id, label='Opacity') {
 #' 
 #' @rdname opacity_slider
 #' 
-opacity_slider.server <- function(input, output, session) {
+opacity_slider.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %sopacity_slider.server') %>% message()
 }

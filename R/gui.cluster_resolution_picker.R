@@ -54,7 +54,7 @@ cluster_resolution_picker.ui <- function(id, label='Cluster resolutions', includ
 #' 
 #' @rdname cluster_resolution_picker
 #' 
-cluster_resolution_picker.server <- function(input, output, session) {
+cluster_resolution_picker.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %scluster_resolution_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -80,7 +80,7 @@ cluster_resolution_picker.server <- function(input, output, session) {
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat$formatted_project) %>% message()
 
     # create variables for shorthand
     seurat <- seurat_object.reactions$seurat

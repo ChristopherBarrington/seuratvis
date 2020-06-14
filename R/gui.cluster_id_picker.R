@@ -50,7 +50,7 @@ cluster_id_picker.ui <- function(id, label='Cluster selection') {
 #' 
 #' @rdname cluster_id_picker
 #' 
-cluster_id_picker.server <- function(input, output, session) {
+cluster_id_picker.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %scluster_id_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -60,7 +60,7 @@ cluster_id_picker.server <- function(input, output, session) {
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat_object.reactions$picked_cluster_resolution_idents, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %scluster_id_picker.server-observeEvent-seurat_object.reactions$picked_cluster_resolution_idents [%s]', seurat_object.reactions$formatted.project.name) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %scluster_id_picker.server-observeEvent-seurat_object.reactions$picked_cluster_resolution_idents [%s]', seurat$formatted_project) %>% message()
 
     # create variables for shorthand
     idents <- seurat_object.reactions$picked_cluster_resolution_idents %>% pluck('ident') %>% levels() %>% mixedsort()
