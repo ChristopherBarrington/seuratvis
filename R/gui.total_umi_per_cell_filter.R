@@ -73,18 +73,26 @@ total_umi_per_cell_filter.server <- function(input, output, session, seurat, cel
     # send a message
     session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$min_umis [%s]', input$min_umis) %>% message()
 
-    # update the reactive
-    cell_filtering$total_umi_per_cell_min <- round(input$min_umis, digits=0)
-    cell_filtering$updated_parameter <- rnorm(1)})
+    # check that max>min and update the reactive
+    if(input$min_umis<=input$max_umis) {
+      cell_filtering$total_umi_per_cell_min <- round(input$min_umis, digits=0)
+      cell_filtering$updated_parameter <- rnorm(1)
+    } else {
+      updateNumericInput(session=session, inputId='min_umis', value=input$max_umis)
+    }})
 
   # react to the max_umis input element
   observeEvent(eventExpr=input$max_umis, handlerExpr={
     # send a message
     session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$max_umis [%s]', input$max_umis) %>% message()
 
-    # update the reactive
-    cell_filtering$total_umi_per_cell_max <- round(input$max_umis, digits=0)
-    cell_filtering$updated_parameter <- rnorm(1)})
+    # check that max>min and update the reactive
+    if(input$max_umis>=input$min_umis) {
+      cell_filtering$total_umi_per_cell_max <- round(input$max_umis, digits=0)
+      cell_filtering$updated_parameter <- rnorm(1)
+    } else {
+      updateNumericInput(session=session, inputId='max_umis', value=input$min_umis)
+    }})
 
   # react to the initialisation of the reference min value
   observeEvent(eventExpr=seurat$n_umi_values_min, handlerExpr={

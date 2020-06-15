@@ -47,7 +47,7 @@ features_per_cell_filter.ui <- function(id, label='Features per cell', low=TRUE,
   ## if a maximum box is required, make one
   if(high)
     div(tags$h6('Maximum', style='display: inline;'),
-        numericInput(inputId=ns('max_features'), label=NULL, , value=0, step=50, width='100%')) -> high_ui
+        numericInput(inputId=ns('max_features'), label=NULL, value=0, step=50, width='100%')) -> high_ui
 
   # return ui element(s)
   tagList(tags$label(label), br(), low_ui, high_ui)
@@ -72,18 +72,26 @@ features_per_cell_filter.server <- function(input, output, session, seurat, cell
     # send a message
     session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-input$min_features [%s]', input$min_features) %>% message()
 
-    # update the reactive
-    cell_filtering$features_per_cell_min <- round(input$min_features, digits=0)
-    cell_filtering$updated_parameter <- rnorm(1)})
+    # check that min<max and update the reactive
+    if(input$min_features<=input$max_features) {
+      cell_filtering$features_per_cell_min <- round(input$min_features, digits=0)
+      cell_filtering$updated_parameter <- rnorm(1)
+    } else {
+      updateNumericInput(session=session, inputId='min_features', value=input$max_features)
+    }})
 
   # react to the maximum input element
   observeEvent(eventExpr=input$max_features, handlerExpr={
     # send a message
     session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-input$max_features [%s]', input$max_features) %>% message()
 
-    # update the reactive
-    cell_filtering$features_per_cell_max <- round(input$max_features, digits=0)
-    cell_filtering$updated_parameter <- rnorm(1)})
+    # check that max>min and update the reactive
+    if(input$max_features>=input$min_features) {
+      cell_filtering$features_per_cell_max <- round(input$max_features, digits=0)
+      cell_filtering$updated_parameter <- rnorm(1)
+    } else {
+      updateNumericInput(session=session, inputId='max_features', value=input$min_features)
+    }})
 
   # react to the initialisation of the reference min value
   observeEvent(eventExpr=seurat$n_features_values_min, handlerExpr={
