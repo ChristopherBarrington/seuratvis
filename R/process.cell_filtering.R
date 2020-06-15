@@ -17,9 +17,6 @@ cell_filtering.server <- function(input, output, session, seurat, ...) {
   # react to the filtering parameters being changed
   observeEvent(eventExpr=filtering.rv$updated_parameter, handlerExpr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
-    req(seurat$object)
-
     req(seurat$n_features_values)
     req(seurat$n_umi_values)
     req(seurat$proportion_mt_values)
