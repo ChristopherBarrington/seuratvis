@@ -36,7 +36,7 @@ number_of_clusters_text_box.ui <- function(id, width=12) {
 
 #' @rdname number_of_clusters_text_box
 #' 
-number_of_clusters_text_box.server <- function(input, output, session, ...) {
+number_of_clusters_text_box.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %snumber_of_clusters_text_box.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -53,7 +53,7 @@ number_of_clusters_text_box.server <- function(input, output, session, ...) {
            'Cell clusters') -> subtitle
 
     # create output object
-    list(value={seurat_object.reactions$selected_clusters_per_resolution %>% comma()},
+    list(value={seurat$selected_clusters_per_resolution %>% comma()},
          subtitle=subtitle,
          icon=icon('first-order')) %>%
       modifyList(x=seuratvis:::text_box_defaults()) %>%
