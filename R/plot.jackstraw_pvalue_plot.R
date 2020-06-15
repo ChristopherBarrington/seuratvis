@@ -33,7 +33,7 @@ jackstraw_pvalue_plot.ui <- function(id) {
 #' 
 #' @rdname jackstraw_pvalue_plot
 #'
-jackstraw_pvalue_plot.server <- function(input, output, session, ...) {
+jackstraw_pvalue_plot.server <- function(input, output, session, seurat,  ...) {
   session$ns('') %>% sprintf(fmt='### %sjackstraw_pvalue_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -44,18 +44,18 @@ jackstraw_pvalue_plot.server <- function(input, output, session, ...) {
   # render the elbow plot
   renderPlot(expr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
     req(input$reduction_method_picker)
 
     # send a message
     session$ns('') %>% sprintf(fmt='### %sjackstraw_pvalue_plot.server-renderPlot') %>% message()
    
     # make variables for shorthand    
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
     reduction_name <- input$reduction_method_picker
 
     # make a plot
-    as.data.frame(Seurat::JS(object=seurat[[reduction_name]], slot='overall')) %>% 
+    as.data.frame(Seurat::JS(object=object[[reduction_name]], slot='overall')) %>% 
       ggplot() +
       aes(x=PC, y=-log10(Score)) +
       labs(x='Principle component', y='-log10(score)') +
