@@ -18,16 +18,6 @@ shinyAppServer <- function(input, output, session) {
   available_seurat_objects <- find_seurat_objects() # has to be here to access the global environment ... ?
 
   # ###############################################################################################
-  # reactions to tab selection
-  ## react to opening tab with a filtered object loaded
-  observeEvent(input$sidebarmenu, {
-    if(!is.null(seurat_object.reactions$seurat) & input$sidebarmenu=='cell_filtering-tab' && (!is.null(seurat_object.reactions$seurat@misc$cells_filtered) && seurat_object.reactions$seurat@misc$cells_filtered))
-      sendSweetAlert(session=session, type='success', html=TRUE,
-                     title='Notice', btn_labels='Great!',
-                     text=tags$span('It looks like low-quality cells have already been removed from this Seurat object:', tags$h5(tags$code('@misc$cells_filtered == TRUE'))),
-                     closeOnClickOutside=TRUE, showCloseButton=FALSE)})
-
-  # ###############################################################################################
   # call servers for modules
   ## special case to load the seurat handler tab's server first
   callModule(module=available_seurats.server, id='load_dataset')
@@ -43,6 +33,16 @@ shinyAppServer <- function(input, output, session) {
       if(TRUE) print(server)
       callModule(module=get(x=server), id=id, seurat=seurat, cell_filtering=cell_filtering)
     }
+
+  # ###############################################################################################
+  # reactions to tab selection
+  ## react to opening tab with a filtered object loaded
+  observeEvent(input$sidebarmenu, {
+    if(!is.null(seurat$object) & input$sidebarmenu=='cell_filtering-tab' && (!is.null(seurat$object@misc$cells_filtered) && seurat$object@misc$cells_filtered))
+      sendSweetAlert(session=session, type='success', html=TRUE,
+                     title='Notice', btn_labels='Great!',
+                     text=tags$span('It looks like low-quality cells have already been removed from this Seurat object:', tags$h5(tags$code('@misc$cells_filtered == TRUE'))),
+                     closeOnClickOutside=TRUE, showCloseButton=FALSE)})
 
   # ###############################################################################################
   # any code to exectue when the session ends
