@@ -127,7 +127,7 @@ feature_picker.server <- function(input, output, session, seurat, ...) {
   ## use the selected feature (it may be a feature or metadata)
   observeEvent(eventExpr=input$picked_feature, handlerExpr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
 
     # send a message
     sprintf(fmt='### %sfeature_picker.server-observeEvent-input$picked_feature [%s]', session$ns(''), input$picked_feature) %>% message()
@@ -157,17 +157,17 @@ feature_picker.server <- function(input, output, session, seurat, ...) {
                       min=min_value, max=max_value, value=c(-Inf,Inf))})
 
   # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+  observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    sprintf(fmt='### %sfeature_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', session$ns(''), seurat$formatted_project) %>% message()
+    sprintf(fmt='### %sfeature_picker.server-observeEvent-seurat$object [%s]', session$ns(''), seurat$formatted_project) %>% message()
 
     # create variables for shorthand
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$seurat
 
     # get the possible features and values
     ## get names of features and metadata
-    list(features=rownames(seurat),
-         metadata=colnames(seurat@meta.data)) -> feature_picker_options
+    list(features=rownames(object),
+         metadata=colnames(object@meta.data)) -> feature_picker_options
 
     ## pick a random feature and metadata column
     feature_picker_options %>% lapply(sample, size=1) -> feature_picker_selected
