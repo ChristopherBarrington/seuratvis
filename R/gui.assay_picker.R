@@ -65,21 +65,19 @@ assay_picker.server <- function(input, output, session, seurat, ...) {
     assay <- input$assay_picker
 
     # set the default assay for the reactive seurat object
-    if(assay!='' && !is.null(seurat_object.reactions$seurat)) {
-      DefaultAssay(seurat_object.reactions$seurat) <- assay
+    if(assay!='' && !is.null(seurat$object))
       DefaultAssay(seurat$object) <- assay
-    }
 
     # update the reactive
-    seurat$n_features <- nrow(seurat_object.reactions$seurat)})
+    seurat$n_features <- nrow(seurat$object)})
 
   # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+  observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sassay_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat$formatted_project) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sassay_picker.server-observeEvent-seurat$object [%s]', seurat$formatted_project) %>% message()
 
     # create variables for shorthand
-    seurat <- seurat_object.reactions$seurat
+    seurat <- seurat$object
 
     # update the ui element(s)
     updateSelectInput(session=session, inputId='assay_picker', choices='-spoof-')
