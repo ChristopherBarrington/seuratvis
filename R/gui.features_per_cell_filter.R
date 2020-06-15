@@ -88,7 +88,7 @@ features_per_cell_filter.server <- function(input, output, session, seurat, cell
   # react to the initialisation of the reference min value
   observeEvent(eventExpr=seurat$n_features_values_min, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-seurat$n_features_values_min [%s]', seurat_object.reactions$n_features_values_min) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-seurat$n_features_values_min [%s]', seurat$n_features_values_min) %>% message()
 
     # create variables for shorthand
     value <- seurat$n_features_values_min
@@ -99,7 +99,7 @@ features_per_cell_filter.server <- function(input, output, session, seurat, cell
   # react to the initialisation of the reference max value
   observeEvent(eventExpr=seurat$n_features_values_max, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-seurat$n_features_values_max [%s]', seurat_object.reactions$n_features_values_max) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-seurat$n_features_values_max [%s]', seurat$n_features_values_max) %>% message()
 
     # create variables for shorthand
     value <- seurat$n_features_values_max
