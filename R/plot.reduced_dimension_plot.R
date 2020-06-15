@@ -138,9 +138,8 @@ reduced_dimension_plot.server <- function(input, output, session, seurat, ...) {
       }
     } else if(module_env$feature=='selected_cluster_ids') {
       output_plot +
-        aes(colour=is_selected_cluster_id, alpha=is_selected_cluster_id) +
-        scale_colour_manual(values=c(`FALSE`='grey90', `TRUE`='darkorange1')) +
-        scale_alpha_manual(values=c(`FALSE`=0.1, `TRUE`=1)) -> output_plot
+        aes(colour=ident, alpha=is_selected_cluster_id) +
+        scale_alpha_manual(values=c(`FALSE`=0.01, `TRUE`=1)) -> output_plot
       output_plot$data %<>% arrange(is_selected_cluster_id)
       output_plot$layers[[3]]$aes_params$alpha <- NULL
       include_legend <- FALSE
