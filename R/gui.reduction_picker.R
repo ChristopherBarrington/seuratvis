@@ -63,14 +63,14 @@ reduction_method_picker.server <- function(input, output, session, seurat, ...) 
   # react to the reduction method selection
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
     req(input$reduction_method_picker)
 
     # send a message
     session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-input$reduction_method_picker [%s]', input$reduction_method_picker) %>% message()
 
     # create varaibles for shorthand
-    object <- seurat_object.reactions$seurat
+    object <- seurat$object
     dimred_method <- input$reduction_method_picker
 
     # pull out the reduction
@@ -83,12 +83,12 @@ reduction_method_picker.server <- function(input, output, session, seurat, ...) 
     seurat$dimred[[tab]] <- dimred})
 
   # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+  observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat$formatted_project) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat$object [%s]', seurat$formatted_project) %>% message()
 
     # create varaibles for shorthand
-    seurat <- seurat_object.reactions$seurat
+    seurat <- seurat$object
     Reductions(seurat) %>%
       str_subset(pattern=regex(pattern=module_env$regex)) %>%
       str_subset(pattern=regex(pattern='3D', ignore_case=TRUE), negate=TRUE) -> reductions
