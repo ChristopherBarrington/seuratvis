@@ -69,10 +69,11 @@ reduced_dimension_plot.server <- function(input, output, session, seurat, ...) {
     args$label_clusters <- input_server[[session$ns('label_clusters') %>% parse_ns_label()]]
     args$picked_feature_values <- isolate(seurat$picked_feature_values[[tab]])
     args$dimred <- seurat$dimred[[tab]]
+    args$picked_cluster_resolution_idents <- seurat$picked_cluster_resolution_idents
 
     # make a base plot
     cbind(args$dimred,
-          seurat_object.reactions$picked_cluster_resolution_idents,
+          args$picked_cluster_resolution_idents,
           {args$picked_feature_values %>% rename(picked_feature_value=value)}) %>%
       mutate(is_selected_cluster_id=ident %in% args$cluster_id_picker) %>%
       arrange(picked_feature_value) %>%
