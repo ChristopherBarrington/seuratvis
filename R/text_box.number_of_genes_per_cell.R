@@ -52,7 +52,7 @@ number_of_genes_per_cell_text_box.server <- function(input, output, session, seu
 
     # create variables for shorthand
     n_reference <- seurat$n_features_values %>% unlist() %>% module_env$summary_function()
-    n_filtered <- cell_filtering$n_features_values %>% unlist() %>% module_env$summary_function()
+    n_filtered <- cell_filtering$n_features_values %>% unlist() %>% (function(x) ifelse(is.null(x), 0, module_env$summary_function(x)))
 
     # get the box subtitle
     switch(module_env$id,

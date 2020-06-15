@@ -52,7 +52,7 @@ number_of_reads_per_cell_text_box.server <- function(input, output, session, seu
 
     # get summarised values
     n_reference <- seurat$n_umi_values %>% unlist() %>% module_env$summary_function()
-    n_filtered <- cell_filtering$n_umi_values %>% unlist() %>% module_env$summary_function()
+    n_filtered <- cell_filtering$n_umi_values %>% unlist() %>%  (function(x) ifelse(is.null(x), 0, module_env$summary_function(x)))
 
     # get the box subtitle
     switch(module_env$id,
