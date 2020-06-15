@@ -48,7 +48,6 @@ feature_picker.ui <- function(id, label='Feature selection', include_features=TR
   selectizeInput(inputId=ns(id='feature_picker_gene_module'), label=NULL, choices=NULL, selected=NULL, multiple=FALSE) %>%
     conditionalPanel(condition=sprintf('input["%s"]=="gene_modules"', ns(id='feature_type'))) -> gene_module_picker_conditional
 
-
   ## slider to limit colour range
   sliderInput(inputId=ns(id='value_range'), label='Colour range limits',
               min=0, max=1, step=0.1, value=c(-Inf,Inf)) -> value_range
