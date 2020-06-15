@@ -65,18 +65,18 @@ principle_component_picker.server <- function(input, output, session, seurat, ..
   # update UI when reduction type is changed
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
     req(input$reduction_method_picker)
 
     # send a message
     sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-input$reduction_method_picker [%s]', session$ns(''), seurat$formatted_project) %>% message()
 
     # create variables for shorthand
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
     reduction_name <- input$reduction_method_picker
 
     # get the number of components available in this reduction
-    Stdev(object=seurat, reduction=reduction_name) %>%
+    Stdev(object=object, reduction=reduction_name) %>%
       seq_along() %>%
       purrr::set_names() -> principle_component_picker_options
     min_value <- min(principle_component_picker_options)
