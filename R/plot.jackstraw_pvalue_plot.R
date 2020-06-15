@@ -24,7 +24,7 @@ jackstraw_pvalue_plot.ui <- function(id) {
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # return ui element(s)
-  tagList(plotOutput(outputId=ns(id='jackstraw_pvalue_plot')) %>% withSpinner(), textOutput(outputId=ns('notice')))
+  plotOutput(outputId=ns(id='jackstraw_pvalue_plot')) %>% withSpinner()
 }
 
 #' Produce the ggplot object for a JackStraw pvalue plot
@@ -33,7 +33,7 @@ jackstraw_pvalue_plot.ui <- function(id) {
 #' 
 #' @rdname jackstraw_pvalue_plot
 #'
-jackstraw_pvalue_plot.server <- function(input, output, session) {
+jackstraw_pvalue_plot.server <- function(input, output, session, seurat,  ...) {
   session$ns('') %>% sprintf(fmt='### %sjackstraw_pvalue_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -44,26 +44,25 @@ jackstraw_pvalue_plot.server <- function(input, output, session) {
   # render the elbow plot
   renderPlot(expr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
     req(input$reduction_method_picker)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sjackstraw_pvalue_plot.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sjackstraw_pvalue_plot.server-renderPlot') %>% message()
    
     # make variables for shorthand    
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
     reduction_name <- input$reduction_method_picker
 
     # make a plot
-    as.data.frame(Seurat::JS(object=seurat[[reduction_name]], slot='overall')) %>% 
+    as.data.frame(Seurat::JS(object=object[[reduction_name]], slot='overall')) %>% 
       ggplot() +
       aes(x=PC, y=-log10(Score)) +
+      labs(x='Principle component', y='-log10(score)') +
       geom_smooth() +
       geom_point(shape=4) +
       theme_bw() +
       theme(legend.background=element_blank(),
             legend.justification=c(1,1),
             legend.position=c(1,1))}) -> output$jackstraw_pvalue_plot
-
-  renderText({input[[session$ns('principle_component_picker')]]}) -> output$notice
 }

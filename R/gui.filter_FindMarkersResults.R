@@ -30,7 +30,7 @@ filter_FindMarkersResults.ui <- function(id) {
                        column(width=9, dimred_plot))))
 }
 
-filter_FindMarkersResults.server <- function(input, output, session) {
+filter_FindMarkersResults.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sfilter_FindMarkersResults.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -38,44 +38,47 @@ filter_FindMarkersResults.server <- function(input, output, session) {
   session_server <- get(x='session', env=server_env)
 
   # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+  observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfilter_FindMarkersResults.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sfilter_FindMarkersResults.server-observeEvent-seurat$object [%s]', seurat$formatted_project) %>% message()
+
+    if(is.null(seurat$object@misc$processing$clustered) || !seurat$object@misc$processing$clustered)
+      return(NULL)
 
     # create varaibles for shorthand
-    seurat <- seurat_object.reactions$seurat
-    values <- FetchData(seurat, c('UMAP_1', 'UMAP_2', 'tSNE_1', 'tSNE_2', str_subset(colnames(seurat@meta.data), '_snn_res.')))
-    seurat@misc$FindMarkersResults %>%
+    object <- seurat$object
+    values <- FetchData(object, c('UMAP_1', 'UMAP_2', 'tSNE_1', 'tSNE_2', str_subset(colnames(object@meta.data), '_snn_res.')))
+    object@misc$FindMarkersResults %>%
       pluck('wilcox') %>%
       mutate(p_adj_group={p_val_adj %>% cut(breaks=c(0, 0.1/100, 1/100, 5/100, 10/100, 100/100), labels=c('<0.1%','<1%','<5%','<10%','NS'), include.lowest=TRUE, right=TRUE)}) %>%
       dplyr::select(cluster_set, ident.1, gene, pct.1, pct.2, avg_logFC, p_adj_group) %>%
       rename(`Cluster set`='cluster_set', `Cluster ID`='ident.1', `Gene`='gene', `Cluster detection`='pct.1', `Map detection`='pct.2', `Avg. logFC`='avg_logFC', `Adj. P`='p_adj_group') -> tidied_results
 
     # update the reactive(s)
-    seurat_object.reactions$FindMarkersResults$table <- tidied_results
-    seurat_object.reactions$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
+    seurat$FindMarkersResults$table <- tidied_results
+    seurat$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
 
     # call the ggplot module for the reduced dimension data
     callModule(session=session_server,
                module=esquisserServer,
                id=session$ns('dimred_plot'),
-               data=reactiveValues(data=values, name=seurat_object.reactions$formatted.project.name))})
+               data=reactiveValues(data=values, name=seurat$formatted_project))})
 
   # handle the data.frame filtering
   ## call the data.frame filtering filtering module
   callModule(session=session_server, module=filterDF, id=session$ns('filter_parameters'),
              picker=TRUE,
-             data_name=reactive(seurat_object.reactions$formatted.project.name), 
-             data_table=reactive(seurat_object.reactions$FindMarkersResults$table),
-             data_vars=reactive(seurat_object.reactions$FindMarkersResults$vars)) -> res_filter
+             data_name=reactive(seurat$formatted_project), 
+             data_table=reactive(seurat$FindMarkersResults$table),
+             data_vars=reactive(seurat$FindMarkersResults$vars)) -> results_filter.rv
   
   ## render the filtered data.table
   DT::renderDataTable({
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfilter_FindMarkersResults.server-DT::renderDataTable [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sfilter_FindMarkersResults.server-DT::renderDataTable [%s]', seurat$formatted_project) %>% message()
 
     # render the datatable and send it to the output
-    res_filter$data_filtered() %>%
+    results_filter.rv$data_filtered() %>%
       DT::datatable(rownames=FALSE,
                     options=list(columnDefs=list(list(className='dt-right', targets=c(1,6))),
                                  ordering=FALSE,

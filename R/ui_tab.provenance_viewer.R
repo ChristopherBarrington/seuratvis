@@ -4,10 +4,6 @@
     # provenance viewer tab
     tab <- 'provenance_viewer'
 
-    # define ui-specific css
-    cssAce <- tags$style(type='text/css', '#r_script {height: calc(100vh-80px) !important;}')
-
-
     # assemble tab content
     content <- tabItem(tabName=NS(namespace=tab, id='tab'),
                        h1('View the functions used to create this Seurat object'),

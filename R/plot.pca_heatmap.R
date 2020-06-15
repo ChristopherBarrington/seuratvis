@@ -31,7 +31,7 @@ pca_heatmap.ui <- function(id) {
 #' 
 #' @rdname pca_heatmap
 #'
-pca_heatmap.server <- function(input, output, session) {
+pca_heatmap.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %spca_heatmap.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -42,23 +42,26 @@ pca_heatmap.server <- function(input, output, session) {
   # render the elbow plot
   renderPlot(expr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
     req(input$reduction_method_picker)
     req(input$principle_component_picker)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %spca_heatmap.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %spca_heatmap.server-renderPlot') %>% message()
    
     # make variables for shorthand    
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
     reduction_name <- input$reduction_method_picker
     selected_component <- input$principle_component_picker
 
     # render the heatmap
     #! TODO: make this a nice ggplot
-    DefaultAssay(object=seurat) <- DefaultAssay(object=seurat[[reduction_name]])
-    DimHeatmap(object=seurat, reduction=reduction_name,
-               dims=as.numeric(selected_component),
-               disp.min=-2.5, disp.max=2.5, slot='scale.data',
-               cells=2000, balanced=TRUE, fast=FALSE)}) -> output$pca_heatmap
+    if(!DefaultAssay(object=object[['pca']]) %in% Assays(object)) {
+      ggplot()+aes()+annotate(geom='text', label='Nothing to see here', x=0, y=0)+theme_void()
+    } else {
+      DefaultAssay(object=object) <- DefaultAssay(object=object[[reduction_name]])
+      DimHeatmap(object=object, reduction=reduction_name,
+                 dims=as.numeric(selected_component),
+                 disp.min=-2.5, disp.max=2.5,
+                 cells=2000, balanced=TRUE, fast=FALSE)}}) -> output$pca_heatmap
 }

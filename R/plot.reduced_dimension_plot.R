@@ -44,30 +44,36 @@ reduced_dimension_plot.ui <- function(id, feature) {
 #' 
 #' @rdname reduced_dimension_plot
 #'
-reduced_dimension_plot.server <- function(input, output, session) {
+reduced_dimension_plot.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='reduced_dimension_plot') # provides `seuratvis_env`, `server_env` and `module_env`
-  id <- parent.frame()$id
+  tab <- parent.frame()$id
+  tab %<>% str_remove('-.+?$') #! TODO: do not know why this can't be on one line with previous...?
   session_server <- get(x='session', env=server_env)
   input_server <- get(x='input', env=server_env)
 
   # render the reduced dimension plot
   renderPlot(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sreduced_dimension_plot.server-renderPlot') %>% message()
 
-    # collect args from selections.rv
-    c('dimred', 'picked_feature_values', 'cluster_id_picker', 'point_size', 'opacity', 'value_range_limits') %>%
-      purrr::set_names() %>%
-      sapply(session$ns) %>%
-      sapply(parse_ns_label) %>%
-      lapply(function(x) selections.rv[[x]]) -> args
+    # because multiple plots are using the same `input` tag...
+    #! TODO: could make each umap type a different module?? ie differnet ui id tags? in different servers perhaps?
+    args <- list()
+    args$opacity <- input_server[[session$ns('opacity_slider') %>% parse_ns_label()]]
+    args$point_size <- input_server[[session$ns('point_size_slider') %>% parse_ns_label()]]
+    args$value_range_limits <- input_server[[session$ns('value_range') %>% parse_ns_label()]]
+    args$cluster_id_picker <- input_server[[session$ns('cluster_id_picker') %>% parse_ns_label()]]
+    args$label_clusters <- input_server[[session$ns('label_clusters') %>% parse_ns_label()]]
+    args$picked_feature_values <- isolate(seurat$picked_feature_values[[tab]])
+    args$dimred <- seurat$dimred[[tab]]
+    args$picked_cluster_resolution_idents <- seurat$picked_cluster_resolution_idents
 
     # make a base plot
     cbind(args$dimred,
-          seurat_object.reactions$picked_cluster_resolution_idents,
+          args$picked_cluster_resolution_idents,
           {args$picked_feature_values %>% rename(picked_feature_value=value)}) %>%
       mutate(is_selected_cluster_id=ident %in% args$cluster_id_picker) %>%
       arrange(picked_feature_value) %>%
@@ -86,7 +92,7 @@ reduced_dimension_plot.server <- function(input, output, session) {
         aes(colour=ident) -> output_plot
 
       # if labels should be added, add them
-      if(seurat_object.reactions$label_clusters) {
+      if(args$label_clusters) {
         output_plot$data %>%
           group_by(ident) %>%
           summarise(DIMRED_1=mean(DIMRED_1), DIMRED_2=mean(DIMRED_2)) -> data_labels
@@ -105,9 +111,9 @@ reduced_dimension_plot.server <- function(input, output, session) {
         output_plot +
           aes(colour=picked_feature_value) -> output_plot
 
-        c_min <- session$ns('low') %>% parse_ns_label() %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
+        c_min <- input_server[[session$ns('low') %>% parse_ns_label()]] #! TODO: should these be input[[NS(tab,'low']]
         c_mid <- 'white'
-        c_max <- session$ns('high') %>% parse_ns_label() %>% pluck(.x=plotting_options.rv$colours) # TODO: this is dependent on the label names!
+        c_max <- input_server[[session$ns('high') %>% parse_ns_label()]] #! TODO: should these be input[[NS(tab,'high']]
         c_range_limits <- args$value_range_limits
 
         colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=c_range_limits, oob=scales::squish)

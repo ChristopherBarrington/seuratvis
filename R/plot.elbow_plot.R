@@ -31,7 +31,7 @@ elbow_plot.ui <- function(id) {
 #' 
 #' @rdname elbow_plot
 #'
-elbow_plot.server <- function(input, output, session) {
+elbow_plot.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %selbow_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -42,20 +42,20 @@ elbow_plot.server <- function(input, output, session) {
   # render the elbow plot
   renderPlot(expr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %selbow_plot.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %selbow_plot.server-renderPlot') %>% message()
    
     # make variables for shorthand    
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
     reduction_name <- input$reduction_method_picker
 
-    data.frame(project_name=Project(seurat),
-               Y=Stdev(object=seurat, reduction=reduction_name)) %>%
+    data.frame(project_name=Project(object),
+               Y=Stdev(object=object, reduction=reduction_name)) %>%
       mutate(X=seq(n())) -> data
 
-    stdev <- Stdev(object=seurat, reduction=reduction_name)
+    stdev <- Stdev(object=object, reduction=reduction_name)
     pct <- stdev / sum(stdev) * 100 # Determine percent of variation associated with each PC
     cumu <- cumsum(pct) # Calculate cumulative percents for each PC
     

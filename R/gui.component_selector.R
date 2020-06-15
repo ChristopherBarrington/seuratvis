@@ -23,11 +23,6 @@ principle_component_picker.ui <- function(id, label='Principle component selecti
   e$id <- id
   assign(x=module_ns, val=e, envir=module_environments)
 
-  # track the re-used UI elements in each namespace
-  get0(env=ui_element_ids.env, x=NS(namespace=module, id='principle_component_picker')) %>%
-    append(ns(id='principle_component_picker')) %>%
-    assign(env=ui_element_ids.env, x=NS(namespace=module, id='principle_component_picker'))
-
   # record the server(s) to call
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
@@ -54,50 +49,29 @@ principle_component_picker.ui <- function(id, label='Principle component selecti
 #' 
 #' @rdname principle_component_picker
 #' 
-principle_component_picker.server <- function(input, output, session) {
+principle_component_picker.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sprinciple_component_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='principle_component_picker') # provides `seuratvis_env`, `server_env` and `module_env`
   session_server <- get(x='session', env=server_env)
-
-  # react to the component selection
-  ## if a component is selected, copy it to the reactive
-  observeEvent(eventExpr={input$principle_component_picker}, ignoreInit=TRUE, handlerExpr={
-    # make sure these elements are defined
-    req(selections.rv[[session$ns('picked_component')]])
-
-    # send a message
-    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-input$principle_component_picker[%s]', session$ns(''), input$principle_component_picker) %>% message()
-    
-    selections.rv[[session$ns('picked_component')]] <- input$principle_component_picker})
-
-  # react to the colour scale limits
-  observeEvent(eventExpr=input$principle_components_slider, handlerExpr={
-    # make sure these elements are defined
-    req(selections.rv[[session$ns('value_range_limits')]])
-
-    # send a message
-    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-input$principle_components_slider [%s]', session$ns(''), str_c(input$principle_components_slider, collapse=',')) %>% message()
-
-    # update the reactive
-    selections.rv[[session$ns('picked_components_range')]] <- input$principle_components_slider})
+  input_server <- get(x='input', env=server_env)
 
   # update UI when reduction type is changed
   observeEvent(eventExpr=input$reduction_method_picker, handlerExpr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
     req(input$reduction_method_picker)
 
     # send a message
-    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-selections.rv[[session$ns(selected_reduction_method)]] [%s]', session$ns(''), seurat_object.reactions$formatted.project.name) %>% message()
+    sprintf(fmt='### %sprinciple_component_picker.server-observeEvent-input$reduction_method_picker [%s]', session$ns(''), seurat$formatted_project) %>% message()
 
     # create variables for shorthand
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
     reduction_name <- input$reduction_method_picker
 
     # get the number of components available in this reduction
-    Stdev(object=seurat, reduction=reduction_name) %>%
+    Stdev(object=object, reduction=reduction_name) %>%
       seq_along() %>%
       purrr::set_names() -> principle_component_picker_options
     min_value <- min(principle_component_picker_options)
@@ -105,14 +79,12 @@ principle_component_picker.server <- function(input, output, session) {
 
     # update the ui element(s)
     ## principle components drop down box
+    updateSelectizeInput(session=session, inputId='principle_component_picker', choices='-spoof-')
     updateSelectizeInput(session=session, inputId='principle_component_picker',
                          choices=principle_component_picker_options, selected=min_value)
     
     ## slider to limit range of components
+    updateSliderInput(session=session, inputId='principle_components_slider', min=-1)
     updateSliderInput(session=session, inputId='principle_components_slider',
-                      min=min_value, max=max_value, value=min_value+5)
-
-    # update the reactive
-    selections.rv[[session$ns('picked_component')]] <- min_value
-    selections.rv[[session$ns('picked_components_range')]] <- c(min_value, max_value)})
+                      min=min_value, max=max_value, value=min_value+5)})
 }

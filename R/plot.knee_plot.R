@@ -42,7 +42,7 @@ knee_plot.ui <- function(id, feature) {
 #' 
 #' @rdname knee_plot
 #'
-knee_plot.server <- function(input, output, session) {
+knee_plot.server <- function(input, output, session, seurat, cell_filtering, ...) {
   session$ns('') %>% sprintf(fmt='### %sknee_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -52,17 +52,17 @@ knee_plot.server <- function(input, output, session) {
   # render the knee plot
   renderPlot(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sknee_plot.server-renderPlot') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sknee_plot.server-renderPlot') %>% message()
    
     # get feature-specific plotting elements
     feature_plot <- NULL
     if(module_env$feature=='nCount_RNA') {
       # get thresholds of total UMI
-      min_value <- filtering_parameters.reactions$total_umi_per_cell_min
-      max_value <- filtering_parameters.reactions$total_umi_per_cell_max
+      min_value <- cell_filtering$total_umi_per_cell_min
+      max_value <- cell_filtering$total_umi_per_cell_max
       
       # start the knee plot
-      seurat_object.reactions$n_umi_values %>%
+      seurat$n_umi_values %>%
         set_names('y') %>%
         arrange(desc(y)) %>%
         mutate(x=seq(n()),
@@ -74,11 +74,11 @@ knee_plot.server <- function(input, output, session) {
         scale_y_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(y) scales::comma(y, accuracy=1)) -> feature_plot
     } else if(module_env$feature=='nFeature_RNA') {
       # get thresholds of detected features
-      min_value <- filtering_parameters.reactions$features_per_cell_min
-      max_value <- filtering_parameters.reactions$features_per_cell_max
+      min_value <- cell_filtering$features_per_cell_min
+      max_value <- cell_filtering$features_per_cell_max
       
       # start the knee plot
-      seurat_object.reactions$n_features_values %>%
+      seurat$n_features_values %>%
         set_names('y') %>%
         arrange(desc(y)) %>%
         mutate(x=seq(n()),
@@ -90,10 +90,10 @@ knee_plot.server <- function(input, output, session) {
         scale_y_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(y) scales::comma(y, accuracy=1)) -> feature_plot
     } else if(module_env$feature=='percent_mt') {
       # get max fraction Mt UMI
-      max_value <- filtering_parameters.reactions$max_percent_mitochondria
+      max_value <- cell_filtering$max_percent_mitochondria
 
       # start the knee plot
-      seurat_object.reactions$proportion_mt_values %>%
+      seurat$proportion_mt_values %>%
         set_names('y') %>%
         arrange(desc(y)) %>%
         mutate(x=seq(n()),

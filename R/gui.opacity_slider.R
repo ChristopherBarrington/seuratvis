@@ -46,26 +46,6 @@ opacity_slider.ui <- function(id, label='Opacity') {
 #' 
 #' @rdname opacity_slider
 #' 
-opacity_slider.server <- function(input, output, session) {
+opacity_slider.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %sopacity_slider.server') %>% message()
-
-  # get environments containing variables to run/configure this object
-  collect_environments(id=parent.frame()$id, module='opacity_slider') # provides `seuratvis_env`, `server_env` and `module_env`
-  session_server <- get(x='session', env=server_env)
-
-  # react to the opacity slider
-  observeEvent(eventExpr=input$opacity_slider, handlerExpr={
-    # send a message
-    session$ns('') %>% sprintf(fmt='### %sopacity_slider.server-observeEvent-input$opacity_slider [%s]', input$opacity_slider) %>% message('')
-
-    # update the reactive
-    selections.rv[[session$ns('opacity')]] <- input$opacity_slider})
-
-  # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
-    # send a message
-    session$ns('') %>% sprintf(fmt='### %sopacity_slider.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message('')
-
-    # update the reactive
-    selections.rv[[session$ns('opacity')]] <- 1})
 }

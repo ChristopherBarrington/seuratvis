@@ -60,7 +60,7 @@ features_per_cell_filter.ui <- function(id, label='Features per cell', low=TRUE,
 #' 
 #' @rdname features_per_cell_filter
 #'
-features_per_cell_filter.server <- function(input, output, session) {
+features_per_cell_filter.server <- function(input, output, session, seurat, cell_filtering, ...) {
   session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -70,37 +70,39 @@ features_per_cell_filter.server <- function(input, output, session) {
   # react to the minimum input element
   observeEvent(eventExpr=input$min_features, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-input$min_features [%s]', input$min_features) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-input$min_features [%s]', input$min_features) %>% message()
 
     # update the reactive
-    filtering_parameters.reactions$features_per_cell_min <- round(input$min_features, digits=0)})
+    cell_filtering$features_per_cell_min <- round(input$min_features, digits=0)
+    cell_filtering$updated_parameter <- rnorm(1)})
 
   # react to the maximum input element
   observeEvent(eventExpr=input$max_features, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-input$max_features [%s]', input$max_features) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-input$max_features [%s]', input$max_features) %>% message()
 
     # update the reactive
-    filtering_parameters.reactions$features_per_cell_max <- round(input$max_features, digits=0)})
+    cell_filtering$features_per_cell_max <- round(input$max_features, digits=0)
+    cell_filtering$updated_parameter <- rnorm(1)})
 
   # react to the initialisation of the reference min value
-  observeEvent(eventExpr=seurat_object.reactions$n_features_values_min, handlerExpr={
+  observeEvent(eventExpr=seurat$n_features_values_min, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-seurat_object.reactions$n_features_values_min [%s]', seurat_object.reactions$n_features_values_min) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-seurat$n_features_values_min [%s]', seurat$n_features_values_min) %>% message()
 
     # create variables for shorthand
-    value <- seurat_object.reactions$n_features_values_min
+    value <- seurat$n_features_values_min
 
     # update the ui element(s)
     updateNumericInput(session=session, inputId='min_features', value=value, min=value)})
 
   # react to the initialisation of the reference max value
-  observeEvent(eventExpr=seurat_object.reactions$n_features_values_max, handlerExpr={
+  observeEvent(eventExpr=seurat$n_features_values_max, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-seurat_object.reactions$n_features_values_max [%s]', seurat_object.reactions$n_features_values_max) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sfeatures_per_cell_filter.server-observeEvent-seurat$n_features_values_max [%s]', seurat$n_features_values_max) %>% message()
 
     # create variables for shorthand
-    value <- seurat_object.reactions$n_features_values_max
+    value <- seurat$n_features_values_max
 
     # update the ui element(s)
     updateNumericInput(session=session, inputId='max_features', value=value, max=value)})

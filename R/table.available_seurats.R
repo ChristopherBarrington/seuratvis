@@ -55,7 +55,7 @@ available_seurats.ui <- function(id) {
 #' 
 #' @rdname available_seurats
 #' 
-available_seurats.server <- function(input, output, session) {
+available_seurats.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %savailable_seurats.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -86,10 +86,20 @@ available_seurats.server <- function(input, output, session) {
     return(NULL)
   }
 
+  # make the data.frame for the detected Seurat objects
   server_env$available_seurat_objects %>%
     dplyr::select(-choiceName) %>%
-    plyr::adply(.margins=1, function(params) {
+    plyr::adply(.margins=1, .parallel=FALSE, function(params) { #! TODO: parallelise this doMC does not work on Windows though!
       x <- eval(parse(text=params$choiceValue))
+      
+      # choose a gene to look for to identify male dataset
+      x@misc$mart@dataset %>%
+        str_remove(pattern='_.*') %>%
+        switch(hsapiens='SRY',
+               mmusculus='Sry',
+               'SRY') -> boy_gene
+
+      # make the data.frame for this Seurat
       data.frame(project=reformat_project_name(Project(x)),
                  environment=if_else(params$env=='globalenv()', 'RGlobal', as.character(params$env)),
                  ncells=ncol(x),
@@ -102,7 +112,7 @@ available_seurats.server <- function(input, output, session) {
                  assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% collapse_strings()},
                  nfeatures=nrow(x),
                  reductions={Reductions(x) %>% collapse_strings()},
-                 guessed_sex={FetchData(x, vars=c('SRY','Sry')) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))})}) %>%
+                 guessed_sex={FetchData(x, vars=boy_gene) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))})}) %>%
     mutate(dimensions=as.integer(dimensions),
            object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
@@ -159,182 +169,4 @@ available_seurats.server <- function(input, output, session) {
                   color=styleEqual(levels=c(0,1), values=c('#B96A3C','#B93C8B'), default='orange'),
                   fontFamily='monospace',
                   fontWeight='bold')}) -> output$seurats_table
-}
-
-#' Load a seurat object into a reactive
-#' 
-#' @rdname available_seurats
-#' 
-load_a_seurat.server <- function(input, output, session) {
-  session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server') %>% message()
-
-  # get environments containing variables to run/configure this object
-  collect_environments(id=parent.frame()$id, module='available_seurats') # provides `seuratvis_env`, `server_env` and `module_env`
-  session_server <- get(x='session', env=server_env)
-
-  # react to a row being selected in the available Seurats table
-  observeEvent(eventExpr=input$seurats_table_rows_selected, handlerExpr={
-    # make sure these elements are defined
-    req(input$seurats_table_rows_selected)
-
-    # send a message
-    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$seurats_table_rows_selected [%s]', input$seurats_table_rows_selected) %>% message('')
-
-    # empty out the reactives
-    for(i in names(seurat_object.reactions))
-      seurat_object.reactions[[i]] <- NULL
-
-    for(i in names(filtering_parameters.reactions))
-      filtering_parameters.reactions[[i]] <- NULL
-
-    for(i in names(filtered_cells.reactions))
-      filtered_cells.reactions[[i]] <- NULL
-
-    for(i in names(seurat_configuration.reactions))
-      seurat_configuration.reactions[[i]] <- NULL
-
-    for(i in names(filtering_arguments.reactions))
-      filtering_arguments.reactions[[i]] <- NULL
-
-    for(i in names(reference_metrics.rv))
-      reference_metrics.rv[[i]] <- NULL
-
-    for(i in names(plotting_options.rv))
-      plotting_options.rv[[i]] <- NULL
-
-    for(i in names(selections.rv))
-      selections.rv[[i]] <- NULL
-
-    # row number is saved in the `input` so get the expression to `get` the object from the initial search table
-    input_seurat_expr <- server_env$available_seurat_objects %>% pluck('choiceValue') %>% pluck(input$seurats_table_rows_selected)
-
-    # load Seurat object from user
-    seurat <- parse(text=input_seurat_expr) %>% eval()
-
-    if(is.null(seurat@meta.data$seurat_clusters))
-      seurat@meta.data$seurat_clusters <- 0
-
-    selected_assay <- 'RNA'
-    DefaultAssay(seurat) <- selected_assay
-    if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
-      seurat <- NormalizeData(seurat)
-
-    #! TODO: remove seurat_object.reactions$reference_metrics and cell_filtering_data.reference
-    list(n_cells=ncol(seurat),
-         n_features=nrow(seurat),
-         # total_umi=sum(seurat@meta.data$nCount_RNA),
-         # median_umi_per_cell=round(x=median(seurat@meta.data$nCount_RNA), digits=0),
-         # median_features_per_cell=round(x=median(seurat@meta.data$nFeature_RNA), digits=0),
-         # min_umi_per_cell=min(seurat@meta.data$nCount_RNA), max_umi_per_cell=max(seurat@meta.data$nCount_RNA),
-         # min_features_per_cell=min(seurat@meta.data$nFeature_RNA), max_features_per_cell=max(seurat@meta.data$nFeature_RNA),
-         
-         # total_umi_per_cell_min=min(seurat@meta.data$nCount_RNA), total_umi_per_cell_max=max(seurat@meta.data$nCount_RNA),
-         # features_per_cell_min=min(seurat@meta.data$nFeature_RNA), features_per_cell_max=max(seurat@meta.data$nFeature_RNA),
-         project=Project(seurat)) -> cell_filtering_data.reference
-
-    available_assays <- Assays(seurat)
-    available_slots <- lapply(seurat@assays, function(x) c('counts','data','scale.data') %>% purrr::set_names() %>% lapply(function(y) slot(x,y) %>% nrow())) %>% lapply(function(y) names(y)[unlist(y)>0])
-
-    # update ui elements
-    ## get the numeric metadata variables
-    sapply(seurat@meta.data, is.numeric) %>% subset(x=colnames(seurat@meta.data)) -> choices
-
-    ## guess a default choice
-    n_features_picker_default <- preferred_choice(x=choices, preferences=c('nFeature_RNA','nFeature_SCT'))
-    n_umi_picker_default <- preferred_choice(x=choices, preferences=c('nCount_RNA','nCount_SCT'))
-    proportion_mt_picker_default <- preferred_choice(x=choices, preferences=c('percent.mt', 'percent_mt', 'prop.mt', 'prop_mt'))
-
-    ## define the choices and default in the input ui elements
-    updateSelectizeInput(session=session, inputId='n_features_picker', choices=choices, selected=n_features_picker_default)
-    updateSelectizeInput(session=session, inputId='n_umi_picker', choices=choices, selected=n_umi_picker_default)
-    updateSelectizeInput(session=session, inputId='proportion_mt_picker', choices=choices, selected=proportion_mt_picker_default)
-
-    # copy the important stuff into the reaction values
-    seurat_object.reactions$active_object_expr <- input_seurat_expr
-    seurat_object.reactions$mart <- seurat@misc$mart
-    seurat_object.reactions$formatted.project.name <- seurat@project.name %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
-    seurat_object.reactions$reference_metrics <- cell_filtering_data.reference
-    seurat_object.reactions$cell_metadata <- seurat@meta.data
-    seurat_object.reactions$project <- Project(seurat)
-    seurat_object.reactions$seurat <- seurat})
-
-  # react when the configuration options are changed
-  ## react to the percent mitochondria column being set
-  observeEvent(eventExpr=c(input$proportion_mt_picker, seurat_object.reactions$seurat), handlerExpr={
-    # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
-    req(input$proportion_mt_picker)
-
-    # send a message
-    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$proportion_mt_picker [%s]', input$proportion_mt_picker) %>% message('')
-
-    # create varaibles for shorthand
-    seurat <- seurat_object.reactions$seurat
-    var <- input$proportion_mt_picker
-    values <- FetchData(object=seurat, vars=var) %>% set_names('proportion_mt')
-    high <- max(values$proportion_mt)
-
-    # trigger update of the ui element(s)
-    seurat_configuration.reactions$reset_proportion_mt <- rnorm(1)
-
-    # update the reactive
-    seurat_object.reactions$proportion_mt_values_max <- high
-    seurat_object.reactions$proportion_mt_values <- values
-    seurat_configuration.reactions$proportion_mt_variable <- var
-    filtering_parameters.reactions$max_percent_mitochondria <- high})
-  
-  ## react to the number of features per cell column being set
-  observeEvent(eventExpr=c(input$n_features_picker, seurat_object.reactions$seurat), handlerExpr={
-    # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
-    req(input$n_features_picker)
-
-    # send a message
-    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_features_picker [%s]', input$n_features_picker) %>% message('')
-
-    # create varaibles for shorthand
-    seurat <- seurat_object.reactions$seurat
-    var <- input$n_features_picker
-    values <- FetchData(object=seurat, vars=var) %>% set_names('n_features')
-    low <- min(values)
-    high <- max(values)
-
-    # trigger update of the ui element(s)
-    seurat_configuration.reactions$reset_n_features <- rnorm(1)
-
-    # update the reactive
-    seurat_object.reactions$n_features_values_min <- low
-    seurat_object.reactions$n_features_values_max <- high
-    seurat_object.reactions$n_features_values <- values
-    seurat_configuration.reactions$n_features_variable <- var
-    filtering_parameters.reactions$features_per_cell_min <- low
-    filtering_parameters.reactions$features_per_cell_max <- high})
-
-  ## react to the number of UMI column being set
-  observeEvent(eventExpr=c(input$n_umi_picker, seurat_object.reactions$seurat), handlerExpr={
-    # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
-    req(input$n_umi_picker)
-
-    # send a message
-    session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$n_umi_picker [%s]', input$n_umi_picker) %>% message('')
-
-    # create varaibles for shorthand
-    seurat <- seurat_object.reactions$seurat
-    var <- input$n_umi_picker
-    values <- FetchData(object=seurat, vars=var) %>% set_names('n_umi')
-    low <- min(values)
-    high <- max(values)
-
-    # trigger update of the ui element(s)
-    seurat_configuration.reactions$reset_n_umi <- rnorm(1)
-
-    # update the reactives
-    seurat_object.reactions$n_umi <- sum(values)
-    seurat_object.reactions$n_umi_values_min <- low
-    seurat_object.reactions$n_umi_values_max <- high
-    seurat_object.reactions$n_umi_values <- values
-    seurat_configuration.reactions$n_umi_variable <- var
-    filtering_parameters.reactions$total_umi_per_cell_min <- low
-    filtering_parameters.reactions$total_umi_per_cell_max <- high})
 }
