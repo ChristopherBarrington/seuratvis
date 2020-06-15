@@ -162,7 +162,7 @@ feature_picker.server <- function(input, output, session, seurat, ...) {
     sprintf(fmt='### %sfeature_picker.server-observeEvent-seurat$object [%s]', session$ns(''), seurat$formatted_project) %>% message()
 
     # create variables for shorthand
-    object <- seurat$seurat
+    object <- seurat$object
 
     # get the possible features and values
     ## get names of features and metadata

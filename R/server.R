@@ -29,7 +29,7 @@ shinyAppServer <- function(input, output, session) {
   module_servers_to_call %<>% as.list()
   for(id in names(module_servers_to_call))
     for(server in module_servers_to_call[[id]]) {
-      if(TRUE) print(server)
+      if(FALSE) print(server)
       callModule(module=get(x=server), id=id, seurat=seurat, cell_filtering=cell_filtering)
     }
 

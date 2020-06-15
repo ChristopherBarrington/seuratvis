@@ -80,7 +80,7 @@ cluster_resolution_picker.server <- function(input, output, session, seurat, ...
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat$object [%s]', seurat$formatted_project) %>% message()
+    session$ns('') %>% sprintf(fmt='### %scluster_resolution_picker.server-observeEvent-seurat$object [%s]', seurat$formatted_project) %>% message()
 
     # create variables for shorthand
     object <- seurat$object

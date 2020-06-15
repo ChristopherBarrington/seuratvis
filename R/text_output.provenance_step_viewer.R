@@ -79,7 +79,7 @@ provenance_step_viewer.server <- function(input, output, session, seurat, ...) {
   # update UI when Seurat object is loaded
   observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    sprintf(fmt='### %sprovenance_step_viewer.server-observeEvent-seurat$object [%s]', session$ns(''), object$formatted_project) %>% message()
+    sprintf(fmt='### %sprovenance_step_viewer.server-observeEvent-seurat$object [%s]', session$ns(''), seurat$formatted_project) %>% message()
 
     # create variables for shorthand
     object <- seurat$object
