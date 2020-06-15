@@ -38,12 +38,12 @@ filter_FindMarkersResults.server <- function(input, output, session, seurat, ...
   session_server <- get(x='session', env=server_env)
 
   # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+  observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfilter_FindMarkersResults.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat$formatted_project) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sfilter_FindMarkersResults.server-observeEvent-seurat$object [%s]', seurat$formatted_project) %>% message()
 
     # create varaibles for shorthand
-    object <- seurat_object.reactions$seurat
+    object <- seurat$object
     values <- FetchData(object, c('UMAP_1', 'UMAP_2', 'tSNE_1', 'tSNE_2', str_subset(colnames(object@meta.data), '_snn_res.')))
     object@misc$FindMarkersResults %>%
       pluck('wilcox') %>%
@@ -52,8 +52,8 @@ filter_FindMarkersResults.server <- function(input, output, session, seurat, ...
       rename(`Cluster set`='cluster_set', `Cluster ID`='ident.1', `Gene`='gene', `Cluster detection`='pct.1', `Map detection`='pct.2', `Avg. logFC`='avg_logFC', `Adj. P`='p_adj_group') -> tidied_results
 
     # update the reactive(s)
-    seurat_object.reactions$FindMarkersResults$table <- tidied_results
-    seurat_object.reactions$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
+    seurat$FindMarkersResults$table <- tidied_results
+    seurat$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
 
     # call the ggplot module for the reduced dimension data
     callModule(session=session_server,
@@ -66,8 +66,8 @@ filter_FindMarkersResults.server <- function(input, output, session, seurat, ...
   callModule(session=session_server, module=filterDF, id=session$ns('filter_parameters'),
              picker=TRUE,
              data_name=reactive(seurat$formatted_project), 
-             data_table=reactive(seurat_object.reactions$FindMarkersResults$table),
-             data_vars=reactive(seurat_object.reactions$FindMarkersResults$vars)) -> res_filter
+             data_table=reactive(seurat$FindMarkersResults$table),
+             data_vars=reactive(seurat$FindMarkersResults$vars)) -> results_filter.rv
   
   ## render the filtered data.table
   DT::renderDataTable({
@@ -75,7 +75,7 @@ filter_FindMarkersResults.server <- function(input, output, session, seurat, ...
     session$ns('') %>% sprintf(fmt='### %sfilter_FindMarkersResults.server-DT::renderDataTable [%s]', seurat$formatted_project) %>% message()
 
     # render the datatable and send it to the output
-    res_filter$data_filtered() %>%
+    results_filter.rv$data_filtered() %>%
       DT::datatable(rownames=FALSE,
                     options=list(columnDefs=list(list(className='dt-right', targets=c(1,6))),
                                  ordering=FALSE,
