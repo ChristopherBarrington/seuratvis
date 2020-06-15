@@ -33,7 +33,7 @@ jackstraw_plot.ui <- function(id) {
 #' 
 #' @rdname jackstraw_plot
 #'
-jackstraw_plot.server <- function(input, output, session, ...) {
+jackstraw_plot.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sjackstraw_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -44,27 +44,27 @@ jackstraw_plot.server <- function(input, output, session, ...) {
   # render the elbow plot
   renderPlot(expr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
 
     # send a message
     session$ns('') %>% sprintf(fmt='### %sjackstraw_plot.server-renderPlot') %>% message()
    
     # make variables for shorthand    
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
     reduction_name <- input$reduction_method_picker
     components_range <- input$principle_components_slider
     min_component <- min(components_range)
     max_component <- max(components_range)
 
-    Seurat::JS(object=seurat[[reduction_name]], slot='empirical') %>%
+    Seurat::JS(object=object[[reduction_name]], slot='empirical') %>%
       as.data.frame() %>%
       rownames_to_column('Contig') %>%
       gather(key='PC', value='Value', -Contig) %>%
       mutate(PC={stringr::str_remove(PC, '^PC') %>% as.numeric()}) %>%
       filter(dplyr::between(PC, left=min_component, right=max_component)) %>%
-      left_join(y=as.data.frame(Seurat::JS(object=seurat[[reduction_name]], slot='overall')), by='PC') %>%
+      left_join(y=as.data.frame(Seurat::JS(object=object[[reduction_name]], slot='overall')), by='PC') %>%
       mutate(PC_colour=sprintf('PC %d: %1.3g', PC, Score),
-             project_name=Project(seurat)) %>%
+             project_name=Project(object)) %>%
       mutate(PC_colour=factor(PC_colour, levels={unique(PC_colour) %>% str_sort(numeric=TRUE)})) %>%
       ggplot() +
       aes(sample=Value, colour=PC_colour) +
