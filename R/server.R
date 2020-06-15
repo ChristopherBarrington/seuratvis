@@ -4,7 +4,6 @@
 
 module_environments <- new.env()
 module_servers_to_call <- new.env()
-seurat_object.reactions <- reactiveValues()
 
 #' UI elements by module
 #' 
