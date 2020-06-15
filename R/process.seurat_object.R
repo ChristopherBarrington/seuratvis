@@ -54,12 +54,19 @@ seurat_object.server <- function(input, output, session, seurat, ...) {
     updateSelectizeInput(session=session, inputId='n_umi_picker', choices=choices, selected=n_umi_picker_default)
     updateSelectizeInput(session=session, inputId='proportion_mt_picker', choices=choices, selected=proportion_mt_picker_default)
 
+    # pull gene modules out of the meta.data
+    meta_data <- gene_modules <- seurat@meta.data
+    gene_modules_regex <- '^GeneModule-'
+    gene_modules %<>% (function(x) x[colnames(x) %>% str_detect(regex(pattern=gene_modules_regex, ignore_case=TRUE), negate=FALSE)]) %>% set_names(str_remove, gene_modules_regex)
+    meta_data %<>% (function(x) x[colnames(x) %>% str_detect(regex(pattern=gene_modules_regex, ignore_case=TRUE), negate=TRUE)])
+
     # copy the important stuff into the reaction values
     seurat.rv$active_object_expr <- input_seurat_expr
     seurat.rv$mart <- Misc(object=seurat, slot='mart')
     seurat.rv$n_cells <- ncol(seurat)
     seurat.rv$n_features <- nrow(seurat) #! TODO: this is the number of features in the _active_ assay
-    seurat.rv$metadata <- seurat@meta.data
+    seurat.rv$metadata <- meta_data
+    seurat.rv$gene_modules <- gene_modules
     seurat.rv$project <- Project(seurat)
     seurat.rv$formatted_project <- Project(seurat) %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat.rv$object <- seurat

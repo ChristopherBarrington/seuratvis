@@ -23,7 +23,7 @@
                                              feature_values_per_cluster_plot.ui(id=tab)),
                   gene_selector=box(title='Select feature',
                                     status='success', solidHeader=TRUE, width=4, collapsible=TRUE,
-                                    feature_picker.ui(id=tab, include_metadata_switch=TRUE),
+                                    feature_picker.ui(id=tab),
                                     cluster_resolution_picker.ui(id=tab, include_label_switch=TRUE),
                                     cluster_id_picker.ui(id=tab),
                                     reduction_method_picker.ui(id=tab),

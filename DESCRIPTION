@@ -16,6 +16,7 @@ Remotes:
 Imports:
   biomaRt,
   ggrepel,
+  ggridges,
   gtools,
   shinyAce
 Depends:
