@@ -42,6 +42,9 @@ filter_FindMarkersResults.server <- function(input, output, session, seurat, ...
     # send a message
     session$ns('') %>% sprintf(fmt='### %sfilter_FindMarkersResults.server-observeEvent-seurat$object [%s]', seurat$formatted_project) %>% message()
 
+    if(is.null(seurat$object@misc$processing$clustered) || !seurat$object@misc$processing$clustered)
+      return(NULL)
+
     # create varaibles for shorthand
     object <- seurat$object
     values <- FetchData(object, c('UMAP_1', 'UMAP_2', 'tSNE_1', 'tSNE_2', str_subset(colnames(object@meta.data), '_snn_res.')))

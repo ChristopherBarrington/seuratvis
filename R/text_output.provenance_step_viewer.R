@@ -81,6 +81,9 @@ provenance_step_viewer.server <- function(input, output, session, seurat, ...) {
     # send a message
     sprintf(fmt='### %sprovenance_step_viewer.server-observeEvent-seurat$object [%s]', session$ns(''), seurat$formatted_project) %>% message()
 
+    if(is.null(seurat$object@misc$provenance))
+      return(NULL)
+
     # create variables for shorthand
     object <- seurat$object
 
