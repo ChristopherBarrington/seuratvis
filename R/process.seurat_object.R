@@ -21,8 +21,8 @@ seurat_object.server <- function(input, output, session, seurat, ...) {
     session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$seurats_table_rows_selected [%s]', input$seurats_table_rows_selected) %>% message()
 
     # clear out seurat.rv
-    #! TODO: is this rv cleared each time?
-    seurat.rv <- reactiveValues()
+    #! TODO: better way to reset the reactive values list?
+    for(i in names(seurat.rv)) seurat.rv[[i]] <- NULL
 
     # row number is saved in the `input` so get the expression to `get` the object from the initial search table
     input_seurat_expr <- server_env$available_seurat_objects %>% pluck('choiceValue') %>% pluck(input$seurats_table_rows_selected)
