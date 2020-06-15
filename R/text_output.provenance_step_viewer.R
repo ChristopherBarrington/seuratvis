@@ -65,27 +65,27 @@ provenance_step_viewer.server <- function(input, output, session, seurat, ...) {
   # render the R code
   observeEvent(input$analysis_step, {
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
 
     # send a message
     sprintf(fmt='### %sprovenance_step_viewer.server-observeEvent-input$analysis_step [%s]', session$ns(''), input$analysis_step) %>% message()
 
     # create variables for shorthand
-    r_script <- seurat_object.reactions$seurat@misc$provenance[[input$analysis_step]]
+    r_script <- seurat$object@misc$provenance[[input$analysis_step]]
    
     # update the ui element(s)
     updateAceEditor(session=session_server, editorId='provenance_text', value=r_script)})
 
   # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+  observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    sprintf(fmt='### %sprovenance_step_viewer.server-observeEvent-seurat_object.reactions$seurat [%s]', session$ns(''), seurat$formatted_project) %>% message()
+    sprintf(fmt='### %sprovenance_step_viewer.server-observeEvent-seurat$object [%s]', session$ns(''), object$formatted_project) %>% message()
 
     # create variables for shorthand
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
 
     # get the analysis steps
-    seurat@misc$provenance %>%
+    object@misc$provenance %>%
       names() %>%
       purrr::set_names() %>%
       purrr::set_names(function(x) str_c(seq_along(x), x, sep=': ')) -> analysis_steps
