@@ -106,7 +106,6 @@ available_seurats.server <- function(input, output, session, ...) {
                  ncells=ncol(x),
                  numi=sum(x@meta.data$nCount_RNA),
                  median_umi=median(x@meta.data$nCount_RNA),
-                 dimensions=ifelse(is.null(x@misc$n_dimensions$pca), -1, x@misc$n_dimensions$pca),
                  filtered=!is.null(x@misc$cells_filtered) && x@misc$cells_filtered,
                  integrated=!is.null(x@misc$integrated_dataset) && x@misc$integrated_dataset,
                  active_assay=DefaultAssay(x),
@@ -115,8 +114,7 @@ available_seurats.server <- function(input, output, session, ...) {
                  reductions={Reductions(x) %>% collapse_strings()},
                  guessed_sex={FetchData(x, vars=boy_gene) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))},
                  size={object.size(x) %>% format(units='Gb') %>% str_remove(' ')})}) %>%
-    mutate(dimensions=as.integer(dimensions),
-           object=value) %>%
+    mutate(object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
 
   # identify columns to format in the `datatable` `columnDefs` argument
