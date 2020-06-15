@@ -74,7 +74,8 @@ available_seurats.server <- function(input, output, session, ...) {
     `Active assay`='active_assay',
     `Other assays`='assays',
     `Features in active assay`='nfeatures',
-    `Reductions`='reductions') -> column_order
+    `Reductions`='reductions',
+    `Size`='size') -> column_order
 
   # make the `data.frame` of Seurat information
   collapse_strings <- function(x, replacement='-', sep=', ')
@@ -112,7 +113,8 @@ available_seurats.server <- function(input, output, session, ...) {
                  assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% collapse_strings()},
                  nfeatures=nrow(x),
                  reductions={Reductions(x) %>% collapse_strings()},
-                 guessed_sex={FetchData(x, vars=boy_gene) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))})}) %>%
+                 guessed_sex={FetchData(x, vars=boy_gene) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))},
+                 size={object.size(x) %>% format(units='Gb') %>% str_remove(' ')})}) %>%
     mutate(dimensions=as.integer(dimensions),
            object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
@@ -160,7 +162,7 @@ available_seurats.server <- function(input, output, session, ...) {
                   backgroundSize='98% 50%',
                   backgroundRepeat='no-repeat',
                   backgroundPosition='center') %>%
-      formatStyle(columns='object',
+      formatStyle(columns=c('object', 'size'),
                   fontFamily='monospace',
                   fontWeight='bold') %>%
       formatRound(columns=c('ncells', 'numi', 'median_umi', 'nfeatures'),
