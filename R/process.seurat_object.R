@@ -20,10 +20,6 @@ seurat_object.server <- function(input, output, session, seurat, ...) {
     # send a message
     session$ns('') %>% sprintf(fmt='### %sload_a_seurat.server-observeEvent-input$seurats_table_rows_selected [%s]', input$seurats_table_rows_selected) %>% message()
 
-    # empty out the reactives
-    for(i in names(seurat_object.reactions))
-      seurat_object.reactions[[i]] <- NULL
-
     # row number is saved in the `input` so get the expression to `get` the object from the initial search table
     input_seurat_expr <- server_env$available_seurat_objects %>% pluck('choiceValue') %>% pluck(input$seurats_table_rows_selected)
 
@@ -63,7 +59,6 @@ seurat_object.server <- function(input, output, session, seurat, ...) {
     seurat.rv$project <- Project(seurat)
     seurat.rv$formatted_project <- Project(seurat) %>% str_replace_all(pattern='_', replacement=' ') %>% str_to_upper()
     seurat.rv$object <- seurat
-    seurat_object.reactions$seurat <- seurat
 
     seurat.rv$done <- rnorm(1)})
 
