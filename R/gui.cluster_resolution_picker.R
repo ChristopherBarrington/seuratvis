@@ -64,42 +64,42 @@ cluster_resolution_picker.server <- function(input, output, session, seurat, ...
   # react to the cluster resolution selection
   observeEvent(eventExpr=input$cluster_resolution_picker, handlerExpr={
     # make sure these elements are defined
-    req(seurat_object.reactions$seurat)
+    req(seurat$object)
 
     # send a message
     session$ns('') %>% sprintf(fmt='### %scluster_resolution_picker.server-observeEvent-input$cluster_resolution_picker [%s]', input$cluster_resolution_picker) %>% message()
 
     # create variables for shorthand
     r <- input$cluster_resolution_picker
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
 
     # save cluster information in the reactive
-    seurat_object.reactions$selected_clusters_per_resolution <- seurat_object.reactions$clusters_per_resolution[r]
-    seurat_object.reactions$picked_cluster_resolution_idents <- FetchData(object=seurat, vars=r) %>% set_names('ident')})
+    seurat$selected_clusters_per_resolution <- seurat$clusters_per_resolution[r]
+    seurat$picked_cluster_resolution_idents <- FetchData(object=object, vars=r) %>% set_names('ident')})
 
   # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+  observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat$formatted_project) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sreduction_method_picker.server-observeEvent-seurat$object [%s]', seurat$formatted_project) %>% message()
 
     # create variables for shorthand
-    seurat <- seurat_object.reactions$seurat
+    object <- seurat$object
 
     # update the ui element(s)
-    cluster_options <- c('seurat_clusters', str_subset(colnames(seurat@meta.data), '_snn_res.'))
+    cluster_options <- c('seurat_clusters', str_subset(colnames(object@meta.data), '_snn_res.'))
     updateSelectInput(session=session, inputId='cluster_resolution_picker', choices='-spoof-')
     updateSelectInput(session=session, inputId='cluster_resolution_picker',
                       choices=cluster_options, selected='seurat_clusters')
 
     # count the clusters per resolution and initialise reactive
-    select_at(seurat@meta.data, vars(all_of(cluster_options))) %>%
+    select_at(object@meta.data, vars(all_of(cluster_options))) %>%
       mutate_all(function(x) {as.character(x) %>% as.numeric()}) %>%
       gather(key='cluster_set', value='ID') %>%
       group_by(cluster_set) %>%
       summarise(N=length(unique(ID))) %>%
       deframe() -> clusters_per_resolution
 
-    seurat_object.reactions$clusters_per_resolution <- clusters_per_resolution
-    seurat_object.reactions$selected_clusters_per_resolution <- clusters_per_resolution['seurat_clusters']
-    seurat_object.reactions$picked_cluster_resolution_idents <- FetchData(object=seurat, vars='seurat_clusters') %>% set_names('ident')})
+    seurat$clusters_per_resolution <- clusters_per_resolution
+    seurat$selected_clusters_per_resolution <- clusters_per_resolution['seurat_clusters']
+    seurat$picked_cluster_resolution_idents <- FetchData(object=object, vars='seurat_clusters') %>% set_names('ident')})
 }
