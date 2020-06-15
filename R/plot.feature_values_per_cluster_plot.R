@@ -52,7 +52,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session, seura
     session$ns('') %>% sprintf(fmt='### %sfeature_values_per_cluster_plot.server-renderPlot') %>% message()
 
     # get the data to plot
-    cbind(seurat_object.reactions$picked_cluster_resolution_idents,
+    cbind(seurat$picked_cluster_resolution_idents,
           seurat$picked_feature_values[[tab]]) %>%
       mutate(x={as.character(ident) %>% as.numeric()}) -> data
 
