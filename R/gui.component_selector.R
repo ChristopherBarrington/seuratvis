@@ -23,11 +23,6 @@ principle_component_picker.ui <- function(id, label='Principle component selecti
   e$id <- id
   assign(x=module_ns, val=e, envir=module_environments)
 
-  # track the re-used UI elements in each namespace
-  get0(env=ui_element_ids.env, x=NS(namespace=module, id='principle_component_picker')) %>%
-    append(ns(id='principle_component_picker')) %>%
-    assign(env=ui_element_ids.env, x=NS(namespace=module, id='principle_component_picker'))
-
   # record the server(s) to call
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 

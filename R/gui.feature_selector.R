@@ -30,11 +30,6 @@ feature_picker.ui <- function(id, label='Feature selection', include_metadata_sw
   e$include_metadata_switch <- include_metadata_switch
   assign(x=module_ns, val=e, envir=module_environments)
 
-  # track the re-used UI elements in each namespace
-  get0(env=ui_element_ids.env, x=NS(namespace=module, id='feature_picker_feature_names')) %>%
-    append(ns(id='feature_picker_feature_names')) %>%
-    assign(env=ui_element_ids.env, x=NS(namespace=module, id='feature_picker_feature_names'))
-
   # record the server(s) to call
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 

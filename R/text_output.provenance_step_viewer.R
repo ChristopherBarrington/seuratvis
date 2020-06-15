@@ -22,11 +22,6 @@ provenance_step_viewer.ui <- function(id) {
   e$id <- id
   assign(x=module_ns, val=e, envir=module_environments)
 
-  # track the re-used UI elements in each namespace
-  get0(env=ui_element_ids.env, x=NS(namespace=module, id='analysis_step')) %>%
-    append(ns(id='analysis_step')) %>%
-    assign(env=ui_element_ids.env, x=NS(namespace=module, id='analysis_step'))
-
   # record the server(s) to call
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 

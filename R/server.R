@@ -5,10 +5,6 @@
 module_environments <- new.env()
 module_servers_to_call <- new.env()
 
-#' UI elements by module
-#' 
-ui_element_ids.env <- new.env()
-
 shinyAppServer <- function(input, output, session) {
 
   # ###############################################################################################
