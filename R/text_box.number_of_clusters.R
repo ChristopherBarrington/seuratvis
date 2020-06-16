@@ -41,6 +41,7 @@ number_of_clusters_text_box.server <- function(input, output, session, seurat, .
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='number_of_clusters_text_box') # provides `seuratvis_env`, `server_env` and `module_env`
+  tab <- parent.frame()$id
   # input <- get(x='input', envir=server_env)
 
   # make the text box
@@ -53,7 +54,7 @@ number_of_clusters_text_box.server <- function(input, output, session, seurat, .
            'Cell clusters') -> subtitle
 
     # create output object
-    list(value={seurat$selected_clusters_per_resolution %>% comma()},
+    list(value={seurat$selected_clusters_per_resolution[[tab]] %>% comma()},
          subtitle=subtitle,
          icon=icon('first-order')) %>%
       modifyList(x=seuratvis:::text_box_defaults()) %>%
