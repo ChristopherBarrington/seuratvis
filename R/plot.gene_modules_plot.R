@@ -7,7 +7,7 @@
 #' @rdname gene_module_score_plot
 #' 
 gene_module_score_plot.ui <- function(id) {
-  sprintf(fmt='### %s-elbow_plot.ui', id) %>% message()
+  sprintf(fmt='### %s-gene_module_score_plot.ui', id) %>% message()
 
   module <- 'gene_module_score_plot'
 
@@ -23,8 +23,50 @@ gene_module_score_plot.ui <- function(id) {
   # record the server(s) to call
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
+  # make the ui elements
+  #! TODO: can this be generalised?
+  ## scores in a cluster tab panel
+  tabpanel_name <- str_c(id, 'score_in_clusters', sep='_')
+  tabpanel_ns <- NS(namespace=tabpanel_name)
+  tabPanel(title='Score in clusters', value='score_in_clusters',
+    column(width=8, 
+           div(style="display: inline-block;vertical-align:top; width: 150px;", cluster_id_picker.ui(id=tabpanel_name, opts=list(multiple=TRUE))),
+           div(style="display: inline-block;vertical-align:top; width: 150px;", feature_picker.ui(id=tabpanel_name, gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE)),
+           plotOutput(outputId=tabpanel_ns('score_in_clusters_ridges')) %>% withSpinner()),
+    column(width=4, boxPlus(title='Options', width=12, closable=FALSE,
+                            cluster_resolution_picker.ui(id=tabpanel_name)),
+                            # add_gene_module.ui(id=tab)),
+                    boxPlus(title='Map overview', width=12, closable=FALSE,
+                            reduced_dimension_plot.ui(id=tabpanel_name, feature='selected_cluster_ids'),
+                            reduction_method_picker.ui(id=tabpanel_name)),
+                    boxPlus(title='Gene modules', width=12, closable=FALSE,
+                            show_genes_in_module.ui(id=tabpanel_name)))) -> score_in_clusters
+  get0(env=module_servers_to_call, x=tabpanel_name) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=tabpanel_name)
+
+  ## score in clusters tab panel
+  tabpanel_name <- str_c(id, 'scores_in_cluster', sep='_')
+  tabpanel_ns <- NS(namespace=tabpanel_name)
+  tabPanel(title='Score in clusters', value='scores_in_cluster',
+    column(width=8, 
+           div(style="display: inline-block;vertical-align:top; width: 150px;", cluster_id_picker.ui(id=tabpanel_name, opts=list(multiple=FALSE))),
+           div(style="display: inline-block;vertical-align:top; width: 150px;", feature_picker.ui(id=tabpanel_name, gene_modules_opts=list(multiple=TRUE), include_feature_type=FALSE, include_values_range=FALSE)),
+           plotOutput(outputId=tabpanel_ns('scores_in_cluster_ridges')) %>% withSpinner()),
+    column(width=4, boxPlus(title='Options', width=12, closable=FALSE,
+                            cluster_resolution_picker.ui(id=tabpanel_name)),
+                            # add_gene_module.ui(id=tab)),
+                    boxPlus(title='Map overview', width=12, closable=FALSE,
+                            reduced_dimension_plot.ui(id=tabpanel_name, feature='selected_cluster_ids'),
+                            reduction_method_picker.ui(id=tabpanel_name)),
+                    boxPlus(title='Gene modules', width=12, closable=FALSE,
+                            show_genes_in_module.ui(id=tabpanel_name)))) -> scores_in_cluster
+  get0(env=module_servers_to_call, x=tabpanel_name) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=tabpanel_name)
+
+  tabBox(id=NS(namespace=id, id='gene_modules_scores_plot_box'),
+         width=12, height='1250px',
+         score_in_clusters, scores_in_cluster) -> ridges_plot_box
+
   # return ui element(s)
-  tagList(plotOutput(outputId=ns(id='gene_module_score_ridges')) %>% withSpinner())
+  tagList(ridges_plot_box)
 }
 
 #' Produce the ggplot object for a gene module score
@@ -34,63 +76,86 @@ gene_module_score_plot.ui <- function(id) {
 #' @rdname gene_module_score_plot
 #'
 gene_module_score_plot.server <- function(input, output, session, seurat, ...) {
-  session$ns('') %>% sprintf(fmt='### %selbow_plot.server') %>% message()
+  session$ns('') %>% sprintf(fmt='### %sgene_module_score_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='gene_module_score_plot') # provides `seuratvis_env`, `server_env` and `module_env`
   tab <- parent.frame()$id
-  ns <- NS(namespace='gene_module_score_plot')
+  session_server <- get(x='session', env=server_env)
+  input_server <- get(x='input', env=server_env)
 
-  updateRadioGroupButtons(session=session, inputId='feature_type',
+  # restrict the feature selection to gene modules only
+  updateRadioGroupButtons(session=session_server, inputId=NS(namespace=str_c(tab, 'score_in_clusters', sep='_'), id='feature_type'),
+                          choices=list(`Gene modules`='gene_modules'),
+                          selected='gene_modules')
+  updateRadioGroupButtons(session=session_server, inputId=NS(namespace=str_c(tab, 'scores_in_cluster', sep='_'), id='feature_type'),
                           choices=list(`Gene modules`='gene_modules'),
                           selected='gene_modules')
 
-  # render the elbow plot
+  # react to the tab panel switching
+  observeEvent(eventExpr=input$gene_modules_scores_plot_box, ignoreInit=FALSE, handlerExpr={})
+
+  # render the gene module score in multiple clusters ggridges plot
   renderPlot(expr={
+    tabpanel <- str_c(tab, input$gene_modules_scores_plot_box, sep='_')
+
     # make sure these elements are defined
-    req(seurat$object)
+    req(seurat$picked_cluster_resolution_idents[[tabpanel]])
+    req(seurat$picked_feature_values[[tabpanel]])
 
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sgene_module_score_plot.server-renderPlot') %>% message()
+    session$ns('') %>% sprintf(fmt='### %sgene_module_score_plot.server-renderPlot-IDs') %>% message()
    
     # make variables for shorthand    
-    object <- seurat$object
-    reduction_name <- input$reduction_method_picker
-
-    # plot module (y) and score (x)
-    # cbind(seurat$picked_feature_values[[tab]] %>% set_names('score'),
-    #       seurat$picked_cluster_resolution_idents) %>%
-    #   gather(key=gene_module, value=module_score, -cluster_id) %>%
-    #   ggplot() +
-    #   aes(x=module_score, y=gene_module, fill=gene_module) +
-    #   labs(title=str_c(Project(seurat), cluster_set, cluster_id, sep=' / ')) +
-    #   geom_density_ridges(alpha=0.8, size=0.7, colour='black') +
-    #   scale_fill_cyclical(values=c('grey50','grey70')) +
-    #   theme_bw() +
-    #   theme(axis.text.y=element_text(vjust=0), panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())
+    picked_gene_module <- input$picked_feature
+    selected_cluster_idents <- input$cluster_id_picker
 
     # plot cluster (y) and score(x)
-    cbind(seurat$picked_cluster_resolution_idents,
-          seurat$picked_feature_values[[tab]]) %>%
+    cbind(seurat$picked_cluster_resolution_idents[[tabpanel]],
+          seurat$picked_feature_values[[tabpanel]]) %>%
+      filter(ident %in% selected_cluster_idents) %>%
       set_names(c('cluster_id', 'module_score')) %>%
       ggplot() +
       aes(x=module_score, y=cluster_id, fill=cluster_id) +
-      labs(title=str_c(seurat$formatted_project, input$cluster_resolution_picker, input$picked_feature, sep=' / ')) +
+      labs(x='Gene module score', y='Cluster ID', fill='Cluster ID') +
+      geom_density_ridges(alpha=0.8, size=0.7, colour='black') +
+      # scale_fill_cyclical(values=c('grey50','grey70')) +
+      theme_bw() +
+      theme(axis.text.y=element_text(vjust=0),
+            legend.position='none',
+            panel.grid.major.x=element_blank(),
+            panel.grid.minor.x=element_blank())}, height=1100) -> output$score_in_clusters_ridges
+
+  # render the gene modules score in a cluster ggridges plot
+  renderPlot(expr={
+    tabpanel <- str_c(tab, input$gene_modules_scores_plot_box, sep='_')
+
+    # make sure these elements are defined
+    req(seurat$picked_cluster_resolution_idents[[tabpanel]])
+    req(seurat$picked_feature_values[[tabpanel]])
+
+    # send a message
+    session$ns('') %>% sprintf(fmt='### %sgene_module_score_plot.server-renderPlot-GMs') %>% message()
+   
+    # make variables for shorthand    
+    picked_gene_modules <- input$picked_feature
+    selected_cluster_ident <- input$cluster_id_picker
+
+    # plot cluster (y) and score(x)
+    cbind(seurat$picked_cluster_resolution_idents[[tabpanel]],
+          seurat$picked_feature_values[[tabpanel]]) %>%
+      filter(ident==selected_cluster_ident) %>%
+      gather(key=gene_module, value=module_score, -ident) %>%
+      ggplot() +
+      aes(x=module_score, y=gene_module) +
+      labs(x='Gene module score', y='Gene module') +
       geom_density_ridges(alpha=0.8, size=0.7, colour='black') +
       scale_fill_cyclical(values=c('grey50','grey70')) +
       theme_bw() +
-      theme(axis.text.y=element_text(vjust=0), panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())
+      theme(axis.text.y=element_text(vjust=0),
+            legend.position='none',
+            panel.grid.major.x=element_blank(),
+            panel.grid.minor.x=element_blank())}, height=1100) -> output$scores_in_cluster_ridges
 
 
-
-######
-# need to set cluster idents to one
-# need to fetch multiple features
-# plot the reults
-######
-
-
-
-
-    }, height=800) -> output$gene_module_score_ridges
 }
