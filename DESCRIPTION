@@ -23,6 +23,7 @@ Depends:
   esquisse,
   shiny,
   shinydashboard,
+  shinydashboardPlus,
   rclipboard,
   scales,
   dqshiny,
