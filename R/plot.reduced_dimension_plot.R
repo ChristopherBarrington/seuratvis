@@ -134,7 +134,7 @@ reduced_dimension_plot.server <- function(input, output, session, seurat, ...) {
         c_range_limits <- args$value_range_limits
 
         colour_gradient <- scale_colour_gradient(low=c_min, high=c_max, limits=c_range_limits, oob=scales::squish)
-        if(c_range_limits %>% sign() %>% Reduce(f='*') %>% equals(-1)) {
+        if(c_range_limits %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1)) {
           colour_gradient <- scale_colour_gradientn(colours=c(low=c_min, mid=c_mid, high=c_max), 
                                                     values={c_range_limits %>% c(0) %>% sort() %>% scales::rescale()},
                                                     limits=c_range_limits, breaks=0)
