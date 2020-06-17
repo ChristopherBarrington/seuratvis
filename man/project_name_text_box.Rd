@@ -7,7 +7,7 @@
 \usage{
 project_name_text_box.ui(id, width = 12)
 
-project_name_text_box.server(input, output, session)
+project_name_text_box.server(input, output, session, seurat, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

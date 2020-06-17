@@ -7,7 +7,14 @@
 \usage{
 number_of_cells_text_box.ui(id, width = 12)
 
-number_of_cells_text_box.server(input, output, session)
+number_of_cells_text_box.server(
+  input,
+  output,
+  session,
+  seurat,
+  cell_filtering,
+  ...
+)
 }
 \arguments{
 \item{id}{unique name of the element}

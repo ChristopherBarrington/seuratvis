@@ -4,6 +4,7 @@
 #' 
 #' @param id unique name of the element
 #' @param label text label of the element
+#' @param opts a list of arguments merged into defaults for \code{pickerInput}
 #' 
 #' @examples
 #' 
@@ -15,7 +16,7 @@
 #' 
 #' @rdname cluster_id_picker
 #' 
-cluster_id_picker.ui <- function(id, label='Cluster selection') {
+cluster_id_picker.ui <- function(id, label='Cluster selection', opts=list()) {
   sprintf(fmt='### %s-cluster_id_picker.ui', id) %>% message()
 
   module <- 'cluster_id_picker'
@@ -33,9 +34,11 @@ cluster_id_picker.ui <- function(id, label='Cluster selection') {
   get0(env=module_servers_to_call, x=id) %>% append(sprintf(fmt='%s.server', module)) %>% assign(env=module_servers_to_call, x=id)
 
   # make ui elements
-  pickerInput(inputId=ns(id='cluster_id_picker'), label=label, choices=NULL, multiple=TRUE,
-              options=list(`actions-box`=TRUE, header='Cluster selection', title='Cluster selection',
-                           `selected-text-format`='count>5', `count-selected-text`='{0} cluster(s)')) -> input
+   list(inputId=ns(id='cluster_id_picker'), label=label, choices=NULL, multiple=TRUE,
+       options=list(`actions-box`=TRUE, header='Cluster selection', title='Cluster selection',
+                    `selected-text-format`='count>5', `count-selected-text`='{0} cluster(s)')) %>%
+    modifyList(val=opts) %>%
+    do.call(what=pickerInput) -> input
 
   # return ui element(s)
   tagList(input)
@@ -56,14 +59,16 @@ cluster_id_picker.server <- function(input, output, session, seurat, ...) {
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='cluster_id_picker') # provides `seuratvis_env`, `server_env` and `module_env`
   session_server <- get(x='session', env=server_env)
+  tab <- parent.frame()$id
+  tabpanel <- tab %>% str_remove('-.*$')
 
   # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat$picked_cluster_resolution_idents, handlerExpr={
+  observeEvent(eventExpr=seurat$picked_cluster_resolution_idents[[tabpanel]], handlerExpr={
     # send a message
     session$ns('') %>% sprintf(fmt='### %scluster_id_picker.server-observeEvent-seurat$picked_cluster_resolution_idents [%s]', seurat$formatted_project) %>% message()
 
     # create variables for shorthand
-    idents <- seurat$picked_cluster_resolution_idents %>% pluck('ident') %>% levels() %>% mixedsort()
+    idents <- seurat$picked_cluster_resolution_idents[[tabpanel]] %>% pluck('ident') %>% levels() %>% mixedsort()
 
     # update the ui
     updatePickerInput(session=session, inputId='cluster_id_picker', choices=idents, selected=idents)})

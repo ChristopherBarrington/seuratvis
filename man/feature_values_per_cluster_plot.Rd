@@ -7,7 +7,7 @@
 \usage{
 feature_values_per_cluster_plot.ui(id)
 
-feature_values_per_cluster_plot.server(input, output, session)
+feature_values_per_cluster_plot.server(input, output, session, seurat, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

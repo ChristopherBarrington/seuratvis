@@ -4,7 +4,7 @@
 \alias{cell_filtering.server}
 \title{React to filtering thresholds and filter Seurat}
 \usage{
-cell_filtering.server(input, output, session)
+cell_filtering.server(input, output, session, seurat, ...)
 }
 \description{
 React to filtering thresholds and filter Seurat

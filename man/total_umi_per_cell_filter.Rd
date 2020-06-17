@@ -3,16 +3,23 @@
 \name{total_umi_per_cell_filter.ui}
 \alias{total_umi_per_cell_filter.ui}
 \alias{total_umi_per_cell_filter.server}
-\title{Specify total UMIs per cell limits}
+\title{Specify total UMI per cell limits}
 \usage{
 total_umi_per_cell_filter.ui(
   id,
-  label = "UMIs per cell",
+  label = "UMI per cell",
   low = TRUE,
   high = TRUE
 )
 
-total_umi_per_cell_filter.server(input, output, session)
+total_umi_per_cell_filter.server(
+  input,
+  output,
+  session,
+  seurat,
+  cell_filtering,
+  ...
+)
 }
 \arguments{
 \item{id}{unique name of the element}

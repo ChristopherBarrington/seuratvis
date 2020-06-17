@@ -7,7 +7,7 @@
 \usage{
 assay_picker.ui(id, label = "Assay")
 
-assay_picker.server(input, output, session)
+assay_picker.server(input, output, session, seurat, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

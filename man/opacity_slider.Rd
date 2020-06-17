@@ -7,7 +7,7 @@
 \usage{
 opacity_slider.ui(id, label = "Opacity")
 
-opacity_slider.server(input, output, session)
+opacity_slider.server(input, output, session, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

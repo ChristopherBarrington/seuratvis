@@ -65,7 +65,7 @@ assay_picker.server <- function(input, output, session, seurat, ...) {
     assay <- input$assay_picker
 
     # set the default assay for the reactive seurat object
-    if(assay!='' && !is.null(seurat$object))
+    if(assay!='' && !is.null(seurat$object) && assay!=DefaultAssay(seurat$object))
       DefaultAssay(seurat$object) <- assay
 
     # update the reactive

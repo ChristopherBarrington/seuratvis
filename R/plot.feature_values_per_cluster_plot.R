@@ -50,9 +50,10 @@ feature_values_per_cluster_plot.server <- function(input, output, session, seura
   renderPlot(expr={
     # send a message
     session$ns('') %>% sprintf(fmt='### %sfeature_values_per_cluster_plot.server-renderPlot') %>% message()
+    seurat$feature_selector_refreshed # need this because `value_range_limits` and `picked_feature_values` upadted by the same observer so are isolated
 
     # get the data to plot
-    cbind(seurat$picked_cluster_resolution_idents,
+    cbind(seurat$picked_cluster_resolution_idents[[tab]],
           seurat$picked_feature_values[[tab]]) %>%
       mutate(x={as.character(ident) %>% as.numeric()}) -> data
 

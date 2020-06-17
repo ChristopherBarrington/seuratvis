@@ -12,6 +12,7 @@ shinyAppUI <- function(...) {
   eval(.ui_tab.feature_highlighting())
   eval(.ui_tab.feature_highlighting_cluster_selection())
   eval(.ui_tab.findmarkers_table())
+  eval(.ui_tab.gene_modules())
   eval(.ui_tab.provenance_viewer())
   eval(.ui_tab.configure_seurat())
   eval(.ui_tab.sidebar_links())

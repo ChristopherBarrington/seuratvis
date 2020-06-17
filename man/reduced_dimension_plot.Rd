@@ -4,7 +4,7 @@
 \alias{reduced_dimension_plot.server}
 \title{Produce the ggplot object for a scatterplot}
 \usage{
-reduced_dimension_plot.server(input, output, session)
+reduced_dimension_plot.server(input, output, session, seurat, ...)
 }
 \description{
 Produce the ggplot object for a scatterplot
