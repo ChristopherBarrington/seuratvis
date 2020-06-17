@@ -44,7 +44,7 @@ available_seurats.ui <- function(id) {
   list(inputId=ns(id='proportion_mt_picker'), label='Mitochondrial proportion') %>% modifyList(x=selectizeInput_defaults) %>% do.call(what=selectizeInput) -> proportion_mt_picker
 
   # return ui element(s)
-  tagList(DTOutput(outputId=ns(id='seurats_table')) %>% withSpinner(), tags$h3('Configure metadata columns'),
+  tagList(DTOutput(outputId=ns(id='seurats_table')) %>% withSpinner(type=6), tags$h3('Configure metadata columns'),
           column(width=6, splitLayout(n_features_picker, n_umi_picker, proportion_mt_picker),
           tags$head(tags$style(HTML(".shiny-split-layout > div {overflow: visible; }")))))
 }
@@ -97,7 +97,7 @@ available_seurats.server <- function(input, output, session, ...) {
     dplyr::select(-choiceName) %>%
     plyr::adply(.margins=1, .parallel=use_domc, function(params) { #! TODO: parallelise this doMC does not work on Windows though!
       x <- eval(parse(text=params$choiceValue))
-      
+
       # choose a gene to look for to identify male dataset
       x@misc$mart@dataset %>%
         str_remove(pattern='_.*') %>%
