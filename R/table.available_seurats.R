@@ -138,8 +138,7 @@ available_seurats.server <- function(input, output, session, ...) {
                                                infoEmpty='No Seurat objects found!')),
                     style='bootstrap4',
                     class='stripe',
-                    selection=list(mode='single',
-                                   selected=input$seurats_table_rows_selected),
+                    selection=list(mode='single'),
                     escape=FALSE) %>%
       formatStyle(columns='ncells',
                   background=styleColorBar(data=c(0,max(data_to_show$ncells)), color='#3CB96A'),
