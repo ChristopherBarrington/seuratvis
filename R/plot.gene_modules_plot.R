@@ -28,7 +28,7 @@ gene_module_score_plot.ui <- function(id) {
   ## scores in a cluster tab panel
   tabpanel_name <- str_c(id, 'score_in_clusters', sep='_')
   tabpanel_ns <- NS(namespace=tabpanel_name)
-  tabPanel(title='Score in clusters', value='score_in_clusters',
+  tabPanel(title='Score across clusters', value='score_in_clusters',
     column(width=8, 
            div(style="display: inline-block;vertical-align:top; width: 150px;", cluster_id_picker.ui(id=tabpanel_name, opts=list(multiple=TRUE))),
            div(style="display: inline-block;vertical-align:top; width: 150px;", feature_picker.ui(id=tabpanel_name, gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE)),
@@ -46,7 +46,7 @@ gene_module_score_plot.ui <- function(id) {
   ## score in clusters tab panel
   tabpanel_name <- str_c(id, 'scores_in_cluster', sep='_')
   tabpanel_ns <- NS(namespace=tabpanel_name)
-  tabPanel(title='Score in clusters', value='scores_in_cluster',
+  tabPanel(title='Scores in a cluster', value='scores_in_cluster',
     column(width=8, 
            div(style="display: inline-block;vertical-align:top; width: 150px;", cluster_id_picker.ui(id=tabpanel_name, opts=list(multiple=FALSE))),
            div(style="display: inline-block;vertical-align:top; width: 150px;", feature_picker.ui(id=tabpanel_name, gene_modules_opts=list(multiple=TRUE), include_feature_type=FALSE, include_values_range=FALSE)),
