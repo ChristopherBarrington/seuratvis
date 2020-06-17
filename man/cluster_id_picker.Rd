@@ -5,14 +5,16 @@
 \alias{cluster_id_picker.server}
 \title{Pick clusters from selected resolution}
 \usage{
-cluster_id_picker.ui(id, label = "Cluster selection")
+cluster_id_picker.ui(id, label = "Cluster selection", opts = list())
 
-cluster_id_picker.server(input, output, session)
+cluster_id_picker.server(input, output, session, seurat, ...)
 }
 \arguments{
 \item{id}{unique name of the element}
 
 \item{label}{text label of the element}
+
+\item{opts}{a list of arguments merged into defaults for \code{pickerInput}}
 }
 \description{
 Provides a method to select clusters(s)

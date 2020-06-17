@@ -7,7 +7,7 @@
 \usage{
 density_plot.ui(id, feature)
 
-density_plot.server(input, output, session)
+density_plot.server(input, output, session, seurat, cell_filtering, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

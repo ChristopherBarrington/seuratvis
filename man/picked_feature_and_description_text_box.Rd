@@ -7,7 +7,13 @@
 \usage{
 picked_feature_and_description_text_box.ui(id, width = 12)
 
-picked_feature_and_description_text_box.server(input, output, session)
+picked_feature_and_description_text_box.server(
+  input,
+  output,
+  session,
+  seurat,
+  ...
+)
 }
 \arguments{
 \item{id}{unique name of the element}

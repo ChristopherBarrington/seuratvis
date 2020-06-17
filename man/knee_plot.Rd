@@ -7,7 +7,7 @@
 \usage{
 knee_plot.ui(id, feature)
 
-knee_plot.server(input, output, session)
+knee_plot.server(input, output, session, seurat, cell_filtering, ...)
 }
 \arguments{
 \item{id}{unique name of the element}
