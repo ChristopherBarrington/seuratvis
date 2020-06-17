@@ -88,14 +88,9 @@ available_seurats.server <- function(input, output, session, ...) {
   }
 
   # make the data.frame for the detected Seurat objects
-  use_domc <- 'doMC' %in% installed.packages()
-
-  if(use_domc)
-    doMC::registerDoMC(parallel::detectCores())
-
   server_env$available_seurat_objects %>%
     dplyr::select(-choiceName) %>%
-    plyr::adply(.margins=1, .parallel=use_domc, function(params) { #! TODO: parallelise this doMC does not work on Windows though!
+    plyr::adply(.margins=1, .parallel=FALSE, function(params) { #! TODO: parallelise this doMC does not work on Windows though!
       x <- eval(parse(text=params$choiceValue))
 
       # choose a gene to look for to identify male dataset
@@ -131,6 +126,7 @@ available_seurats.server <- function(input, output, session, ...) {
 
   # make and format the `datatable`
   DT::renderDataTable({
+    session$ns('') %>% sprintf(fmt='### %savailable_seurats.server-renderDataTable') %>% message()
     data_to_show %>%
       DT::datatable(colnames=formatted_colnames,
                     rownames=FALSE,
