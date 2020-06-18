@@ -37,8 +37,8 @@ seurat_object.server <- function(input, output, session, seurat, ...) {
     # ensure we are using RNA assay and it is normalised
     selected_assay <- 'RNA'
     DefaultAssay(seurat) <- selected_assay
-    if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
-      seurat <- NormalizeData(seurat)
+    # if(sum(seurat@assays[[selected_assay]]@counts)==sum(seurat@assays[[selected_assay]]@data))
+    #   seurat <- NormalizeData(seurat)
 
     # update ui elements
     ## get the numeric metadata variables
