@@ -20,6 +20,9 @@ show_genes_in_module.ui <- function(id) {
   tagList(tags$label('Genes in modules'), DTOutput(outputId=ns(id='genes_in_module')))
 }
 
+
+#' @import htmlwidgets
+#' 
 show_genes_in_module.server <- function(input, output, session, seurat, ...) {
 
   DT::renderDataTable({
@@ -48,7 +51,7 @@ show_genes_in_module.server <- function(input, output, session, seurat, ...) {
     # define the callback
     #! TODO: look at this and figure it out!
     #! TODO: I don't like this implementation
-    JS("table.column(1).nodes().to$().css({cursor: 'pointer'});",
+    htmlwidgets::JS("table.column(1).nodes().to$().css({cursor: 'pointer'});",
        "",
        "// make the table header of the nested table",
        "var format = function(d, childId){",
