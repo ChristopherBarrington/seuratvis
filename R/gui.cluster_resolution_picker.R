@@ -94,7 +94,7 @@ cluster_resolution_picker.server <- function(input, output, session, seurat, ...
 
     # count the clusters per resolution and initialise reactive
     select_at(object@meta.data, vars(all_of(cluster_options))) %>%
-      mutate_all(function(x) {as.character(x) %>% as.numeric()}) %>%
+      mutate_all(function(x) levels(x)[x]) %>%
       gather(key='cluster_set', value='ID') %>%
       group_by(cluster_set) %>%
       summarise(N=length(unique(ID))) %>%
