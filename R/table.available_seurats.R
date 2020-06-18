@@ -65,7 +65,8 @@ available_seurats.server <- function(input, output, session, ...) {
   c(Project='project',
     Environment='environment',
     `Object name`='object',
-    `Guessed sex`='guessed_sex',
+    # `Size`='size',
+    # `Guessed sex`='guessed_sex',
     `Number of cells`='ncells',
     `Total UMI`='numi',
     `Median UMI`='median_umi',
@@ -74,8 +75,7 @@ available_seurats.server <- function(input, output, session, ...) {
     `Active assay`='active_assay',
     `Other assays`='assays',
     `Features in active assay`='nfeatures',
-    `Reductions`='reductions',
-    `Size`='size') -> column_order
+    `Reductions`='reductions') -> column_order
 
   # make the `data.frame` of Seurat information
   collapse_strings <- function(x, replacement='-', sep=', ')
@@ -111,9 +111,9 @@ available_seurats.server <- function(input, output, session, ...) {
                  active_assay=DefaultAssay(x),
                  assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% collapse_strings()},
                  nfeatures=nrow(x),
-                 reductions={Reductions(x) %>% collapse_strings()},
-                 guessed_sex={FetchData(x, vars=boy_gene) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))},
-                 size={object.size(x) %>% format(units='Gb') %>% str_remove(' ')})}) %>%
+                 # guessed_sex={FetchData(x, vars=boy_gene) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))},
+                 # size={object.size(x) %>% format(units='Gb') %>% str_remove(' ')},
+                 reductions={Reductions(x) %>% collapse_strings()})}) %>%
     mutate(object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
 
@@ -160,7 +160,7 @@ available_seurats.server <- function(input, output, session, ...) {
                   backgroundSize='98% 50%',
                   backgroundRepeat='no-repeat',
                   backgroundPosition='center') %>%
-      formatStyle(columns=c('object', 'size'),
+      formatStyle(columns=c('object'),
                   fontFamily='monospace',
                   fontWeight='bold') %>%
       formatRound(columns=c('ncells', 'numi', 'median_umi', 'nfeatures'),

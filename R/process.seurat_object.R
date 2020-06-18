@@ -13,7 +13,7 @@ seurat_object.server <- function(input, output, session, seurat, ...) {
   seurat.rv <- reactiveValues()
 
   # react to a row being selected in the available Seurats table
-  observeEvent(eventExpr=input$seurats_table_rows_selected, handlerExpr={
+  observeEvent(eventExpr=input$seurats_table_rows_selected, label='PROCESS LOAD SEURAT', handlerExpr={
     # make sure these elements are defined
     req(input$seurats_table_rows_selected)
 
