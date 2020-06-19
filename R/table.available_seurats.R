@@ -91,14 +91,15 @@ available_seurats.server <- function(input, output, session, ...) {
   server_env$available_seurat_objects %>%
     dplyr::select(-choiceName) %>%
     plyr::adply(.margins=1, .parallel=FALSE, function(params) { #! TODO: parallelise this doMC does not work on Windows though!
+      # make a copy of the Seurat object
       x <- eval(parse(text=params$choiceValue))
 
       # choose a gene to look for to identify male dataset
-      x@misc$mart@dataset %>%
-        str_remove(pattern='_.*') %>%
-        switch(hsapiens='SRY',
-               mmusculus='Sry',
-               'SRY') -> boy_gene
+      # x@misc$mart@dataset %>%
+      #   str_remove(pattern='_.*') %>%
+      #   switch(hsapiens='SRY',
+      #          mmusculus='Sry',
+      #          'SRY') -> boy_gene
 
       # make the data.frame for this Seurat
       data.frame(project=reformat_project_name(Project(x)),
