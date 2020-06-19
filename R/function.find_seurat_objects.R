@@ -27,7 +27,8 @@ find_seurat_objects <- function() {
       } else {
         x %>% mutate(choiceName=str_c(str_remove_all(string=env, pattern='\\(\\)$'), value, sep=' : '))
       }}) %>%
-    arrange(choiceName) -> available_objects # add varaibles for where to find the objects and what to call them
+    arrange(choiceName) %>%
+    mutate(env=as.character(env)) -> available_objects # add varaibles for where to find the objects and what to call them
 
   available_objects
 }

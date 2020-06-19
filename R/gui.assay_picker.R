@@ -49,7 +49,7 @@ assay_picker.ui <- function(id, label='Assay') {
 #' 
 #' @rdname assay_picker
 #' 
-assay_picker.server <- function(input, output, session) {
+assay_picker.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sassay_picker.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -59,32 +59,28 @@ assay_picker.server <- function(input, output, session) {
   # react to the reduction method selection
   observeEvent(eventExpr=input$assay_picker, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sassay_picker.server-observeEvent-input$assay_picker [%s]', input$assay_picker) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %sassay_picker.server-observeEvent-input$assay_picker [%s]', input$assay_picker) %>% message()
 
     # create variables for shorthand
     assay <- input$assay_picker
-    seurat_object.reactions$selected_assay <- assay
-
-    # update other reduction method pickers
-    for(nsid in module_environments$assay_pickers$ns)
-      updateSelectInput(session=session_server, inputId=nsid, selected=assay)
 
     # set the default assay for the reactive seurat object
-    if(assay!='' && !is.null(seurat_object.reactions$seurat))
-      DefaultAssay(seurat_object.reactions$seurat) <- assay
+    if(assay!='' && !is.null(seurat$object) && assay!=DefaultAssay(seurat$object))
+      DefaultAssay(seurat$object) <- assay
 
     # update the reactive
-    seurat_object.reactions$reference_metrics$n_features <- nrow(seurat_object.reactions$seurat)})
+    seurat$n_features <- nrow(seurat$object)})
 
   # update UI when Seurat object is loaded
-  observeEvent(eventExpr=seurat_object.reactions$seurat, handlerExpr={
+  observeEvent(eventExpr=seurat$object, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sassay_picker.server-observeEvent-seurat_object.reactions$seurat [%s]', seurat_object.reactions$formatted.project.name) %>% message()
+    session$ns('') %>% sprintf(fmt='### %sassay_picker.server-observeEvent-seurat$object [%s]', seurat$formatted_project) %>% message()
 
     # create variables for shorthand
-    seurat <- seurat_object.reactions$seurat
+    seurat <- seurat$object
 
     # update the ui element(s)
+    updateSelectInput(session=session, inputId='assay_picker', choices='-spoof-')
     updateSelectInput(session=session, inputId='assay_picker',
                       choices=Assays(seurat), selected=DefaultAssay(seurat))})
 }

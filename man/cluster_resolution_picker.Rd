@@ -11,7 +11,7 @@ cluster_resolution_picker.ui(
   include_label_switch = FALSE
 )
 
-cluster_resolution_picker.server(input, output, session)
+cluster_resolution_picker.server(input, output, session, seurat, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

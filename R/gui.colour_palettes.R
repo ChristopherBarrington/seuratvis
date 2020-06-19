@@ -72,7 +72,7 @@ colour_palette.ui <- function(id, label='Feature value colours', selectors=list(
 #' 
 #' @rdname colour_palette
 #' 
-update_palette_type.server <- function(input, output, session) {
+update_palette_type.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %supdate_palette_type.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -95,7 +95,7 @@ update_palette_type.server <- function(input, output, session) {
 #' 
 #' @rdname colour_palette
 #' 
-add_to_colour_palette.server <- function(input, output, session) {
+add_to_colour_palette.server <- function(input, output, session, ...) {
   session$ns('') %>% sprintf(fmt='### %sadd_to_colour_palette.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -110,14 +110,6 @@ add_to_colour_palette.server <- function(input, output, session) {
         x %<>% gplots::col2hex()
       unique(c(colour_palette(), x)) %>% colour_palette()
     }})
-
-  # react to the colour picker input
-  #! TODO: this should not be dependent on the input names...
-  observe({
-    plotting_options.rv$colours[[session$ns(id='low')]] <- input$low})
-
-  observe({
-    plotting_options.rv$colours[[session$ns(id='high')]] <- input$high})
 }
 
 #' Define default colour palette

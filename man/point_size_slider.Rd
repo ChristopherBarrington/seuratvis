@@ -7,7 +7,7 @@
 \usage{
 point_size_slider.ui(id, label = "Point size")
 
-point_size_slider.server(input, output, session)
+point_size_slider.server(input, output, session, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

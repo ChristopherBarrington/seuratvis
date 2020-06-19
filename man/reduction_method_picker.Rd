@@ -5,14 +5,16 @@
 \alias{reduction_method_picker.server}
 \title{Select reduction method}
 \usage{
-reduction_method_picker.ui(id, label = "Reduction method")
+reduction_method_picker.ui(id, label = "Reduction method", regex = ".*")
 
-reduction_method_picker.server(input, output, session)
+reduction_method_picker.server(input, output, session, seurat, ...)
 }
 \arguments{
 \item{id}{unique name of the element}
 
 \item{label}{text label of the element}
+
+\item{regex}{a value passed to \code{str_subset()} in a \code{regex()} to filter the reductions in the Seurat}
 }
 \description{
 Provides a way to select a reduction method to plot

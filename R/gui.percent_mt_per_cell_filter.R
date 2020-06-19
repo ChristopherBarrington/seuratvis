@@ -49,7 +49,7 @@ percent_mt_per_cell_filter.ui <- function(id, label='Proportion Mt') {
 #' 
 #' @rdname percent_mt_per_cell_filter
 #'
-percent_mt_per_cell_filter.server <- function(input, output, session) {
+percent_mt_per_cell_filter.server <- function(input, output, session, seurat, cell_filtering, ...) {
   session$ns('') %>% sprintf(fmt='### %spercent_mt_per_cell_filter.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -58,7 +58,7 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
   # react to the maximum input element
   observeEvent(eventExpr=input$max_percent_mt, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %spercent_mt_per_cell_filter.server-observeEvent-input$max_percent_mt [%s]', input$max_percent_mt) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %spercent_mt_per_cell_filter.server-observeEvent-input$max_percent_mt [%s]', input$max_percent_mt) %>% message()
 
     # update the reactive
     value <- input$max_percent_mt
@@ -66,15 +66,16 @@ percent_mt_per_cell_filter.server <- function(input, output, session) {
     if(value != sprintf(fmt='%.1f', value)) # if the value is not already 1dp formatted, reformat it
       value %<>% add(0.05) %>% round(digits=1)
 
-    filtering_parameters.reactions$max_percent_mitochondria <- value})
+    cell_filtering$max_percent_mitochondria <- value
+    cell_filtering$updated_parameter <- rnorm(1)})
 
   # react to the initialisation of the reference value
-  observeEvent(eventExpr=seurat_object.reactions$proportion_mt_values_max, handlerExpr={
+  observeEvent(eventExpr=seurat$proportion_mt_values_max, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %spercent_mt_per_cell_filter.server-observeEvent-seurat_object.reactions [%s]', seurat_object.reactions$proportion_mt_values_max) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %spercent_mt_per_cell_filter.server-observeEvent-seurat [%s]', seurat$proportion_mt_values_max) %>% message()
 
     # create variables for shorthand
-    high <- seurat_object.reactions$proportion_mt_values_max %>% add(0.05) %>% round(digits=1)
+    high <- seurat$proportion_mt_values_max %>% add(0.05) %>% round(digits=1)
 
     # update the ui element(s)
     updateNumericInput(session=session, inputId='max_percent_mt', value=high, min=0, max=high)})

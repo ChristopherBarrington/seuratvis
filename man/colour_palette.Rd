@@ -14,9 +14,9 @@ colour_palette.ui(
   include_full = FALSE
 )
 
-update_palette_type.server(input, output, session)
+update_palette_type.server(input, output, session, ...)
 
-add_to_colour_palette.server(input, output, session)
+add_to_colour_palette.server(input, output, session, ...)
 
 colour_palette(x)
 }

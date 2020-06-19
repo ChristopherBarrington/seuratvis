@@ -12,7 +12,14 @@ number_of_reads_per_cell_text_box.ui(
   f_name = deparse(substitute(f))
 )
 
-number_of_reads_per_cell_text_box.server(input, output, session)
+number_of_reads_per_cell_text_box.server(
+  input,
+  output,
+  session,
+  seurat,
+  cell_filtering,
+  ...
+)
 }
 \arguments{
 \item{id}{unique name of the element}

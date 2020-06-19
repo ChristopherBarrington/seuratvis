@@ -7,7 +7,7 @@
 \usage{
 boxplot_plot.ui(id, feature)
 
-boxplot_plot.server(input, output, session)
+boxplot_plot.server(input, output, session, seurat, cell_filtering, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

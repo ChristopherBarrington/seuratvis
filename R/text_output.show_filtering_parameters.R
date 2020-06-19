@@ -59,7 +59,7 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
 #' 
 #' @rdname show_filtering_parameters
 #' 
-show_filtering_parameters.server <- function(input, output, session) {
+show_filtering_parameters.server <- function(input, output, session, seurat, cell_filtering, ...) {
   session$ns('') %>% sprintf(fmt='### %sshow_filtering_parameters.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -68,64 +68,60 @@ show_filtering_parameters.server <- function(input, output, session) {
 
   format_subset_conditional <- function(x, fmt) ifelse(is.na(x), NA, sprintf(fmt=fmt, x))
   group_format_subset_conditional <- function(x) x %>% na.omit() %>% paste(collapse=' & ')
+  filtering_arguments <- list()
 
-  observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
+  # observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
+  observeEvent(eventExpr=c(seurat$done, cell_filtering$done), handlerExpr={
     # make sure these elements are defined
-    req(seurat_object.reactions$project)
-    req(seurat_configuration.reactions$n_features_variable)
-    req(seurat_configuration.reactions$n_umi_variable)
-    req(seurat_configuration.reactions$proportion_mt_variable)
-    req(filtered_cells.reactions$n_cells)
+    req(seurat$n_features_variable)
+    req(seurat$n_umi_variable)
+    req(seurat$proportion_mt_variable)
 
     # send a message
-    sprintf('### %sshow_filtering_parameters.server-observeEvent-reactiveValuesToList(filtering_parameters.reactions)', session$ns('')) %>% message()
-
-    # create variables for shorthand
-    thresholds <- reactiveValuesToList(filtering_parameters.reactions)
-    filtered_cells <- reactiveValuesToList(filtered_cells.reactions)
+    sprintf('### %sshow_filtering_parameters.server-observeEvent-cell_filtering$done', session$ns('')) %>% message()
 
     # save formatted filters
-    c(format_subset_conditional(x=thresholds$total_umi_per_cell_min, fmt='X>=%d'),
-      format_subset_conditional(x=thresholds$total_umi_per_cell_max, fmt='X<=%d')) %>%
-      str_replace_all(pattern='X', replacement=seurat_configuration.reactions$n_umi_variable) %>%
+    c(format_subset_conditional(x=cell_filtering$total_umi_per_cell_min, fmt='X>=%d'),
+      format_subset_conditional(x=cell_filtering$total_umi_per_cell_max, fmt='X<=%d')) %>%
+      str_replace_all(pattern='X', replacement=seurat$n_umi_variable) %>%
       group_format_subset_conditional() -> umi_filter
 
-    c(format_subset_conditional(x=thresholds$features_per_cell_min, fmt='X>=%d'),
-      format_subset_conditional(x=thresholds$features_per_cell_max, fmt='X<=%d')) %>%
-      str_replace_all(pattern='X', replacement=seurat_configuration.reactions$n_features_variable) %>%
+    c(format_subset_conditional(x=cell_filtering$features_per_cell_min, fmt='X>=%d'),
+      format_subset_conditional(x=cell_filtering$features_per_cell_max, fmt='X<=%d')) %>%
+      str_replace_all(pattern='X', replacement=seurat$n_features_variable) %>%
       group_format_subset_conditional() -> features_filter
 
-    format_subset_conditional(x=thresholds$max_percent_mitochondria, fmt='X<=%s') %>%
-      str_replace_all(pattern='X', replacement=seurat_configuration.reactions$proportion_mt_variable) -> mt_filter
+    format_subset_conditional(x=cell_filtering$max_percent_mitochondria, fmt='X<=%s') %>%
+      str_replace_all(pattern='X', replacement=seurat$proportion_mt_variable) -> mt_filter
 
     all_subset_conditions <- list(umi_filter, features_filter, mt_filter)
-    filtering_arguments.reactions$all_subset_conditions <- all_subset_conditions
+    filtering_arguments$all_subset_conditions <- all_subset_conditions
 
     # combine all output lines
-    list(project_line={seurat_object.reactions$project %>% sprintf(fmt='# %s')},
-         n_cells_line={filtered_cells$n_cells %>% comma() %>% sprintf(fmt='# n_cells=%s')},
-         n_umi_line={filtered_cells$n_umi %>% comma() %>% sprintf(fmt='# n_umi=%s')},
+    list(project_line={seurat$project %>% sprintf(fmt='# %s')},
+         n_cells_line={cell_filtering$n_cells %>% comma() %>% sprintf(fmt='# n_cells=%s')},
+         n_umi_line={cell_filtering$n_umi %>% comma() %>% sprintf(fmt='# n_umi=%s')},
          filters_line={all_subset_conditions %>% str_c(collapse=' &\n')}) %>%
       str_c(collapse='\n') -> output_text
 
     # update the ui with filtering parameters
     renderText({output_text}) -> output$verbatim_text_output
-    filtering_arguments.reactions$output_text <- output_text})
+    filtering_arguments$output_text <- output_text})
 
   # prepare copy to clipboard buttons
   ## copy text as is
   renderUI(expr={
     rclipButton(inputId='rclipButton.plain.in', label='', icon('clipboard-check'),
-                clipText=filtering_arguments.reactions$output_text)}) -> output$plain.copybutton
+                clipText=filtering_arguments$output_text)}) -> output$plain.copybutton
   ## comma separate elements
   renderUI(expr={
-    c(filtering_parameters.reactions$project,
-      paste(filtering_arguments.reactions$all_subset_conditions, collapse=' & ')) %>%
+    c(seurat$project,
+      paste(filtering_arguments$all_subset_conditions, collapse=' & ')) %>%
       paste(collapse=',') %>%
       rclipButton(inputId='rclipButton.csv.in', label='', icon('file-excel'))}) -> output$csv.copybutton
 
   ## copy only the conditional
   renderUI(expr={
-    paste(filtering_arguments.reactions$all_subset_conditions, collapse=' & ') %>%
+    paste(filtering_arguments$all_subset_conditions, collapse=' & ') %>%
       rclipButton(inputId='rclipButton.r.in', label='', icon('r-project'))}) -> output$r.copybutton
 }

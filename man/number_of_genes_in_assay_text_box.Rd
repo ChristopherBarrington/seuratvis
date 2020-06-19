@@ -7,7 +7,7 @@
 \usage{
 number_of_genes_in_assay_text_box.ui(id, width = 12)
 
-number_of_genes_in_assay_text_box.server(input, output, session)
+number_of_genes_in_assay_text_box.server(input, output, session, seurat, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

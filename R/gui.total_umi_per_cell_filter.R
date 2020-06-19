@@ -1,4 +1,4 @@
-#' Specify total UMIs per cell limits
+#' Specify total UMI per cell limits
 #' 
 #' Provides a way to define limits on total UMI per cell
 #' 
@@ -16,7 +16,7 @@
 #' 
 #' @rdname total_umi_per_cell_filter
 #' 
-total_umi_per_cell_filter.ui <- function(id, label='UMIs per cell', low=TRUE, high=TRUE) {
+total_umi_per_cell_filter.ui <- function(id, label='UMI per cell', low=TRUE, high=TRUE) {
   sprintf(fmt='### %s-total_umi_per_cell_filter.ui', id) %>% message()
 
   module <- 'total_umi_per_cell_filter'
@@ -61,7 +61,7 @@ total_umi_per_cell_filter.ui <- function(id, label='UMIs per cell', low=TRUE, hi
 #' 
 #' @rdname total_umi_per_cell_filter
 #'
-total_umi_per_cell_filter.server <- function(input, output, session) {
+total_umi_per_cell_filter.server <- function(input, output, session, seurat, cell_filtering, ...) {
   session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -71,37 +71,47 @@ total_umi_per_cell_filter.server <- function(input, output, session) {
   # react to the min_umis input element
   observeEvent(eventExpr=input$min_umis, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$min_umis [%s]', input$min_umis) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$min_umis [%s]', input$min_umis) %>% message()
 
-    # update the reactive
-    filtering_parameters.reactions$total_umi_per_cell_min <- round(input$min_umis, digits=0)})
+    # check that max>min and update the reactive
+    if(input$min_umis<=input$max_umis) {
+      cell_filtering$total_umi_per_cell_min <- round(input$min_umis, digits=0)
+      cell_filtering$updated_parameter <- rnorm(1)
+    } else {
+      updateNumericInput(session=session, inputId='min_umis', value=input$max_umis)
+    }})
 
   # react to the max_umis input element
   observeEvent(eventExpr=input$max_umis, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$max_umis [%s]', input$max_umis) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %stotal_umi_per_cell_filter.server-observeEvent-input$max_umis [%s]', input$max_umis) %>% message()
 
-    # update the reactive
-    filtering_parameters.reactions$total_umi_per_cell_max <- round(input$max_umis, digits=0)})
+    # check that max>min and update the reactive
+    if(input$max_umis>=input$min_umis) {
+      cell_filtering$total_umi_per_cell_max <- round(input$max_umis, digits=0)
+      cell_filtering$updated_parameter <- rnorm(1)
+    } else {
+      updateNumericInput(session=session, inputId='max_umis', value=input$min_umis)
+    }})
 
   # react to the initialisation of the reference min value
-  observeEvent(eventExpr=seurat_object.reactions$n_umi_values_min, handlerExpr={
+  observeEvent(eventExpr=seurat$n_umi_values_min, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat_object.reactions$n_umi_values_min [%s]', seurat_object.reactions$n_umi_values_min) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat$n_umi_values_min [%s]', seurat$n_umi_values_min) %>% message()
 
     # create variables for shorthand
-    value <- seurat_object.reactions$n_umi_values_min
+    value <- seurat$n_umi_values_min
 
     # update the ui element(s)
     updateNumericInput(session=session, inputId='min_umis', value=value, min=value)})
 
   # react to the initialisation of the reference max value
-  observeEvent(eventExpr=seurat_object.reactions$n_umi_values_max, handlerExpr={
+  observeEvent(eventExpr=seurat$n_umi_values_max, handlerExpr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat_object.reactions$n_umi_values_max [%s]', seurat_object.reactions$n_umi_values_max) %>% message('')
+    session$ns('') %>% sprintf(fmt='### %s-observeEvent-seurat$n_umi_values_max [%s]', seurat$n_umi_values_max) %>% message()
 
     # create variables for shorthand
-    value <- seurat_object.reactions$n_umi_values_max
+    value <- seurat$n_umi_values_max
 
     # update the ui element(s)
     updateNumericInput(session=session, inputId='max_umis', value=value, max=value)})

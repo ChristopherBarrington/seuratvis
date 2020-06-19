@@ -12,7 +12,14 @@ features_per_cell_filter.ui(
   high = TRUE
 )
 
-features_per_cell_filter.server(input, output, session)
+features_per_cell_filter.server(
+  input,
+  output,
+  session,
+  seurat,
+  cell_filtering,
+  ...
+)
 }
 \arguments{
 \item{id}{unique name of the element}

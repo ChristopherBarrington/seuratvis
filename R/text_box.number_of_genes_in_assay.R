@@ -36,7 +36,7 @@ number_of_genes_in_assay_text_box.ui <- function(id, width=12) {
 
 #' @rdname number_of_genes_in_assay_text_box
 #' 
-number_of_genes_in_assay_text_box.server <- function(input, output, session) {
+number_of_genes_in_assay_text_box.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %snumber_of_genes_in_assay_text_box.server') %>% message()
 
   # get environments containing variables to run/configure this object
@@ -45,14 +45,14 @@ number_of_genes_in_assay_text_box.server <- function(input, output, session) {
   # make the text box
   renderValueBox(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %snumber_of_genes_in_assay_text_box.server-renderValueBox') %>% message('')
+    session$ns('') %>% sprintf(fmt='### %snumber_of_genes_in_assay_text_box.server-renderValueBox') %>% message()
 
     # get the box subtitle
     switch(module_env$id,
            'Unique features in assay') -> subtitle
 
     # create output object
-    list(value={seurat_object.reactions$reference_metrics$n_features %>% comma()},
+    list(value={seurat$n_features %>% comma()},
          subtitle=subtitle,
          icon=icon('galactic-senate')) %>%
       modifyList(x=seuratvis:::text_box_defaults()) %>%

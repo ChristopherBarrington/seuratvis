@@ -7,7 +7,7 @@
 \usage{
 provenance_step_viewer.ui(id)
 
-provenance_step_viewer.server(input, output, session)
+provenance_step_viewer.server(input, output, session, seurat, ...)
 }
 \arguments{
 \item{id}{unique name of the ekement}

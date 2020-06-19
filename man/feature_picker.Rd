@@ -8,10 +8,14 @@
 feature_picker.ui(
   id,
   label = "Feature selection",
-  include_metadata_switch = TRUE
+  include_feature_type = TRUE,
+  include_values_range = TRUE,
+  features_regex = ".*",
+  metadata_regex = ".*",
+  gene_modules_opts = list()
 )
 
-feature_picker.server(input, output, session)
+feature_picker.server(input, output, session, seurat, ...)
 }
 \arguments{
 \item{id}{unique name of the element}

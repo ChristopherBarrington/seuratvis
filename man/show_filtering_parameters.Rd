@@ -4,7 +4,14 @@
 \alias{show_filtering_parameters.server}
 \title{React to filtering parameters}
 \usage{
-show_filtering_parameters.server(input, output, session)
+show_filtering_parameters.server(
+  input,
+  output,
+  session,
+  seurat,
+  cell_filtering,
+  ...
+)
 }
 \description{
 React to filtering parameters

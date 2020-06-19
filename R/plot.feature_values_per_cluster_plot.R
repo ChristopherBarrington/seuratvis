@@ -39,21 +39,22 @@ feature_values_per_cluster_plot.ui <- function(id) {
 #' 
 #' @rdname feature_values_per_cluster_plot
 #'
-feature_values_per_cluster_plot.server <- function(input, output, session) {
+feature_values_per_cluster_plot.server <- function(input, output, session, seurat, ...) {
   session$ns('') %>% sprintf(fmt='### %sfeature_values_per_cluster_plot.server') %>% message()
 
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='feature_values_per_cluster_plot') # provides `seuratvis_env`, `server_env` and `module_env`
-  id <- parent.frame()$id
+  tab <- parent.frame()$id
 
   # render the knee plot
   renderPlot(expr={
     # send a message
-    session$ns('') %>% sprintf(fmt='### %sfeature_values_per_cluster_plot.server-renderPlot') %>% message('')
-   
+    session$ns('') %>% sprintf(fmt='### %sfeature_values_per_cluster_plot.server-renderPlot') %>% message()
+    seurat$feature_selector_refreshed # need this because `value_range_limits` and `picked_feature_values` upadted by the same observer so are isolated
+
     # get the data to plot
-    cbind(seurat_object.reactions$picked_cluster_resolution_idents,
-          selections.rv[[session$ns('picked_feature_values')]]) %>%
+    cbind(seurat$picked_cluster_resolution_idents[[tab]],
+          seurat$picked_feature_values[[tab]]) %>%
       mutate(x={as.character(ident) %>% as.numeric()}) -> data
 
     # if the picked feature has numeric values
@@ -63,7 +64,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
         # filter(value>0) %>%
         group_by(ident, x) %>%
         summarise(q25=quantile(value, 0.25), q75=quantile(value, 0.75), median=median(value)) %>%
-        mutate(is_selected_cluster_id=ident %in% selections.rv[[{session$ns('cluster_id_picker') %>% str_replace('-.*-', '-')}]]) %>%
+        mutate(is_selected_cluster_id=ident %in% input$cluster_id_picker) %>%
         mutate(iqr=q75-q25, lower=q25-1.5*iqr, upper=q75+1.5*iqr) -> cluster_data_summary
 
       cluster_data_summary %>%
@@ -86,6 +87,7 @@ feature_values_per_cluster_plot.server <- function(input, output, session) {
     # add the shared plotting elements
     feature_plot +
         labs(x='Cluster identifier') +
+        scale_x_continuous(breaks=seq(from=0, to=100, by=2), minor_breaks=seq(from=1, to=99, by=2), sec.axis=dup_axis(name=NULL)) +
         theme_bw() +
-        theme(legend.position='none', panel.grid.major.x=element_blank(), panel.grid.minor.x=element_blank())}) -> output$feature_values_per_cluster_plot
+        theme(legend.position='none')}) -> output$feature_values_per_cluster_plot
 }
