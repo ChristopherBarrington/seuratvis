@@ -56,7 +56,7 @@ filter_FindMarkersResults.server <- function(input, output, session, seurat, ...
 
     # update the reactive(s)
     seurat$FindMarkersResults$table <- tidied_results
-    seurat$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
+    seurat$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Gene', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
 
     # call the ggplot module for the reduced dimension data
     callModule(session=session_server,
@@ -67,7 +67,7 @@ filter_FindMarkersResults.server <- function(input, output, session, seurat, ...
   # handle the data.frame filtering
   ## call the data.frame filtering filtering module
   callModule(session=session_server, module=filterDF, id=session$ns('filter_parameters'),
-             picker=TRUE,
+             picker=TRUE, drop_ids=FALSE,
              data_name=reactive(seurat$formatted_project), 
              data_table=reactive(seurat$FindMarkersResults$table),
              data_vars=reactive(seurat$FindMarkersResults$vars)) -> results_filter.rv

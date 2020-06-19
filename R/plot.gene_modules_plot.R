@@ -76,8 +76,8 @@ gene_module_score_plot.ui <- function(id) {
 #' @rdname gene_module_score_plot
 #'
 gene_module_score_plot.server <- function(input, output, session, seurat, ...) {
-  session$ns('') %>% sprintf(fmt='### %sgene_module_score_plot.server') %>% message()
-
+  sprintf(fmt='### gene_module_score_plot.server [%s]', parent.frame()$id) %>% message()
+  
   # get environments containing variables to run/configure this object
   collect_environments(id=parent.frame()$id, module='gene_module_score_plot') # provides `seuratvis_env`, `server_env` and `module_env`
   tab <- parent.frame()$id

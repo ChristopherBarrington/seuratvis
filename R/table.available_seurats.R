@@ -65,7 +65,8 @@ available_seurats.server <- function(input, output, session, ...) {
   c(Project='project',
     Environment='environment',
     `Object name`='object',
-    `Guessed sex`='guessed_sex',
+    # `Size`='size',
+    # `Guessed sex`='guessed_sex',
     `Number of cells`='ncells',
     `Total UMI`='numi',
     `Median UMI`='median_umi',
@@ -74,8 +75,7 @@ available_seurats.server <- function(input, output, session, ...) {
     `Active assay`='active_assay',
     `Other assays`='assays',
     `Features in active assay`='nfeatures',
-    `Reductions`='reductions',
-    `Size`='size') -> column_order
+    `Reductions`='reductions') -> column_order
 
   # make the `data.frame` of Seurat information
   collapse_strings <- function(x, replacement='-', sep=', ')
@@ -88,22 +88,18 @@ available_seurats.server <- function(input, output, session, ...) {
   }
 
   # make the data.frame for the detected Seurat objects
-  use_domc <- 'doMC' %in% installed.packages()
-
-  if(use_domc)
-    doMC::registerDoMC(parallel::detectCores())
-
   server_env$available_seurat_objects %>%
     dplyr::select(-choiceName) %>%
-    plyr::adply(.margins=1, .parallel=use_domc, function(params) { #! TODO: parallelise this doMC does not work on Windows though!
+    plyr::adply(.margins=1, .parallel=FALSE, function(params) { #! TODO: parallelise this doMC does not work on Windows though!
+      # make a copy of the Seurat object
       x <- eval(parse(text=params$choiceValue))
 
       # choose a gene to look for to identify male dataset
-      x@misc$mart@dataset %>%
-        str_remove(pattern='_.*') %>%
-        switch(hsapiens='SRY',
-               mmusculus='Sry',
-               'SRY') -> boy_gene
+      # x@misc$mart@dataset %>%
+      #   str_remove(pattern='_.*') %>%
+      #   switch(hsapiens='SRY',
+      #          mmusculus='Sry',
+      #          'SRY') -> boy_gene
 
       # make the data.frame for this Seurat
       data.frame(project=reformat_project_name(Project(x)),
@@ -116,9 +112,9 @@ available_seurats.server <- function(input, output, session, ...) {
                  active_assay=DefaultAssay(x),
                  assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% collapse_strings()},
                  nfeatures=nrow(x),
-                 reductions={Reductions(x) %>% collapse_strings()},
-                 guessed_sex={FetchData(x, vars=boy_gene) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))},
-                 size={object.size(x) %>% format(units='Gb') %>% str_remove(' ')})}) %>%
+                 # guessed_sex={FetchData(x, vars=boy_gene) %>% is_greater_than(0) %>% any() %>% if_else(as.character(icon(name='mars', class='boy')), as.character(icon(name='venus', class='girl')))},
+                 # size={object.size(x) %>% format(units='Gb') %>% str_remove(' ')},
+                 reductions={Reductions(x) %>% collapse_strings()})}) %>%
     mutate(object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
 
@@ -131,6 +127,7 @@ available_seurats.server <- function(input, output, session, ...) {
 
   # make and format the `datatable`
   DT::renderDataTable({
+    session$ns('') %>% sprintf(fmt='### %savailable_seurats.server-renderDataTable') %>% message()
     data_to_show %>%
       DT::datatable(colnames=formatted_colnames,
                     rownames=FALSE,
@@ -142,8 +139,7 @@ available_seurats.server <- function(input, output, session, ...) {
                                                infoEmpty='No Seurat objects found!')),
                     style='bootstrap4',
                     class='stripe',
-                    selection=list(mode='single',
-                                   selected=input$seurats_table_rows_selected),
+                    selection=list(mode='single'),
                     escape=FALSE) %>%
       formatStyle(columns='ncells',
                   background=styleColorBar(data=c(0,max(data_to_show$ncells)), color='#3CB96A'),
@@ -165,7 +161,7 @@ available_seurats.server <- function(input, output, session, ...) {
                   backgroundSize='98% 50%',
                   backgroundRepeat='no-repeat',
                   backgroundPosition='center') %>%
-      formatStyle(columns=c('object', 'size'),
+      formatStyle(columns=c('object'),
                   fontFamily='monospace',
                   fontWeight='bold') %>%
       formatRound(columns=c('ncells', 'numi', 'median_umi', 'nfeatures'),

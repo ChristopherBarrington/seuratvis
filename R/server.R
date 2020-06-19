@@ -17,10 +17,11 @@ shinyAppServer <- function(input, output, session) {
   cell_filtering <- callModule(module=cell_filtering.server, id='seuratvis', seurat=seurat)
 
   ## modules listed in the module_servers_to_call environment
+  #! TODO: can this be parallelised at all?
   module_servers_to_call %<>% as.list()
   for(id in names(module_servers_to_call))
     for(server in module_servers_to_call[[id]]) {
-      if(FALSE) print(server)
+      if(FALSE) sprintf('%s - %s', server, id) %>% print()
       callModule(module=get(x=server), id=id, seurat=seurat, cell_filtering=cell_filtering)
     }
 
