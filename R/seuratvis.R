@@ -86,7 +86,7 @@ shinyAppServer <- function(input, output, session) {
 s <- get('human_CS12', envir=globalenv())
 reactiveValues(
     object=s,
-    formatted_project_name='foo bar baz buz qux',
+    formatted_project_name=Project(s) %>% reformat_project_name(),
     metadata=s@meta.data,
     features_in_assays=list(),
     reductions=Reductions(s),
