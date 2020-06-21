@@ -1,0 +1,121 @@
+#'
+#' 
+dimension_reduction.plot <- function(id)
+  NS(id, 'map') %>% plotOutput() %>% withSpinner()
+
+#'
+#' 
+dimension_reduction.show_cluster_idents.server <- function(input, output, session, dimension_reduction, picked_colours, opacity, point_size, cluster_resolution) {
+  renderPlot(bg='transparent', expr={
+    req(dimension_reduction$embeddings)
+    req(cluster_resolution$idents)
+ 
+    # prepare the data
+    cbind(dimension_reduction$embeddings %>% set_names(c('X','Y')),
+          ident=cluster_resolution$idents) %>%
+      sample_frac(size=1) -> data
+ 
+    # make a ggplot
+    ggplot(data=data) +
+      aes(x=X, y=Y, colour=ident) +
+      geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
+      geom_point(size=point_size$size, alpha=opacity$alpha) +
+      theme_void() +
+      theme(legend.position='none',
+            panel.background=element_rect(fill=picked_colours$background)) -> map
+ 
+    # if labels should be included, add them here
+    if(cluster_resolution$label_clusters) {
+      # find the mean positions of the clusters
+      data %>%
+        group_by(ident) %>%
+        summarise(X=mean(X), Y=mean(Y)) -> data_labels
+ 
+      # add labels to the plot
+      map +
+        geom_label_repel(data=data_labels, mapping=aes(label=ident),
+                         colour='black', size=12/(14/5)) -> map
+    }
+ 
+    # return the map
+    map}) -> output$map
+}
+
+#'
+#'
+dimension_reduction.show_selected_clusters.server <- function(input, output, session, dimension_reduction, opacity, point_size, cluster_resolution) {
+  renderPlot({
+    # prepare the data and make the plot
+    cbind(dimension_reduction$embeddings %>% set_names(c('X','Y')),
+          ident=cluster_resolution$idents) %>%
+      mutate(is_selected=ident %in% cluster_resolution$picked_idents) %>%
+      arrange(is_selected) %>%
+      ggplot() +
+      aes(x=X, y=Y, colour=ident, alpha=is_selected) +
+      geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
+      geom_point(size=point_size$size, alpha=opacity$alpha) +
+      scale_alpha_manual(values=c(`FALSE`=0.05, `TRUE`=1)) +
+      theme_void() +
+      theme(legend.position='none') -> map
+
+    # return the plot
+    map}) -> output$map
+}
+
+#'
+#' 
+dimension_reduction.highlight_feature.server <- function(input, output, session, dimension_reduction, picked_feature, picked_colours, opacity, point_size, colour_picker) {
+  renderPlot(bg='transparent', expr={
+    req(dimension_reduction$embeddings)
+    req(picked_feature$values)
+
+    # prepare the data and start the plot
+    cbind(dimension_reduction$embeddings %>% set_names(c('X','Y')),
+          picked_feature$values %>% set_names('value')) %>%
+      ggplot() +
+      aes(x=X, y=Y, colour=value) +
+      geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
+      geom_point(size=point_size$size, alpha=opacity$alpha) +
+      theme_void() +
+      theme(legend.position='none',
+            panel.background=element_rect(fill=picked_colours$background, colour='black'),
+            strip.background=element_rect(fill=picked_colours$background, colour='black')) -> map
+
+    # if the feature is numeric, colour the points otherwise facet the plot
+    if(is.numeric(map$data$value)) {
+      # get the colour values and range
+      c_low <- picked_colours$low
+      c_mid <- picked_colours$mid
+      c_high <- picked_colours$high
+      c_range <- picked_feature$values_range
+
+      # make a colour scale
+      colour_gradient <- scale_colour_gradient(low=c_low, high=c_high, limits=c_range, oob=scales::squish)
+
+      # if the values cross zero, make a new colour scale
+      if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1))
+        colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
+                                                  values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
+                                                  limits=c_range, breaks=0)
+
+      # add the colour scale and a legend
+      map +
+        colour_gradient +
+        theme(legend.justification=c(1,0),
+              legend.position=c(1,0),
+              legend.direction='horizontal',
+              legend.text=element_blank(),
+              legend.title=element_blank(),
+              panel.background=element_rect(fill=picked_colours$background, colour='black')) -> map
+    } else {
+      # facet the map by the factor levels
+      map <- map + facet_wrap(~value, scales='fixed')
+    }
+
+    # return the plot
+    map}) -> output$map
+}
+
+dimension_reduction.shared_ggplot <- function(x)
+  x +
+    theme_void()
