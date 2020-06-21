@@ -22,6 +22,14 @@ shinyAppUI <- function(...) {
 
   ## get the menu tabs and contents
   eval(highlight_features.tab())
+  eval(provenance.tab())
+  # eval(contact_links.menu())
+
+  # header dropdown definition
+  contact_links.list() %>%
+    dropdownMenu(.list=.,
+                 type='notifications',
+                 badgeStatus=NULL, headerText='', icon=icon('github')) -> contact_header_dropdown
 
   # header definition
   logo_lg <- htmltools::HTML("<p style='font-size:26px'>seurat<b>vis</b></p>")
@@ -29,17 +37,18 @@ shinyAppUI <- function(...) {
   dashboardHeaderPlus(
     title=tagList(span(class='logo-lg', logo_lg),
                   span(class='logo-mini', logo_sm)),
-    enable_rightsidebar=TRUE) -> dashboard_header
+    enable_rightsidebar=TRUE,
+    contact_header_dropdown) -> dashboard_header
 
   # dashboard body definition
   tags$head(tags$style(HTML(text='table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'))) -> cssDT
-  tags$style(type = "text/css", "#provenance_text {height: calc(100vh - 80px) !important;}") -> cssAce
+  tags$style(type='text/css', '.ace_editor {height: calc(65vh) !important;}') -> cssAce # apply this to class `ace_editor`
   tags$style(type='text/css', '.boy, .girl {font-size: x-large} .boy {color: #347DC1} .girl {color: #CC6594') -> cssSex
 
   append(contents,
          list()) %>%
     do.call(what=tabItems) %>%
-    dashboardBody(shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
+    dashboardBody(cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
 
   # sidebar definition
   append(menus, 
@@ -74,6 +83,18 @@ shinyAppServer <- function(input, output, session) {
   # call servers for modules
   ## Seurat object interaction modules
   #! TODO: move the find_seurats function to this module, and return the values as a rective. move to the seratvis id?
+s <- get('human_CS12', envir=globalenv())
+reactiveValues(
+    object=s,
+    formatted_project_name='foo bar baz buz qux',
+    metadata=s@meta.data,
+    features_in_assays=list(),
+    reductions=Reductions(s),
+    assays=Assays(s),
+    gene_module_scores=select_at(s@meta.data, vars(starts_with('GeneModule-'))),
+    cluster_resolutions={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))},
+    all_idents={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}) -> seurat
+
   # callModule(module=available_seurats.server, id='load_dataset')
   # seurat <- callModule(module=seurat_object.server, id='load_dataset')  # callModule(module=load_a_seurat.server, id='load_dataset')
 
@@ -81,27 +102,9 @@ shinyAppServer <- function(input, output, session) {
   # cell_filtering <- callModule(module=cell_filtering.server, id='seuratvis', seurat=seurat)
 
   ## load the servers for the analysis windows (menuItem or menuSubItem from the sidebar)
-
-#  ## modules listed in the module_servers_to_call environment
-#  #! TODO: can this be parallelised at all?
-#  module_servers_to_call %<>% as.list()
-#  for(id in names(module_servers_to_call))
-#    for(server in module_servers_to_call[[id]]) {
-#      if(FALSE) sprintf('%s - %s', server, id) %>% print()
-#      callModule(module=get(x=server), id=id, seurat=seurat, cell_filtering=cell_filtering)
-#    }
-
-s <- get('human_CS12', envir=globalenv())
-reactiveValues(
-    object=s,
-    metadata=s@meta.data,
-    features_in_assays=list(),
-    reductions=Reductions(s),
-    assays=Assays(s),
-    gene_module_scores=select_at(s@meta.data, vars(starts_with('GeneModule-')))) -> seurat
-
   callModule(module=highlight_feature_tab.server, id='highlight_feature_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=highlight_feature_and_clusters_tab.server, id='highlight_feature_and_clusters_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
+  callModule(module=provenance_tab.server, id='provenance_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
 
   observeEvent(input$simLoad, {
     seurat$object <- rnorm(1)

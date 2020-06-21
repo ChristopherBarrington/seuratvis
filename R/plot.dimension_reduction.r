@@ -43,8 +43,11 @@ dimension_reduction.show_cluster_idents.server <- function(input, output, sessio
 
 #'
 #'
-dimension_reduction.show_selected_clusters.server <- function(input, output, session, dimension_reduction, opacity, point_size, cluster_resolution) {
+dimension_reduction.show_selected_clusters.server <- function(input, output, session, dimension_reduction, picked_colours, point_size, cluster_resolution) {
   renderPlot({
+    req(dimension_reduction$embeddings)
+    req(cluster_resolution$idents)
+ 
     # prepare the data and make the plot
     cbind(dimension_reduction$embeddings %>% set_names(c('X','Y')),
           ident=cluster_resolution$idents) %>%
@@ -53,10 +56,11 @@ dimension_reduction.show_selected_clusters.server <- function(input, output, ses
       ggplot() +
       aes(x=X, y=Y, colour=ident, alpha=is_selected) +
       geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
-      geom_point(size=point_size$size, alpha=opacity$alpha) +
+      geom_point(size=point_size$size) +
       scale_alpha_manual(values=c(`FALSE`=0.05, `TRUE`=1)) +
       theme_void() +
-      theme(legend.position='none') -> map
+      theme(legend.position='none',
+            panel.background=element_rect(fill=picked_colours$background)) -> map
 
     # return the plot
     map}) -> output$map
@@ -64,7 +68,7 @@ dimension_reduction.show_selected_clusters.server <- function(input, output, ses
 
 #'
 #' 
-dimension_reduction.highlight_feature.server <- function(input, output, session, dimension_reduction, picked_feature, picked_colours, opacity, point_size, colour_picker) {
+dimension_reduction.highlight_feature.server <- function(input, output, session, dimension_reduction, picked_feature, picked_colours, opacity, point_size) {
   renderPlot(bg='transparent', expr={
     req(dimension_reduction$embeddings)
     req(picked_feature$values)
@@ -115,7 +119,3 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
     # return the plot
     map}) -> output$map
 }
-
-dimension_reduction.shared_ggplot <- function(x)
-  x +
-    theme_void()

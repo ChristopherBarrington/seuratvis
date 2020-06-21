@@ -5,22 +5,15 @@ cluster_picker.ui <- function(id, seurat, resolution, picker, label_switch) {
   if(!missing(picker) && is.logical(picker) && picker) picker <- list()
   if(!missing(label_switch) && is.logical(label_switch) && label_switch) label_switch <- list()
 
-  # get the available cluster resolutions
-  resolutions <- c('seurat_clusters', str_subset(colnames(seurat$object@meta.data), '_snn_res.'))
-
   # get the cluster columns from the metadata
-  select_at(seurat$object@meta.data, vars(all_of(resolutions))) %>%
-    mutate_all(function(x) levels(x)[x]) %>%
-    lapply(unlist) -> all_idents
-
   tagList(if(!missing(resolution))
             list(inputId=NS(id, 'resolution_picker'), label='Cluster resolutions',
-                 choices=resolutions, selected='seurat_clusters', multiple=FALSE) %>%
+                 choices=seurat$cluster_resolutions, selected=preferred_choice(seurat$cluster_resolutions, 'seurat_clusters'), multiple=FALSE) %>%
               modifyList(val=resolution) %>%
               do.call(what=selectInput),
           if(!missing(picker))
             list(inputId=NS(id, 'ident_picker'), label='Cluster selection',
-                 choices=all_idents$seurat_clusters, selected=all_idents$seurat_clusters, multiple=TRUE,
+                 choices=seurat$all_idents$seurat_clusters, selected=seurat$all_idents$seurat_clusters[1], multiple=TRUE,
                  options=list(`actions-box`=TRUE, header='Cluster selection', title='Cluster selection',
                               `selected-text-format`='count>5', `count-selected-text`='{0} cluster(s)')) %>%
               modifyList(val=picker) %>%
@@ -35,12 +28,12 @@ cluster_picker.ui <- function(id, seurat, resolution, picker, label_switch) {
 #'
 #' 
 cluster_picker.server <- function(input, output, session, seurat, ...) {
-
   clusters <- reactiveValues()
 
   # react to a resolution being picked
   observeEvent(eventExpr=input$resolution_picker, label='cluster_picker/resolution_picker', handlerExpr={
-    clusters$idents <- FetchData(object=seurat$object, vars=input$resolution_picker) %>% unlist()})
+    clusters$idents <- FetchData(object=seurat$object, vars=input$resolution_picker) %>% unlist()
+    updatePickerInput(session=session, inputId='ident_picker', choices=seurat$all_idents[[input$resolution_picker]], selected=seurat$all_idents[[input$resolution_picker]])})
 
   # react to idents being picked
   observeEvent(eventExpr=input$ident_picker, label='cluster_picker/ident_picker', handlerExpr={
