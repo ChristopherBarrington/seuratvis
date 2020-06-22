@@ -45,10 +45,6 @@ feature_picker.ui <- function(id, seurat, label='Feature selection', include_fea
               min=0, max=1, step=0.1, value=c(-Inf,Inf)) -> value_range
 
   ## checkbox for feature type
-  radioGroupButtons(inputId=ns(id='feature_type'), status='primary', justified=TRUE,
-                    choices=list(`Features`='features', `Metadata`='metadata', `Gene modules`='gene_modules'),
-                    selected='features',
-                    checkIcon=list(yes=icon('ok', lib='glyphicon'))) -> feature_type_picker
   prettyRadioButtons(inputId=ns(id='feature_type'), status='primary', label=label, 
                      choices=list(`Features`='features', `Metadata`='metadata', `Gene modules`='gene_modules'),
                      selected='features', icon=icon('check'), bigger=TRUE, animation='jelly') -> feature_type_picker
@@ -70,7 +66,7 @@ feature_picker.ui <- function(id, seurat, label='Feature selection', include_fea
 #' 
 #' 
 feature_picker.server <- function(input, output, session, seurat, features_regex='.*', metadata_regex='.*', ...) {
-  previously_picked_feature <- reactiveValues()
+  # previously_picked_feature <- reactiveValues()
   picked_feature <- reactiveValues()
 
   # react to the feature selection
@@ -81,7 +77,8 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
    
     # update hidden ui element
     if(input$feature_type=='features')
-      updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_feature_names)})
+      picked_feature$name <- input$feature_picker_feature_names})
+      # updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_feature_names)})
 
   ## if a metadata column is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_metadata, handlerExpr={
@@ -90,7 +87,8 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
 
     # update hidden ui element
     if(input$feature_type=='metadata')
-      updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_metadata)})
+      picked_feature$name <- input$feature_picker_metadata})
+      # updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_metadata)})
 
   ## if a gene module column is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_gene_module, handlerExpr={
@@ -99,30 +97,28 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
 
     # update hidden ui element
     if(input$feature_type=='gene_modules')
-      updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_gene_module)})
+      picked_feature$name <- input$feature_picker_gene_module})
+      # updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_gene_module)})
 
   ## update the hidden ui element when a feature type is selected
-  observeEvent(eventExpr=input$feature_type, ignoreInit=TRUE, handlerExpr={
+  observeEvent(eventExpr=input$feature_type, handlerExpr={
     # pick the feature to revert to
     input_name <- switch(input$feature_type, features='feature_picker_feature_names', metadata='feature_picker_metadata', gene_modules='feature_picker_gene_module')
-    picked_feature <- input[[input_name]]
-    if(input_name=='feature_picker_feature_names') # autocomplete_input can return empty in this case before it has been typed into
-      picked_feature <- previously_picked_feature[[input$feature_type]]
 
     # update hidden ui element
-    updateTextInput(session=session, inputId='picked_feature', value=picked_feature)})
+    picked_feature$name <- input[[input_name]]})
+    # updateTextInput(session=session, inputId='picked_feature', value=input[[input_name]])})
 
   ## use the selected feature (it may be a feature or metadata)
-  observeEvent(eventExpr=input$picked_feature, handlerExpr={
+  # observeEvent(eventExpr=input$picked_feature, handlerExpr={
+  observeEvent(eventExpr=picked_feature$name, handlerExpr={
     # make sure these elements are defined
     req(seurat$object)
     req(input$feature_type)
 
     # create variables for shorthand
     picked <- input$picked_feature
-
-    # track the history
-    previously_picked_feature[[input$feature_type]] <- picked
+    picked <- picked_feature$name
 
     # get the values for the selected feature(s) from the loaded Seurat
     if(input$feature_type=='gene_modules') {

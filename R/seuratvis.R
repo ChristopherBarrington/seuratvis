@@ -21,7 +21,9 @@ shinyAppUI <- function(...) {
   contents <- list()
 
   ## get the menu tabs and contents
+  eval(preprocessing.tab())
   eval(highlight_features.tab())
+  eval(cluster_classification.tab())
   eval(provenance.tab())
   # eval(contact_links.menu())
 
@@ -51,8 +53,8 @@ shinyAppUI <- function(...) {
     dashboardBody(cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
 
   # sidebar definition
-  append(menus, 
-         list(actionBttn(inputId='simLoad', label='simload'))) %>%
+  lapply(menus, modify_stop_propagation) %>%
+    append(list(actionBttn(inputId='simLoad', label='simload'))) %>%
     sidebarMenu(id='left_sidebar') %>%
     dashboardSidebar() -> left_dashboard_sidebar
 
@@ -92,6 +94,7 @@ reactiveValues(
     reductions=Reductions(s),
     assays=Assays(s),
     gene_module_scores=select_at(s@meta.data, vars(starts_with('GeneModule-'))),
+    gene_modules=s@misc$gene_modules,
     cluster_resolutions={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))},
     all_idents={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}) -> seurat
 
@@ -104,6 +107,7 @@ reactiveValues(
   ## load the servers for the analysis windows (menuItem or menuSubItem from the sidebar)
   callModule(module=highlight_feature_tab.server, id='highlight_feature_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=highlight_feature_and_clusters_tab.server, id='highlight_feature_and_clusters_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
+  callModule(module=gene_module_score_in_clusters_tab.server, id='gene_module_score_in_clusters_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=provenance_tab.server, id='provenance_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
 
   observeEvent(input$simLoad, {
