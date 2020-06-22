@@ -24,6 +24,8 @@ Depends:
   shiny,
   shinydashboard,
   shinydashboardPlus,
+  dashboardthemes,
+  shinyjs,
   rclipboard,
   scales,
   dqshiny,
