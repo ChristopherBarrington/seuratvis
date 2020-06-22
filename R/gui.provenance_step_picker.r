@@ -5,6 +5,7 @@ provenace_picker.ui <- function(id, seurat) {
   seurat$object@misc$provenance %>%
     names() %>%
     purrr::set_names() %>%
+    purrr::set_names(str_replace_all, pattern='_', replacement=' ') %>%
     purrr::set_names(function(x) str_c(seq_along(x), x, sep=': ')) -> analysis_steps
 
   selectInput(inputId=NS(id, 'analysis_step'), label='Analysis step',
