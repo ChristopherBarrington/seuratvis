@@ -39,7 +39,7 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
   # build the sidebar ui
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
     tab <- 'findmarkers_results_tab'
-    if(server_input$left_sidebar==tab) {    
+    if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
       # shinyjs::addClass(selector='body', class='control-sidebar-open')
       renderUI({tagList(filter_umi_per_cell.ui(id=tab, seurat=seurat),
@@ -61,7 +61,7 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
     tab <- 'gene_module_score_in_clusters_tab'
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      # shinyjs::addClass(selector='body', class='control-sidebar-open')
+      shinyjs::addClass(selector='body', class='control-sidebar-open')
       renderUI({tagList(cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=FALSE),
                         feature_picker.ui(id=tab, seurat=seurat, gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE),
                         dimension_reduction.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts

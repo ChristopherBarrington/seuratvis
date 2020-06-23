@@ -62,7 +62,8 @@ shinyAppUI <- function(...) {
   rightSidebar(title='Right Sidebar',
                background='dark',
                rightSidebarTabContent(id='data_opts', title='Options', icon='wrench', active=TRUE, uiOutput(outputId='right_sidebar.data_opts')),
-               rightSidebarTabContent(id='plotting_opts', title='Plotting', icon='glasses', active=FALSE, uiOutput(outputId='right_sidebar.plotting_opts'))) -> right_dashboard_sidebar
+               rightSidebarTabContent(id='plotting_opts', title='Plotting', icon='glasses', active=FALSE, uiOutput(outputId='right_sidebar.plotting_opts')),
+               rightSidebarTabContent(id='config_opts', title='Configure', icon='map', active=FALSE, uiOutput(outputId='right_sidebar.config_opts'))) -> right_dashboard_sidebar
 
   # assemble the final UI
   list(header=dashboard_header,
