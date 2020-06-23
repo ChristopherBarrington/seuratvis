@@ -1,7 +1,7 @@
 #'
 #'
 feature_ridges.plot <- function(id)
-  plotOutput(outputId=NS(id, 'ridges')) %>% withSpinner()
+  plotOutput(outputId=NS(id, 'ridges'), height='70vh') %>% withSpinner()
 
 #'
 #' @import ggridges

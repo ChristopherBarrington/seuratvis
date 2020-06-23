@@ -1,4 +1,5 @@
-
+#'
+#' 
 cluster_classification.tab <- function() {
   bquote({
     menuItem(text='Cluster classification', icon=icon('object-group'), startExpanded=TRUE,
@@ -16,12 +17,12 @@ cluster_classification.tab <- function() {
                  h1('Gene module score in clusters'),
                  fluidRow(project_name_text_box.ui(id=NS('gene_module_score_in_clusters_tab', 'project_name'), width=12)),
                  column(width=7,
-                        boxPlus(title='Gene module score', closable=FALSE, width=12, status='primary', 
+                        boxPlus(title='Gene module score', closable=FALSE, width=12, height='75vh', status='primary', 
                                 feature_ridges.plot(id=NS('gene_module_score_in_clusters_tab', 'scores_plot')))),
                  column(width=5,
-                        boxPlus(title='Map', closable=FALSE, width=12, status='primary',
+                        boxPlus(title='Map', closable=FALSE, width=12, height='35vh', status='primary',
                                 dimension_reduction.plot(id=NS('gene_module_score_in_clusters_tab', 'map'))),
-                        boxPlus(title='Genes', closable=FALSE, width=12, status='primary',
+                        boxPlus(title='Genes', closable=FALSE, width=12, height='35vh', status='primary',
                                 genes_in_modules.table(id=NS('gene_module_score_in_clusters_tab', 'modules_table'))))),
          tabItem(tabName='gene_module_scores_in_a_cluster_tab',
                  h1('Gene modules'),
@@ -32,6 +33,8 @@ cluster_classification.tab <- function() {
       contents %<>% append(content)})
 }
 
+#'
+#' 
 findmarkers_results_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
   # build the sidebar ui
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
@@ -49,10 +52,8 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
   callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
 }
 
-
-
-
-
+#'
+#' 
 gene_module_score_in_clusters_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
   # build the sidebar ui
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
@@ -84,11 +85,4 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
 
 # callModule(feature_ridges_by_ident, id='scores_plot')
 }
-
-
-
-
-
-
-
 
