@@ -9,7 +9,9 @@ genes_in_modules.table <- function(id)
 genes_in_modules.server <- function(input, output, session, seurat, picked_feature) {
 
   DT::renderDataTable({
-  
+    req(picked_feature$name)
+    req(seurat$gene_modules)
+
     # make the data.frame to display
     ## get module(s)
     gm <- str_remove(picked_feature$name, 'GeneModule-') %>% str_split(pattern=',') %>% unlist()
