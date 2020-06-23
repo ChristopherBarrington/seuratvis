@@ -21,11 +21,11 @@ shinyAppUI <- function(...) {
   contents <- list()
 
   ## get the menu tabs and contents
-  eval(preprocessing.tab())
-  eval(highlight_features.tab())
+  # eval(preprocessing.tab())
+  # eval(highlight_features.tab())
   eval(cluster_classification.tab())
   eval(provenance.tab())
-  eval(configuration.tab())
+  # eval(configuration.tab())
   # eval(contact_links.menu())
 
   # header dropdown definition
@@ -61,9 +61,20 @@ shinyAppUI <- function(...) {
   # right sidebar definition
   rightSidebar(title='Right Sidebar',
                background='dark',
-               rightSidebarTabContent(id='data_opts', title='Options', icon='wrench', active=TRUE, uiOutput(outputId='right_sidebar.data_opts')),
-               rightSidebarTabContent(id='plotting_opts', title='Plotting', icon='glasses', active=FALSE, uiOutput(outputId='right_sidebar.plotting_opts')),
-               rightSidebarTabContent(id='config_opts', title='Configure', icon='map', active=FALSE, uiOutput(outputId='right_sidebar.config_opts'))) -> right_dashboard_sidebar
+               shiny::tags$head(shiny::tags$style(shiny::HTML('.control-sidebar-tabs {display:none;} .tabbable > .nav > li > a:hover {background-color: #333e43; color:white} .tabbable > .nav > li[class=active] > a   {background-color: #222d32;  color:white}'))),
+               useShinyjs(),
+               tabsetPanel(id='right_sidebar_tabset',
+
+                           tabPanel(title=icon('wrench'), value='data_opts', uiOutput(outputId='right_sidebar.data_opts')),
+                           tabPanel(title=icon('glasses'), value='plotting_opts', uiOutput(outputId='right_sidebar.plotting_opts')),
+                           tabPanel(title=icon('map'), value='config_opts', uiOutput(outputId='right_sidebar.config_opts'))
+
+                )
+
+               # rightSidebarTabContent(id='data_opts', title='Options', icon='wrench', active=TRUE, uiOutput(outputId='right_sidebar.data_opts')),
+               # rightSidebarTabContent(id='plotting_opts', title='Plotting', icon='glasses', active=FALSE, uiOutput(outputId='right_sidebar.plotting_opts')),
+               # rightSidebarTabContent(id='config_opts', title='Configure', icon='map', active=FALSE, uiOutput(outputId='right_sidebar.config_opts'))
+               ) -> right_dashboard_sidebar
 
   # assemble the final UI
   list(header=dashboard_header,
