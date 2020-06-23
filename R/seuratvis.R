@@ -53,8 +53,7 @@ shinyAppUI <- function(...) {
     dashboardBody(cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
 
   # sidebar definition
-  lapply(menus, modify_stop_propagation) %>%
-    append(list(actionBttn(inputId='simLoad', label='simload'))) %>%
+  menus %>%
     sidebarMenu(id='left_sidebar') %>%
     dashboardSidebar() -> left_dashboard_sidebar
 
