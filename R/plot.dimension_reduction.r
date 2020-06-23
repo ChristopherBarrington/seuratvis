@@ -97,19 +97,27 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
       colour_gradient <- scale_colour_gradient(low=c_low, high=c_high, limits=c_range, oob=scales::squish)
 
       # if the values cross zero, make a new colour scale
-      if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1))
+      if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1)) {
+        c_low <- 'cyan'
+        c_high <- 'magenta'
         colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
                                                   values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
                                                   limits=c_range, breaks=0)
+      }
 
       # add the colour scale and a legend
       map +
         colour_gradient +
+        # labs(colour=picked_feature$name) +
+        guides(colour=guide_colourbar(title.position='top', title.hjust=1, frame.colour='black', ticks=TRUE)) +
         theme(legend.justification=c(1,0),
+              legend.key.height=unit(0.5,'line'),
+              legend.key.width=unit(0.5,'line'),
               legend.position=c(1,0),
               legend.direction='horizontal',
               legend.text=element_blank(),
               legend.title=element_blank(),
+              legend.title.align=0,
               panel.background=element_rect(fill=picked_colours$background, colour='black')) -> map
     } else {
       # facet the map by the factor levels
