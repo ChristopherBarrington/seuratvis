@@ -25,6 +25,7 @@ shinyAppUI <- function(...) {
   eval(highlight_features.tab())
   eval(cluster_classification.tab())
   eval(provenance.tab())
+  eval(configuration.tab())
   # eval(contact_links.menu())
 
   # header dropdown definition
@@ -99,6 +100,7 @@ reactiveValues(
 
   # callModule(module=available_seurats.server, id='load_dataset')
   # seurat <- callModule(module=seurat_object.server, id='load_dataset')  # callModule(module=load_a_seurat.server, id='load_dataset')
+  callModule(module=configuration_tab.server, id='configuration_tab', server_input=input, server_output=output, server_session=session)
 
   ## load the filter_seurat module
   # cell_filtering <- callModule(module=cell_filtering.server, id='seuratvis', seurat=seurat)

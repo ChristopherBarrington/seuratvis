@@ -29,8 +29,8 @@ cluster_classification.tab <- function() {
                  fluidRow(project_name_text_box.ui(id=NS('gene_module_scores_in_a_cluster_tab', 'project_name'), width=12)),
                  fluidRow(column(width=12, feature_ridges.plot(id=NS('gene_module_scores_in_a_cluster_tab', 'scores_plot')))))) -> content
 
-      menus %<>% append(list(menu_item))
-      contents %<>% append(content)})
+    menus %<>% append(list(menu_item))
+    contents %<>% append(content)})
 }
 
 #'

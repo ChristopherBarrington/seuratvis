@@ -31,8 +31,8 @@ preprocessing.tab <- function() {
                           boxPlus(title='JackStraw plot', closable=FALSE, width=6, status='primary'),
                           boxPlus(title='JackStraw p-values', closable=FALSE, width=6, status='primary')))) -> content
 
-      menus %<>% append(list(menu_item))
-      contents %<>% append(content)})
+    menus %<>% append(list(menu_item))
+    contents %<>% append(content)})
 }
 
 cell_filtering_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {

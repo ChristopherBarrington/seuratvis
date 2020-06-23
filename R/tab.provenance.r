@@ -4,15 +4,15 @@ provenance.tab <- function() {
   bquote({
 
     tab <- 'provenance_tab'
-    menuItem(selected=TRUE, text='Provenance', icon=icon('history'), tabName=tab) -> menu_item
+    menuItem(text='Provenance', icon=icon('history'), tabName=tab) -> menu_item
 
     tabItem(tabName=tab,
             h1('View the functions used to create this Seurat object'),
             fluidRow(project_name_text_box.ui(id=NS(tab, 'project_name'), width=12)),
             provenance_step_viewer.ui(id=NS(tab, 'editor'))) -> content
 
-      menus %<>% append(list(menu_item))
-      contents %<>% append(list(content))})
+    menus %<>% append(list(menu_item))
+    contents %<>% append(list(content))})
 }
 
 #'

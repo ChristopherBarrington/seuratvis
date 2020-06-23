@@ -19,8 +19,8 @@ highlight_features.tab <- function() {
                           boxPlus(title='Selected cluster(s)', closable=FALSE, width=4, dimension_reduction.plot(id='highlight_feature_and_clusters_tab-picked_clusters')),
                           boxPlus(title='Feature values in clusters', closable=FALSE, width=4, feature_value_per_cluster.plot(id='highlight_feature_and_clusters_tab-feature_value_per_cluster'))))) -> content
 
-      menus %<>% append(list(menu_item))
-      contents %<>% append(content)})
+    menus %<>% append(list(menu_item))
+    contents %<>% append(content)})
 }
 
 highlight_feature_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
