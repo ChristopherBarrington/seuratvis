@@ -25,7 +25,7 @@ configuration_tab.server <- function(input, output, session, server_input, serve
     
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      shinyjs::addClass(selector='body', class='control-sidebar-closed')
+      addClass(selector='body', class='control-sidebar-closed')
       renderUI({p('No options')})  -> server_output$right_sidebar.data_opts
       renderUI({p('No options')}) -> server_output$right_sidebar.plotting_opts}})
 

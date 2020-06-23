@@ -24,7 +24,8 @@ provenance_tab.server <- function(input, output, session, server_input, server_o
     
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      shinyjs::addClass(selector='body', class='control-sidebar-open')
+      addClass(selector='body', class='control-sidebar-open')
+      showTab(inputId='right_sidebar_tabset', target='data_opts', select=TRUE, session=server_session)
       renderUI({provenace_picker.ui(id=tab, seurat=seurat)})  -> server_output$right_sidebar.data_opts
       renderUI({p('No options')}) -> server_output$right_sidebar.plotting_opts}})
 

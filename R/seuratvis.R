@@ -21,11 +21,11 @@ shinyAppUI <- function(...) {
   contents <- list()
 
   ## get the menu tabs and contents
-  # eval(preprocessing.tab())
-  # eval(highlight_features.tab())
+  eval(preprocessing.tab())
+  eval(highlight_features.tab())
   eval(cluster_classification.tab())
   eval(provenance.tab())
-  # eval(configuration.tab())
+  eval(configuration.tab())
   # eval(contact_links.menu())
 
   # header dropdown definition

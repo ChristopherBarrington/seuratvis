@@ -41,11 +41,11 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
     tab <- 'findmarkers_results_tab'
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      # shinyjs::addClass(selector='body', class='control-sidebar-open')
-      renderUI({tagList(filter_umi_per_cell.ui(id=tab, seurat=seurat),
-                        filter_features_per_cell.ui(id=tab, seurat=seurat, resolution=TRUE, label_switch=TRUE),
-                        filter_mt_umi.ui(id=tab, seurat=seurat),
-                        show_filtering_paramters.ui())})  -> server_output$right_sidebar.data_opts
+      addClass(selector='body', class='control-sidebar-open')
+      showTab(inputId='right_sidebar_tabset', target='data_opts', select=TRUE, session=server_session)
+      # shiny::hideTab(inputId='right_sidebar_tabset', target='plotting_opts', session=server_session)
+      # shiny::hideTab(inputId='right_sidebar_tabset', target='config_opts', session=server_session)
+      renderUI({tagList()})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
@@ -61,7 +61,8 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
     tab <- 'gene_module_score_in_clusters_tab'
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      shinyjs::addClass(selector='body', class='control-sidebar-open')
+      addClass(selector='body', class='control-sidebar-open')
+      showTab(inputId='right_sidebar_tabset', target='data_opts', select=TRUE, session=server_session)
       renderUI({tagList(cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=FALSE),
                         feature_picker.ui(id=tab, seurat=seurat, gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE),
                         dimension_reduction.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
@@ -82,7 +83,5 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
   callModule(module=feature_ridge_by_idents.server, id='scores_plot', picked_feature=feature_picker, picked_clusters=cluster_resolution)
   callModule(module=dimension_reduction.show_selected_clusters.server, id='map', dimension_reduction=dimension_reduction, point_size=list(size=0.6), cluster_resolution=cluster_resolution, picked_colours=colour_picker)
   callModule(module=genes_in_modules.server, id='modules_table', seurat=seurat, picked_feature=feature_picker)
-
-# callModule(feature_ridges_by_ident, id='scores_plot')
 }
 
