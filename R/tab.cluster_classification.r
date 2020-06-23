@@ -64,14 +64,9 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
       addClass(selector='body', class='control-sidebar-open')
       showTab(inputId='right_sidebar_tabset', target='data_opts', select=TRUE, session=server_session)
       renderUI({tagList(cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=FALSE),
-                        feature_picker.ui(id=tab, seurat=seurat, gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE),
+                        feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE),
                         dimension_reduction.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
-      renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts
-
-    # only list gene modules in the feature selection
-    updatePrettyRadioButtons(session=server_session, inputId=session$ns('-feature_type'),
-                             choices=list(`Gene modules`='gene_modules'),
-                             selected='gene_modules')}})
+      renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
   dimension_reduction <- callModule(module=dimension_reduction.server, id='', seurat=seurat, regex='.*')

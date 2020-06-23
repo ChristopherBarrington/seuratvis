@@ -1,6 +1,6 @@
 #' 
 #' 
-feature_picker.ui <- function(id, seurat, label='Feature selection', include_feature_type=TRUE, include_values_range=TRUE, gene_modules_opts=list(), features_regex='.*', metadata_regex='.*') {
+feature_picker.ui <- function(id, seurat, label='Feature selection', choices=list(`Features`='features', `Metadata`='metadata', `Gene modules`='gene_modules'), selected='features', include_feature_type=TRUE, include_values_range=TRUE, gene_modules_opts=list(), features_regex='.*', metadata_regex='.*') {
   ns <- NS(id)
 
   # get the possible features and values
@@ -46,8 +46,8 @@ feature_picker.ui <- function(id, seurat, label='Feature selection', include_fea
 
   ## checkbox for feature type
   prettyRadioButtons(inputId=ns(id='feature_type'), status='primary', label=label, 
-                     choices=list(`Features`='features', `Metadata`='metadata', `Gene modules`='gene_modules'),
-                     selected='features', icon=icon('check'), bigger=TRUE, animation='jelly') -> feature_type_picker
+                     choices=choices, selected=selected,
+                     icon=icon('check'), bigger=TRUE, animation='jelly') -> feature_type_picker
   if(!include_feature_type)
     feature_type_picker %<>% hidden()
 

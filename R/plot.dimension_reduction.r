@@ -109,12 +109,15 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
       map +
         colour_gradient +
         # labs(colour=picked_feature$name) +
-        guides(colour=guide_colourbar(title.position='top', title.hjust=1, frame.colour='black', ticks=TRUE)) +
-        theme(legend.justification=c(1,0),
+        guides(colour=guide_colourbar(title.position='top',
+                                      title.hjust=1,
+                                      frame.colour='black',
+                                      ticks=TRUE)) +
+        theme(legend.direction='horizontal',
+              legend.justification=c(1,0),
               legend.key.height=unit(0.5,'line'),
               legend.key.width=unit(0.5,'line'),
               legend.position=c(1,0),
-              legend.direction='horizontal',
               legend.text=element_blank(),
               legend.title=element_blank(),
               legend.title.align=0,
