@@ -33,6 +33,5 @@ configuration_tab.server <- function(input, output, session, server_input, serve
 
   # callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
   # callModule(module=provenance_step_viewer.server, id='editor', picked_provenance=provenace_picker)
+  callModule(seurats_in_workspace.server, id='seurats_table')
 }
-
-seurats_in_workspace.table <- function(...) return(h2('A TABLE'))
