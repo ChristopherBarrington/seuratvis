@@ -26,7 +26,7 @@ configuration_tab.server <- function(input, output, session, server_input, serve
       tab %<>% str_c('-')
       renderUI({p('No options')})  -> server_output$right_sidebar.data_opts
       renderUI({p('No options')}) -> server_output$right_sidebar.plotting_opts
-      renderUI({p('No options')}) -> server_output$right_sidebar.config_opts}})
+      renderUI({tagList(seurat_object_options.ui(id=tab))}) -> server_output$right_sidebar.config_opts}})
 
   # call the modules for this tab
   # provenace_picker <- callModule(module=provenace_picker.server, id='', seurat=seurat)

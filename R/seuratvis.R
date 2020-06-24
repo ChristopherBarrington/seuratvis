@@ -140,9 +140,10 @@ reactiveValues(
   observeEvent(eventExpr=input$left_sidebar, handlerExpr={
     addClass(selector='body', class='control-sidebar-open')
     removeClass(selector='body', class='control-sidebar-closed')
-    runjs("$('.nav-tabs a[href=\"#control-sidebar-config_opts-tab\"]').tab('show');")
-    runjs("$('.nav-tabs a[href=\"#control-sidebar-plotting_opts-tab\"]').tab('show');")
-    runjs("$('.nav-tabs a[href=\"#control-sidebar-data_opts-tab\"]').tab('show');")})
+    # runjs("$('.nav-tabs a[href=\"#control-sidebar-plotting_opts-tab\"]').tab('show');")
+    runjs("$('.nav-tabs a[href=\"#control-sidebar-data_opts-tab\"]').tab('show');")
+    if(input$left_sidebar=='configuration_tab')
+      runjs("$('.nav-tabs a[href=\"#control-sidebar-config_opts-tab\"]').tab('show');")})
 
 
 
