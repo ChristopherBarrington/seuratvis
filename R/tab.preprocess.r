@@ -41,8 +41,6 @@ cell_filtering_tab.server <- function(input, output, session, server_input, serv
     tab <- 'cell_filtering_tab'
     if(server_input$left_sidebar==tab) {    
       tab %<>% str_c('-')
-      addClass(selector='body', class='control-sidebar-open')
-      showTab(inputId='right_sidebar_tabset', target='data_opts', select=TRUE, session=server_session)
       renderUI({tagList(filter_umi_per_cell.ui(id=tab, seurat=seurat),
                         filter_features_per_cell.ui(id=tab, seurat=seurat, resolution=TRUE, label_switch=TRUE),
                         filter_mt_umi.ui(id=tab, seurat=seurat),
@@ -59,8 +57,6 @@ dimensionality_tab.server <- function(input, output, session, server_input, serv
     tab <- 'dimensionality_tab'
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      addClass(selector='body', class='control-sidebar-open')
-      showTab(inputId='right_sidebar_tabset', target='data_opts', select=TRUE, session=server_session)
       renderUI({tagList()})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 

@@ -54,27 +54,16 @@ shinyAppUI <- function(...) {
     dashboardBody(cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
 
   # sidebar definition
-  menus %>%
+  menus %>% append(list(actionButton(inputId='clickme', label='!', icon=icon('radiation'), with='70x'))) %>%
     sidebarMenu(id='left_sidebar') %>%
     dashboardSidebar() -> left_dashboard_sidebar
 
   # right sidebar definition
   rightSidebar(title='Right Sidebar',
                background='dark',
-               shiny::tags$head(shiny::tags$style(shiny::HTML('.control-sidebar-tabs {display:none;} .tabbable > .nav > li > a:hover {background-color: #333e43; color:white} .tabbable > .nav > li[class=active] > a   {background-color: #222d32;  color:white}'))),
-               useShinyjs(),
-               tabsetPanel(id='right_sidebar_tabset',
-
-                           tabPanel(title=icon('wrench'), value='data_opts', uiOutput(outputId='right_sidebar.data_opts')),
-                           tabPanel(title=icon('glasses'), value='plotting_opts', uiOutput(outputId='right_sidebar.plotting_opts')),
-                           tabPanel(title=icon('map'), value='config_opts', uiOutput(outputId='right_sidebar.config_opts'))
-
-                )
-
-               # rightSidebarTabContent(id='data_opts', title='Options', icon='wrench', active=TRUE, uiOutput(outputId='right_sidebar.data_opts')),
-               # rightSidebarTabContent(id='plotting_opts', title='Plotting', icon='glasses', active=FALSE, uiOutput(outputId='right_sidebar.plotting_opts')),
-               # rightSidebarTabContent(id='config_opts', title='Configure', icon='map', active=FALSE, uiOutput(outputId='right_sidebar.config_opts'))
-               ) -> right_dashboard_sidebar
+               rightSidebarTabContent(id='data_opts', title='Options', icon='wrench', active=TRUE, uiOutput(outputId='right_sidebar.data_opts')),
+               rightSidebarTabContent(id='plotting_opts', title='Plotting', icon='glasses', active=FALSE, uiOutput(outputId='right_sidebar.plotting_opts')),
+               rightSidebarTabContent(id='config_opts', title='Configure', icon='map', active=FALSE, uiOutput(outputId='right_sidebar.config_opts'))) -> right_dashboard_sidebar
 
   # assemble the final UI
   list(header=dashboard_header,
@@ -123,11 +112,19 @@ reactiveValues(
   callModule(module=gene_module_score_in_clusters_tab.server, id='gene_module_score_in_clusters_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=provenance_tab.server, id='provenance_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
 
-  observeEvent(input$simLoad, {
-    seurat$object <- rnorm(1)
-    seurat$object <- get('human_CS12', envir=globalenv())
-    seurat$metadata <- seurat$object@meta.data
-    seurat$gene_module_scores <- select_at(seurat$metadata, vars(starts_with('GeneModule-')))})
+  observeEvent(input$clickme, {
+    # removeClass(id='control-sidebar-plotting_opts-tab', class='active')
+    # removeClass(id='control-sidebar-config_opts-tab', class='active')
+    # addClass(id='control-sidebar-data_opts-tab', class='active')
+
+    # runjs("$('.nav-tabs a[href=\"#control-sidebar-data_opts-tab\"]').tab('show');")
+
+
+    # seurat$object <- rnorm(1)
+    # seurat$object <- get('human_CS12', envir=globalenv())
+    # seurat$metadata <- seurat$object@meta.data
+    # seurat$gene_module_scores <- select_at(seurat$metadata, vars(starts_with('GeneModule-')))
+  })
 
   # ###############################################################################################
   # reactions to tab selection
@@ -138,6 +135,16 @@ reactiveValues(
   #                    title='Notice', btn_labels='Great!',
   #                    text=tags$span('It looks like low-quality cells have already been removed from this Seurat object:', tags$h5(tags$code('@misc$cells_filtered == TRUE'))),
   #                    closeOnClickOutside=TRUE, showCloseButton=FALSE)})
+
+  ## when a tab is selected from the left sidebar, activate the right sidebar and select the data_opts tab
+  observeEvent(eventExpr=input$left_sidebar, handlerExpr={
+    addClass(selector='body', class='control-sidebar-open')
+    removeClass(selector='body', class='control-sidebar-closed')
+    runjs("$('.nav-tabs a[href=\"#control-sidebar-config_opts-tab\"]').tab('show');")
+    runjs("$('.nav-tabs a[href=\"#control-sidebar-plotting_opts-tab\"]').tab('show');")
+    runjs("$('.nav-tabs a[href=\"#control-sidebar-data_opts-tab\"]').tab('show');")})
+
+
 
   # ###############################################################################################
   # any code to exectue when the session ends

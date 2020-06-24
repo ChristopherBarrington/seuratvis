@@ -29,8 +29,6 @@ highlight_feature_tab.server <- function(input, output, session, server_input, s
     tab <- 'highlight_feature_tab'
     if(server_input$left_sidebar==tab) {    
       tab %<>% str_c('-')
-      addClass(selector='body', class='control-sidebar-open')
-      showTab(inputId='right_sidebar_tabset', target='data_opts', select=TRUE, session=server_session)
       renderUI({tagList(dimension_reduction.ui(id=tab, seurat=seurat),
                         cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, label_switch=TRUE),
                         feature_picker.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
@@ -57,8 +55,6 @@ highlight_feature_and_clusters_tab.server <- function(input, output, session, se
     tab <- 'highlight_feature_and_clusters_tab'
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      addClass(selector='body', class='control-sidebar-open')
-      showTab(inputId='right_sidebar_tabset', target='data_opts', select=TRUE, session=server_session)
       renderUI({tagList(dimension_reduction.ui(id=tab, seurat=seurat),
                         cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=TRUE),
                         feature_picker.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts

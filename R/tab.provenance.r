@@ -21,11 +21,8 @@ provenance_tab.server <- function(input, output, session, server_input, server_o
   # build the sidebar ui
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
     tab <- 'provenance_tab'
-    
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      addClass(selector='body', class='control-sidebar-open')
-      showTab(inputId='right_sidebar_tabset', target='data_opts', select=TRUE, session=server_session)
       renderUI({provenace_picker.ui(id=tab, seurat=seurat)})  -> server_output$right_sidebar.data_opts
       renderUI({p('No options')}) -> server_output$right_sidebar.plotting_opts}})
 

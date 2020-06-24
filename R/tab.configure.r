@@ -22,10 +22,8 @@ configuration_tab.server <- function(input, output, session, server_input, serve
   # build the sidebar ui
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
     tab <- 'configuration_tab'
-    
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      addClass(selector='body', class='control-sidebar-closed')
       renderUI({p('No options')})  -> server_output$right_sidebar.data_opts
       renderUI({p('No options')}) -> server_output$right_sidebar.plotting_opts
       renderUI({p('No options')}) -> server_output$right_sidebar.config_opts}})
