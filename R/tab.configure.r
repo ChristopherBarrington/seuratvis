@@ -1,6 +1,6 @@
 #'
 #' 
-configuration.tab <- function() {
+available_seurats.tab <- function() {
   bquote({
 
     tab <- 'configuration_tab'
@@ -18,20 +18,15 @@ configuration.tab <- function() {
 
 #'
 #' 
-configuration_tab.server <- function(input, output, session, server_input, server_output, server_session) {
+available_seurats_tab.server <- function(input, output, session, server_input, server_output, server_session) {
   # build the sidebar ui
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
     tab <- 'configuration_tab'
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
       renderUI({p('No options')})  -> server_output$right_sidebar.data_opts
-      renderUI({p('No options')}) -> server_output$right_sidebar.plotting_opts
-      renderUI({tagList(seurat_object_options.ui(id=tab))}) -> server_output$right_sidebar.config_opts}})
+      renderUI({p('No options')}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
-  # provenace_picker <- callModule(module=provenace_picker.server, id='', seurat=seurat)
-
-  # callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
-  # callModule(module=provenance_step_viewer.server, id='editor', picked_provenance=provenace_picker)
   callModule(seurats_in_workspace.server, id='seurats_table')
 }

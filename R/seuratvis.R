@@ -25,7 +25,7 @@ shinyAppUI <- function(...) {
   eval(highlight_features.tab())
   eval(cluster_classification.tab())
   eval(provenance.tab())
-  eval(configuration.tab())
+  eval(available_seurats.tab())
   # eval(contact_links.menu())
 
   # header dropdown definition
@@ -101,7 +101,7 @@ reactiveValues(
 
   # callModule(module=available_seurats.server, id='load_dataset')
   # seurat <- callModule(module=seurat_object.server, id='load_dataset')  # callModule(module=load_a_seurat.server, id='load_dataset')
-  callModule(module=configuration_tab.server, id='configuration_tab', server_input=input, server_output=output, server_session=session)
+  callModule(module=available_seurats_tab.server, id='configuration_tab', server_input=input, server_output=output, server_session=session)
 
   ## load the filter_seurat module
   # cell_filtering <- callModule(module=cell_filtering.server, id='seuratvis', seurat=seurat)
@@ -131,12 +131,19 @@ observeEvent(input$clickme, {
 
   ## when a tab is selected from the left sidebar, activate the right sidebar and select the data_opts tab
   observeEvent(eventExpr=input$left_sidebar, handlerExpr={
-    addClass(selector='body', class='control-sidebar-open')
+    # open the sidebar
     removeClass(selector='body', class='control-sidebar-closed')
+    addClass(selector='body', class='control-sidebar-open')
+
+    # activate the data sidebar tab (or config sidebar tab if on the available seurats tab)
     # runjs("$('.nav-tabs a[href=\"#control-sidebar-plotting_opts-tab\"]').tab('show');")
     runjs("$('.nav-tabs a[href=\"#control-sidebar-data_opts-tab\"]').tab('show');")
     if(input$left_sidebar=='configuration_tab')
-      runjs("$('.nav-tabs a[href=\"#control-sidebar-config_opts-tab\"]').tab('show');")})
+      runjs("$('.nav-tabs a[href=\"#control-sidebar-config_opts-tab\"]').tab('show');")
+
+    # render the same ui for all config sidebar tabs    
+    renderUI({tagList(seurat_object_options.ui(id='seuratvis'))}) -> output$right_sidebar.config_opts
+  })
 
   # ###############################################################################################
   # any code to exectue when the session ends
