@@ -88,16 +88,16 @@ shinyAppServer <- function(input, output, session) {
   #! TODO: move the find_seurats function to this module, and return the values as a rective. move to the seratvis id?
 s <- get('human_CS12', envir=globalenv())
 reactiveValues(
-    object=s,
-    formatted_project_name=Project(s) %>% reformat_project_name(),
-    metadata=s@meta.data,
-    features_in_assays=list(),
-    reductions=Reductions(s),
-    assays=Assays(s),
-    gene_module_scores=select_at(s@meta.data, vars(starts_with('GeneModule-'))),
-    gene_modules=s@misc$gene_modules,
-    cluster_resolutions={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))},
-    all_idents={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}) -> seurat
+  object=s,
+  formatted_project_name=Project(s) %>% reformat_project_name(),
+  metadata=s@meta.data,
+  features_in_assays=list(),
+  reductions=Reductions(s),
+  assays=Assays(s),
+  gene_module_scores=select_at(s@meta.data, vars(starts_with('GeneModule-'))),
+  gene_modules=s@misc$gene_modules,
+  cluster_resolutions={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))},
+  all_idents={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}) -> seurat
 
   # callModule(module=available_seurats.server, id='load_dataset')
   # seurat <- callModule(module=seurat_object.server, id='load_dataset')  # callModule(module=load_a_seurat.server, id='load_dataset')
@@ -112,19 +112,12 @@ reactiveValues(
   callModule(module=gene_module_score_in_clusters_tab.server, id='gene_module_score_in_clusters_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=provenance_tab.server, id='provenance_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
 
-  observeEvent(input$clickme, {
-    # removeClass(id='control-sidebar-plotting_opts-tab', class='active')
-    # removeClass(id='control-sidebar-config_opts-tab', class='active')
-    # addClass(id='control-sidebar-data_opts-tab', class='active')
-
-    # runjs("$('.nav-tabs a[href=\"#control-sidebar-data_opts-tab\"]').tab('show');")
-
-
-    # seurat$object <- rnorm(1)
-    # seurat$object <- get('human_CS12', envir=globalenv())
-    # seurat$metadata <- seurat$object@meta.data
-    # seurat$gene_module_scores <- select_at(seurat$metadata, vars(starts_with('GeneModule-')))
-  })
+observeEvent(input$clickme, {
+  # seurat$object <- rnorm(1)
+  # seurat$object <- get('human_CS12', envir=globalenv())
+  # seurat$metadata <- seurat$object@meta.data
+  # seurat$gene_module_scores <- select_at(seurat$metadata, vars(starts_with('GeneModule-')))
+})
 
   # ###############################################################################################
   # reactions to tab selection
@@ -144,8 +137,6 @@ reactiveValues(
     runjs("$('.nav-tabs a[href=\"#control-sidebar-data_opts-tab\"]').tab('show');")
     if(input$left_sidebar=='configuration_tab')
       runjs("$('.nav-tabs a[href=\"#control-sidebar-config_opts-tab\"]').tab('show');")})
-
-
 
   # ###############################################################################################
   # any code to exectue when the session ends

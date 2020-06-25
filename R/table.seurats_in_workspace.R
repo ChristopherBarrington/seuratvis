@@ -53,7 +53,7 @@ find_seurat_objects <- function() {
     `Integrated?`='integrated',
     `Active assay`='active_assay',
     `Other assays`='assays',
-    `Features in active assay`='nfeatures',
+    # `Features in active assay`='nfeatures',
     `Reductions`='reductions') -> column_order
 
   # make the `data.frame` of Seurat information
@@ -83,7 +83,7 @@ find_seurat_objects <- function() {
                  integrated=!is.null(x@misc$integrated_dataset) && x@misc$integrated_dataset,
                  active_assay=DefaultAssay(x),
                  assays={Assays(x) %>% str_subset(pattern=DefaultAssay(x), negate=TRUE) %>% collapse_strings()},
-                 nfeatures=nrow(x),
+                 # nfeatures=nrow(x),
                  reductions={Reductions(x) %>% collapse_strings()})}) %>%
     mutate(object=value) %>%
     select_at(vars(all_of(column_order), everything())) -> data_to_show
@@ -109,35 +109,35 @@ find_seurat_objects <- function() {
                                                infoEmpty='No Seurat objects found!')),
                     style='bootstrap4',
                     class='stripe',
-                    selection=list(mode='single'),
+                    selection=list(mode='none'),
                     escape=FALSE) %>%
       formatStyle(columns='ncells',
-                  background=styleColorBar(data=c(0,max(data_to_show$ncells)), color='#3CB96A'),
+                  background=styleColorBar(data=c(0,max(data_to_show$ncells)), color='#605CA8'),
                   backgroundSize='98% 50%',
                   backgroundRepeat='no-repeat',
                   backgroundPosition='center') %>%
       formatStyle(columns='numi',
-                  background=styleColorBar(data=c(0,max(data_to_show$numi)), color='#3CB96A'),
+                  background=styleColorBar(data=c(0,max(data_to_show$numi)), color='#605CA8'),
                   backgroundSize='98% 50%',
                   backgroundRepeat='no-repeat',
                   backgroundPosition='center') %>%
       formatStyle(columns='median_umi',
-                  background=styleColorBar(data=c(0,max(data_to_show$median_umi)), color='#3CB96A'),
+                  background=styleColorBar(data=c(0,max(data_to_show$median_umi)), color='#605CA8'),
                   backgroundSize='98% 50%',
                   backgroundRepeat='no-repeat',
                   backgroundPosition='center') %>%
-      formatStyle(columns='nfeatures',
-                  background=styleColorBar(data=c(0,max(data_to_show$nfeatures)), color='#3CB96A'),
-                  backgroundSize='98% 50%',
-                  backgroundRepeat='no-repeat',
-                  backgroundPosition='center') %>%
+      # formatStyle(columns='nfeatures',
+      #             background=styleColorBar(data=c(0,max(data_to_show$nfeatures)), color='#3CB96A'),
+      #             backgroundSize='98% 50%',
+      #             backgroundRepeat='no-repeat',
+      #             backgroundPosition='center') %>%
       formatStyle(columns=c('object'),
                   fontFamily='monospace',
                   fontWeight='bold') %>%
-      formatRound(columns=c('ncells', 'numi', 'median_umi', 'nfeatures'),
+      formatRound(columns=c('ncells', 'numi', 'median_umi'),
                   digits=0) %>%
       formatStyle(columns={sapply(data_to_show, class) %>% str_which('logical')},
-                  color=styleEqual(levels=c(0,1), values=c('#B96A3C','#B93C8B'), default='orange'),
+                  color=styleEqual(levels=c(0,1), values=c('#dd4b39','#00A65A'), default='orange'),
                   fontFamily='monospace',
                   fontWeight='bold')}) -> output$table
 
