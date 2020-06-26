@@ -39,6 +39,14 @@ process_seurat.server <- function(input, output, session, server_input, server_o
   # react when a seurat is selected
   observeEvent(eventExpr=input$picker, label='process_seurat/picker', handlerExpr={
     s <- eval(parse(text=input$picker))
+
+    # check that there are clusters, if not add a fake one
+    if(is.null(s@meta.data$seurat_clusters))
+      s@meta.data$seurat_clusters <- 0
+
+    # ensure we are using RNA assay
+    DefaultAssay(s) <- selected_assay
+
     seurat$object <- s
     seurat$formatted_project_name <- Project(s) %>% reformat_project_name()
     seurat$metadata <- s@meta.data
@@ -51,17 +59,18 @@ process_seurat.server <- function(input, output, session, server_input, server_o
 
     # update ui elements
     ## get the numeric metadata variables
-    sapply(seurat$metadata, is.numeric) %>% subset(x=colnames(seurat$metadata)) -> choices
+    sapply(seurat$metadata, is.numeric) %>% subset(x=colnames(seurat$metadata)) -> numeric_choices
+    sapply(seurat$metadata, is.character) %>% subset(x=colnames(seurat$metadata)) -> character_choices
 
     ## guess a default choice
-    n_features_picker_default <- preferred_choice(x=choices, preferences=c('nFeature_RNA','nFeature_SCT'))
-    n_umi_picker_default <- preferred_choice(x=choices, preferences=c('nCount_RNA','nCount_SCT'))
-    proportion_mt_picker_default <- preferred_choice(x=choices, preferences=c('percent.mt', 'percent_mt', 'prop.mt', 'prop_mt'))
+    n_features_picker_default <- preferred_choice(x=numeric_choices, preferences=c('nFeature_RNA','nFeature_SCT'))
+    n_umi_picker_default <- preferred_choice(x=numeric_choices, preferences=c('nCount_RNA','nCount_SCT'))
+    proportion_mt_picker_default <- preferred_choice(x=numeric_choices, preferences=c('percent.mt', 'percent_mt', 'prop.mt', 'prop_mt'))
 
     ## define the choices and default in the input ui elements
-    updatePickerInput(session=session, inputId='n_features_picker', choices=choices, selected=n_features_picker_default)
-    updatePickerInput(session=session, inputId='n_umi_picker', choices=choices, selected=n_umi_picker_default)
-    updatePickerInput(session=session, inputId='proportion_mt_picker', choices=choices, selected=proportion_mt_picker_default)})
+    updatePickerInput(session=session, inputId='n_features_picker', choices=numeric_choices, selected=n_features_picker_default)
+    updatePickerInput(session=session, inputId='n_umi_picker', choices=numeric_choices, selected=n_umi_picker_default)
+    updatePickerInput(session=session, inputId='proportion_mt_picker', choices=numeric_choices, selected=proportion_mt_picker_default)})
 
   # update seurat reactive when a options are selected or object is changed
   ## pick out number of features per cell
