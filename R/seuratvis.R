@@ -80,9 +80,6 @@ shinyAppServer <- function(input, output, session) {
   # ###############################################################################################
   # call servers for modules
   ## Seurat object interaction modules
-  #! TODO: move the find_seurats function to this module, and return the values as a rective. move to the seratvis id?
-
-  # callModule(module=available_seurats.server, id='load_dataset')
   available_seurats <- callModule(module=available_seurats_tab.server, id='configuration_tab', server_input=input, server_output=output, server_session=session)
   seurat <- callModule(module=process_seurat.server, id='process_seurat', server_input=input, server_output=output, server_session=session, available_seurats=available_seurats)
   

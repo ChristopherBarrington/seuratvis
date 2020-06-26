@@ -45,7 +45,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
       s@meta.data$seurat_clusters <- 0
 
     # ensure we are using RNA assay
-    DefaultAssay(s) <- selected_assay
+    DefaultAssay(s) <- 'RNA'
 
     seurat$object <- s
     seurat$formatted_project_name <- Project(s) %>% reformat_project_name()
