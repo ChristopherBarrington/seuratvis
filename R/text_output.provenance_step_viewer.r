@@ -15,11 +15,10 @@ provenance_step_viewer.server <- function(input, output, session, picked_provena
 }
 
 
-ace_editor.ui <- function(id)
+ace_editor.ui <- function(id, ...)
   aceEditor(outputId=NS(id, 'ace_editor'), placeholder='R script',
-            mode='r', theme='xcode',
-            tabSize=2, useSoftTabs=TRUE, wordWrap=TRUE,
-            showInvisibles=FALSE, highlightActiveLine=TRUE)
+            mode='r', tabSize=2, useSoftTabs=TRUE, wordWrap=TRUE,
+            showInvisibles=FALSE, highlightActiveLine=FALSE, ...)
 
 ace_editor.server <- function(input, output, session, display_text)
   observe(label='ace_editor/observe', x={

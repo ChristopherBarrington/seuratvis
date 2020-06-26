@@ -45,7 +45,8 @@ shinyAppUI <- function(...) {
 
   # dashboard body definition
   tags$head(tags$style(HTML(text='table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'))) -> cssDT
-  tags$style(type='text/css', '.ace_editor {height: calc(65vh) !important;}') -> cssAce # apply this to class `ace_editor`
+  # tags$style(type='text/css', '.ace_editor {height: calc(65vh) !important;}') -> cssAce # apply this to class `ace_editor`
+  tags$style(type='text/css', '#provenance_tab-editor-ace_editor {height: calc(65vh) !important;} #cell_filtering_tab--ace_verbatim_text_output-ace_editor {height: 150px !important;') -> cssAce # apply this to class `ace_editor`
   tags$style(type='text/css', '.boy, .girl {font-size: x-large} .boy {color: #347DC1} .girl {color: #CC6594') -> cssSex
 
   append(contents,

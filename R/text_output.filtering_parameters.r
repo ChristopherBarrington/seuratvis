@@ -3,7 +3,7 @@
 show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', include_copy_buttons=TRUE) {
   # make ui elements
   ## a text output box
-  verbatimTextOutput(outputId=NS(id, 'verbatim_text_output'), placeholder=TRUE) -> text_output_box
+  ace_editor.ui(id=NS(id, 'ace_verbatim_text_output'), showLineNumbers=FALSE, theme='tomorrow_night_eighties') -> ace_text_output_box
 
   ## copy buttons are required
   div(tags$h6('Copy to clipboard'),
@@ -12,7 +12,7 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
       uiOutput(outputId=NS(id, 'r.copybutton'), inline=TRUE)) -> copy_buttons
 
   # return ui element(s)
-  tagList(tags$label(label), text_output_box, if(include_copy_buttons) copy_buttons)
+  tagList(tags$label(label), ace_text_output_box, if(include_copy_buttons) copy_buttons)
 }
 
 #' 
@@ -21,6 +21,9 @@ show_filtering_parameters.server <- function(input, output, session, seurat, cel
   format_subset_conditional <- function(x, fmt) ifelse(is.na(x), NA, sprintf(fmt=fmt, x))
   group_format_subset_conditional <- function(x, sep=' & ') x %>% na.omit() %>% paste(collapse=sep)
   filtering_arguments <- reactiveValues()
+
+  display_text <- reactiveVal('empty')
+  callModule(module=ace_editor.server, id='ace_verbatim_text_output', display_text=display_text)
 
   # observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
   observeEvent(eventExpr=cell_filtering$done, handlerExpr={
@@ -52,7 +55,8 @@ show_filtering_parameters.server <- function(input, output, session, seurat, cel
       str_c(collapse='\n') -> output_text
 
     # update the ui with filtering parameters
-    renderText({output_text}) -> output$verbatim_text_output
+    display_text('refresh')
+    display_text(output_text)
     filtering_arguments$output_text <- output_text})
 
   # prepare copy to clipboard buttons
