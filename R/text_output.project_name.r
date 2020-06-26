@@ -10,6 +10,6 @@ project_name_text_box.server <- function(input, output, session, seurat) {
     list(value=seurat$formatted_project_name,
          subtitle='Loaded Seurat object',
          icon=icon('certificate')) %>%
-    modifyList(x=list(color='purple')) %>%
-    do.call(what=valueBox)}) -> output$box
+      modifyList(x=list(color='purple')) %>%
+      do.call(what=valueBox)}) -> output$box
 }

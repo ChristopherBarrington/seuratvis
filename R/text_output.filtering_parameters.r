@@ -17,7 +17,7 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
 
 #' 
 #' 
-show_filtering_parameters.server <- function(input, output, session, server_output, seurat, cell_filtering) {
+show_filtering_parameters.server <- function(input, output, session, seurat, cell_filtering) {
   format_subset_conditional <- function(x, fmt) ifelse(is.na(x), NA, sprintf(fmt=fmt, x))
   group_format_subset_conditional <- function(x, sep=' & ') x %>% na.omit() %>% paste(collapse=sep)
   filtering_arguments <- reactiveValues()

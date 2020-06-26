@@ -61,6 +61,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$gene_modules <- s@misc$gene_modules
     seurat$cluster_resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))
     seurat$all_idents <- {resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}
+    seurat$mart <- s@misc$mart
 
     # update ui elements
     ## get the numeric metadata variables

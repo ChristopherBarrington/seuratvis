@@ -65,7 +65,7 @@ cell_filtering_tab.server <- function(input, output, session, server_input, serv
   callModule(module=density_plot.n_umi.server, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=density_plot.proportion_mt.server, id='proportion_mt', seurat=seurat, cell_filtering=filtering_parameters)
 
-  callModule(module=show_filtering_parameters.server, id='', server_output=server_output, seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=show_filtering_parameters.server, id='', seurat=seurat, cell_filtering=filtering_parameters)
 }
 
 dimensionality_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
