@@ -30,4 +30,3 @@ available_seurats_tab.server <- function(input, output, session, server_input, s
   # call the modules for this tab
   return(callModule(seurats_in_workspace.server, id='seurats_table'))
 }
-
