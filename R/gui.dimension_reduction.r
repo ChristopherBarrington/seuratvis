@@ -20,8 +20,10 @@ dimension_reduction.server <- function(input, output, session, seurat, regex='.*
   reduction <- reactiveValues()
 
   # react to the input
-  observeEvent(eventExpr=input$picker, label='dimension_reduction/picker', handlerExpr={
+  # observeEvent(eventExpr=input$picker, label='dimension_reduction/picker', handlerExpr={
+  observe(label='dimension_reduction/picker', x={
     req(seurat$object)
+    req(input$picker)
 
     # get the input
     picked <- input$picker

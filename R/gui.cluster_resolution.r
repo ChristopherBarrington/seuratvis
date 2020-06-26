@@ -32,7 +32,11 @@ cluster_picker.server <- function(input, output, session, seurat, ...) {
   clusters <- reactiveValues()
 
   # react to a resolution being picked
-  observeEvent(eventExpr=input$resolution_picker, label='cluster_picker/resolution_picker', handlerExpr={
+  # observeEvent(eventExpr=input$resolution_picker, label='cluster_picker/resolution_picker', handlerExpr={
+  observe(label='cluster_picker/resolution_picker', x={
+    req(seurat$object)
+    req(input$resolution_picker)
+    
     clusters$idents <- FetchData(object=seurat$object, vars=input$resolution_picker) %>% unlist()
     clusters$distinct_idents <- unique(clusters$idents) %>% mixedsort()
     updatePickerInput(session=session, inputId='ident_picker', choices=seurat$all_idents[[input$resolution_picker]], selected=seurat$all_idents[[input$resolution_picker]])})

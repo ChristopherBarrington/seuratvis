@@ -86,22 +86,30 @@ shinyAppServer <- function(input, output, session) {
   # call servers for modules
   ## Seurat object interaction modules
   #! TODO: move the find_seurats function to this module, and return the values as a rective. move to the seratvis id?
-s <- get('human_CS12', envir=globalenv())
-reactiveValues(
-  object=s,
-  formatted_project_name=Project(s) %>% reformat_project_name(),
-  metadata=s@meta.data,
-  features_in_assays=list(),
-  reductions=Reductions(s),
-  assays=Assays(s),
-  gene_module_scores=select_at(s@meta.data, vars(starts_with('GeneModule-'))),
-  gene_modules=s@misc$gene_modules,
-  cluster_resolutions={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))},
-  all_idents={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}) -> seurat
+# s <- get('human_CS12', envir=globalenv())
+# reactiveValues(
+#   object=s,
+#   formatted_project_name=Project(s) %>% reformat_project_name(),
+#   metadata=s@meta.data,
+#   features_in_assays=list(),
+#   reductions=Reductions(s),
+#   assays=Assays(s),
+#   gene_module_scores=select_at(s@meta.data, vars(starts_with('GeneModule-'))),
+#   gene_modules=s@misc$gene_modules,
+#   cluster_resolutions={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))},
+#   all_idents={resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}) -> seurat
 
   # callModule(module=available_seurats.server, id='load_dataset')
   # seurat <- callModule(module=seurat_object.server, id='load_dataset')  # callModule(module=load_a_seurat.server, id='load_dataset')
-  callModule(module=available_seurats_tab.server, id='configuration_tab', server_input=input, server_output=output, server_session=session)
+  available_seurats <- callModule(module=available_seurats_tab.server, id='configuration_tab', server_input=input, server_output=output, server_session=session)
+  seurat <- callModule(module=process_seurat.server, id='configuration_tab', server_input=input, server_output=output, server_session=session, available_seurats=available_seurats)
+  # renderUI({checkboxInput(inputId='foo', label='bar', choices=available_seurats$choiceName)}) -> output$right_sidebar.config_opts
+  
+  ## render the seurat config right sidebar ui
+  # renderUI({tagList(prettyRadioButtons(inputId='process_seurat-picker', label='Available Seurat objects',
+  #                                      choiceNames=available_seurats$choiceName, choiceValues=available_seurats$choiceValue, selected='',
+  #                                      icon=icon('check'), bigger=TRUE, animation='jelly'),
+  #                   seurat_object_options.ui(id='process_seurat', seurat=seurat))}) -> output$right_sidebar.config_opts
 
   ## load the filter_seurat module
   # cell_filtering <- callModule(module=cell_filtering.server, id='seuratvis', seurat=seurat)
@@ -141,9 +149,20 @@ observeEvent(input$clickme, {
     if(input$left_sidebar=='configuration_tab')
       runjs("$('.nav-tabs a[href=\"#control-sidebar-config_opts-tab\"]').tab('show');")
 
-    # render the same ui for all config sidebar tabs    
-    renderUI({tagList(seurat_object_options.ui(id='seuratvis'))}) -> output$right_sidebar.config_opts
+    # # render the same ui for all config sidebar tabs
+    # ##### move this to the process seurat module ###
+    # renderUI({tagList(prettyRadioButtons(inputId='process_seurat-picker', label='Available Seurat objects',
+    #                                      choiceNames=available_seurats$choiceName, choiceValues=available_seurats$choiceValue, selected='',
+    #                                      icon=icon('check'), bigger=TRUE, animation='jelly'),
+    #                   seurat_object_options.ui(id='seuratvis', seurat=seurat))}) -> output$right_sidebar.config_opts
   })
+
+
+  # renderUI({tagList(prettyRadioButtons(inputId='process_seurat-picker', label='Available Seurat objects',
+  #                                      choiceNames=available_seurats$choiceName, choiceValues=available_seurats$choiceValue, selected='',
+  #                                      icon=icon('check'), bigger=TRUE, animation='jelly'),
+  #                   seurat_object_options.ui(id='seuratvis', seurat=seurat))}) -> output$right_sidebar.config_opts
+
 
   # ###############################################################################################
   # any code to exectue when the session ends
