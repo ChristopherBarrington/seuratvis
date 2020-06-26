@@ -26,6 +26,7 @@ seurat_object_choices.ui <- function(id, available_seurats) {
 }
 
 #'
+#' @import purrr
 #' 
 process_seurat.server <- function(input, output, session, server_input, server_output, server_session, available_seurats) {
   seurat <- reactiveValues()
@@ -58,7 +59,6 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$features_in_assays <- list()
     seurat$reductions <- Reductions(s)
     seurat$assays <- Assays(s)
-    seurat$gene_modules <- s@misc$gene_modules
     seurat$cluster_resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))
     seurat$all_idents <- {resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}
     seurat$mart <- s@misc$mart
@@ -122,12 +122,15 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$proportion_mt_updated <- rnorm(1)})
 
   ## pick out proportion of mitochondria reads per cell
-  observe(label='process_seurat/proportion_mt_picker', x={
+  observe(label='process_seurat/gene_modules_regex', x={
     req(input$gene_modules_regex_text)
     req(seurat$metadata)
 
-    seurat$gene_modules_regex <- input$gene_modules_regex_text
-    seurat$gene_module_scores <- select(seurat$metadata, matches(input$gene_modules_regex_text))})
+    gm_regex <- input$gene_modules_regex_text
+    
+    seurat$gene_modules <- seurat$object@misc$gene_modules %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
+    seurat$gene_modules_regex <- gm_regex
+    seurat$gene_module_scores <- select(seurat$metadata, matches(input$gene_modules_regex_text)) %>% purrr::set_names(str_remove, pattern=regex(gm_regex))})
 
   # return the reactive
   seurat
