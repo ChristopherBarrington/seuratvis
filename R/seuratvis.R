@@ -51,7 +51,7 @@ shinyAppUI <- function(...) {
   append(contents,
          list()) %>%
     do.call(what=tabItems) %>%
-    dashboardBody(cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
+    dashboardBody(rclipboardSetup(), cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
 
   # sidebar definition
   menus %>% append(list(actionButton(inputId='clickme', label='!', icon=icon('radiation'), with='70x'))) %>%

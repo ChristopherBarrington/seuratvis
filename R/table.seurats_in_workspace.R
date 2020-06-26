@@ -96,7 +96,6 @@ seurats_in_workspace.server <- function(input, output, session) {
 
   ## render the datatable
   DT::renderDataTable({
-    session$ns('') %>% sprintf(fmt='### %savailable_seurats.server-renderDataTable') %>% message()
     data_to_show %>%
       DT::datatable(colnames=formatted_colnames,
                     rownames=FALSE,

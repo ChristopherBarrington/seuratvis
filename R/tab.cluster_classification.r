@@ -53,7 +53,6 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
 gene_module_score_in_clusters_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
   # build the sidebar ui
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
-    print(server_input$left_sidebar)
     tab <- 'gene_module_score_in_clusters_tab'
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')

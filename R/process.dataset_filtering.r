@@ -4,8 +4,7 @@ dataset_filtering.server <- function(input, output, session, seurat) {
   reactiveValues() -> filtering_parameters
 
   # update the reactive when the filters are changed
-  observe(label='dataset_filtering/reaction', x={
-    req(filtering_parameters$metadata)
+  observe(, label='dataset_filtering/reaction', x={
     req(filtering_parameters$n_umi_min)
     req(filtering_parameters$n_umi_max)
     req(filtering_parameters$n_features_min)
@@ -20,7 +19,6 @@ dataset_filtering.server <- function(input, output, session, seurat) {
     req(seurat$proportion_mt_variable)
 
     # copy the variables
-    cell_metadata <- filtering_parameters$metadata
     min_umi_per_cell <- filtering_parameters$n_umi_min
     max_umi_per_cell <- filtering_parameters$n_umi_max
     min_features_per_cell <- filtering_parameters$n_features_min
@@ -37,7 +35,7 @@ dataset_filtering.server <- function(input, output, session, seurat) {
     ({seurat$n_umi_values %>% between(left=min_umi_per_cell, right=max_umi_per_cell)} &
      {seurat$n_features_values %>% between(left=min_features_per_cell, right=max_features_per_cell)} &
      {seurat$proportion_mt_values<=max_percent_mitochondria}) %>%
-      filter(.data=cell_metadata) -> filtered_cell_metadata
+      filter(.data=seurat$metadata) -> filtered_cell_metadata
 
     # pull out the filtered variables
     filtered_n_umi_values <- pluck(filtered_cell_metadata, seurat$n_umi_variable)
@@ -65,7 +63,7 @@ dataset_filtering.server <- function(input, output, session, seurat) {
     filtering_parameters$n_umi_max <- seurat$n_umi_values_max
     filtering_parameters$n_features_min <- seurat$n_features_values_min
     filtering_parameters$n_features_max <- seurat$n_features_values_max
-    filtering_parameters$proportion_mt_max <- seurat$proportion_mt_values_max})
+    filtering_parameters$proportion_mt_max <- seurat$proportion_mt_values_max %>% add(0.05) %>% round(digits=1)})
 
   # return the reactive values list
   return(filtering_parameters)

@@ -52,7 +52,8 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$proportion_mt_updated <- NULL
 
     seurat$object <- s
-    seurat$formatted_project_name <- Project(s) %>% reformat_project_name()
+    seurat$project <- Project(s)
+    seurat$formatted_project_name <- seurat$project %>% reformat_project_name()
     seurat$metadata <- s@meta.data
     seurat$features_in_assays <- list()
     seurat$reductions <- Reductions(s)

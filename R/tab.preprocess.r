@@ -38,16 +38,20 @@ cell_filtering_tab.server <- function(input, output, session, server_input, serv
     tab <- 'cell_filtering_tab'
     if(server_input$left_sidebar==tab) {    
       tab %<>% str_c('-')
-      # renderUI({tagList(filter_umi_per_cell.ui(id=tab, seurat=seurat),
-      #                   filter_features_per_cell.ui(id=tab, seurat=seurat, resolution=TRUE, label_switch=TRUE),
-      #                   filter_mt_umi.ui(id=tab, seurat=seurat),
-      #                   show_filtering_paramters.ui())})  -> server_output$right_sidebar.data_opts
+      renderUI({tagList(filter_n_umi.ui(id=tab, seurat=seurat),
+                        filter_n_features.ui(id=tab, seurat=seurat),
+                        filter_proportion_mt.ui(id=tab, seurat=seurat),
+                        show_filtering_parameters.ui(id=tab, label='Cell filtering parameters'))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
   filtering_parameters <- callModule(module=dataset_filtering.server, id='filtering', seurat=seurat)
 
   callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
+
+  callModule(module=filter_n_umi.server, id='', cell_filtering=filtering_parameters)
+  callModule(module=filter_n_features.server, id='', cell_filtering=filtering_parameters)
+  callModule(module=filter_proportion_mt.server, id='', cell_filtering=filtering_parameters)
 
   callModule(module=boxplot_plot.n_features.server, id='n_features', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=boxplot_plot.n_umi.server, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
@@ -60,6 +64,8 @@ cell_filtering_tab.server <- function(input, output, session, server_input, serv
   callModule(module=density_plot.n_features.server, id='n_features', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=density_plot.n_umi.server, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=density_plot.proportion_mt.server, id='proportion_mt', seurat=seurat, cell_filtering=filtering_parameters)
+
+  callModule(module=show_filtering_parameters.server, id='', server_output=server_output, seurat=seurat, cell_filtering=filtering_parameters)
 }
 
 dimensionality_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
