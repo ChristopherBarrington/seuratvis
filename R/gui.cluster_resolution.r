@@ -1,6 +1,6 @@
 #'
 #' 
-cluster_picker.ui <- function(id, seurat, resolution, picker, label_switch) {
+cluster_picker.ui <- function(id, seurat, resolution=TRUE, picker=TRUE, label_switch=TRUE) {
   if(!missing(resolution) && is.logical(resolution) && resolution) resolution <- list()
   if(!missing(picker) && is.logical(picker) && picker) picker <- list()
   if(!missing(label_switch) && is.logical(label_switch) && label_switch) label_switch <- list()

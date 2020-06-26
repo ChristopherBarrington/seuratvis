@@ -14,10 +14,10 @@ highlight_features.tab <- function() {
          tabItem(tabName='highlight_feature_and_clusters_tab',
                  h1('Highlight a feature and clusters'),
                  fluidRow(project_name_text_box.ui(id=NS('highlight_feature_and_clusters_tab', 'project_name'), width=12)),
-                 fluidRow(boxPlus(title='All clusters in map', closable=FALSE, width=4, dimension_reduction.plot(id='highlight_feature_and_clusters_tab-all_clusters')),
-                          boxPlus(title='Selected feature', closable=FALSE, width=4, dimension_reduction.plot(id='highlight_feature_and_clusters_tab-picked_feature')),
-                          boxPlus(title='Selected cluster(s)', closable=FALSE, width=4, dimension_reduction.plot(id='highlight_feature_and_clusters_tab-picked_clusters')),
-                          boxPlus(title='Feature values in clusters', closable=FALSE, width=4, feature_value_per_cluster.plot(id='highlight_feature_and_clusters_tab-feature_value_per_cluster'))))) -> content
+                 fluidRow(boxPlus(title='All clusters in map', closable=FALSE, width=3, dimension_reduction.plot(id='highlight_feature_and_clusters_tab-all_clusters')),
+                          boxPlus(title='Selected feature', closable=FALSE, width=3, dimension_reduction.plot(id='highlight_feature_and_clusters_tab-picked_feature')),
+                          boxPlus(title='Selected cluster(s)', closable=FALSE, width=3, dimension_reduction.plot(id='highlight_feature_and_clusters_tab-picked_clusters')),
+                          boxPlus(title='Feature values in clusters', closable=FALSE, width=3, feature_value_per_cluster.plot(id='highlight_feature_and_clusters_tab-feature_value_per_cluster'))))) -> content
 
     menus %<>% append(list(menu_item))
     contents %<>% append(content)})
@@ -30,7 +30,7 @@ highlight_feature_tab.server <- function(input, output, session, server_input, s
     if(server_input$left_sidebar==tab) {    
       tab %<>% str_c('-')
       renderUI({tagList(dimension_reduction.ui(id=tab, seurat=seurat),
-                        cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, label_switch=TRUE),
+                        cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=FALSE, label_switch=TRUE),
                         feature_picker.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList(point_size.ui(id=tab),
                         opacity.ui(id=tab))}) -> server_output$right_sidebar.plotting_opts}})
