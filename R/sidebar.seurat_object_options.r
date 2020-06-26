@@ -47,6 +47,10 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     # ensure we are using RNA assay
     DefaultAssay(s) <- 'RNA'
 
+    seurat$n_features_updated <- NULL
+    seurat$n_umi_updated <- NULL
+    seurat$proportion_mt_updated <- NULL
+
     seurat$object <- s
     seurat$formatted_project_name <- Project(s) %>% reformat_project_name()
     seurat$metadata <- s@meta.data
@@ -80,10 +84,12 @@ process_seurat.server <- function(input, output, session, server_input, server_o
 
     seurat$n_features_variable <- input$n_features_picker
     seurat$n_features_values <- select(seurat$metadata, input$n_features_picker) %>% unlist(use.names=FALSE)
-    seurat$n_features_min <- min(seurat$n_features_values)
+    seurat$n_features_values_min <- min(seurat$n_features_values)
     seurat$n_features_values_max <- max(seurat$n_features_values)
-    seurat$n_features_mean <- mean(seurat$n_features_values)
-    seurat$n_features_median <- median(seurat$n_features_values)})
+    seurat$n_features_values_mean <- mean(seurat$n_features_values)
+    seurat$n_features_values_median <- median(seurat$n_features_values)
+
+    seurat$n_features_updated <- rnorm(1)})
 
   ## pick out total umi per cell
   observe(label='process_seurat/n_umi_picker', x={
@@ -92,10 +98,12 @@ process_seurat.server <- function(input, output, session, server_input, server_o
 
     seurat$n_umi_variable <- input$n_umi_picker
     seurat$n_umi_values <- select(seurat$metadata, input$n_umi_picker) %>% unlist(use.names=FALSE)
-    seurat$n_umi_min <- min(seurat$n_umi_values)
+    seurat$n_umi_values_min <- min(seurat$n_umi_values)
     seurat$n_umi_values_max <- max(seurat$n_umi_values)
-    seurat$n_umi_mean <- mean(seurat$n_umi_values)
-    seurat$n_umi_median <- median(seurat$n_umi_values)})
+    seurat$n_umi_values_mean <- mean(seurat$n_umi_values)
+    seurat$n_umi_values_median <- median(seurat$n_umi_values)
+
+    seurat$n_umi_updated <- rnorm(1)})
 
   ## pick out proportion of mitochondria reads per cell
   observe(label='process_seurat/proportion_mt_picker', x={
@@ -104,10 +112,12 @@ process_seurat.server <- function(input, output, session, server_input, server_o
 
     seurat$proportion_mt_variable <- input$proportion_mt_picker
     seurat$proportion_mt_values <- select(seurat$metadata, input$proportion_mt_picker) %>% unlist(use.names=FALSE)
-    seurat$proportion_mt_min <- min(seurat$proportion_mt_values)
+    seurat$proportion_mt_values_min <- min(seurat$proportion_mt_values)
     seurat$proportion_mt_values_max <- max(seurat$proportion_mt_values)
-    seurat$proportion_mt_mean <- mean(seurat$proportion_mt_values)
-    seurat$proportion_mt_median <- median(seurat$proportion_mt_values)})
+    seurat$proportion_mt_values_mean <- mean(seurat$proportion_mt_values)
+    seurat$proportion_mt_values_median <- median(seurat$proportion_mt_values)
+
+    seurat$proportion_mt_updated <- rnorm(1)})
 
   ## pick out proportion of mitochondria reads per cell
   observe(label='process_seurat/proportion_mt_picker', x={

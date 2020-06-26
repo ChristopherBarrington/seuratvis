@@ -8,21 +8,18 @@ preprocessing.tab <- function() {
     list(tabItem(tabName='cell_filtering_tab',
                  h1('Identify cells that can be removed with quality filters'),
                  fluidRow(project_name_text_box.ui(id=NS('cell_filtering_tab', 'project_name'), width=12)),
-                 fluidRow(boxPlus(title='UMI per cell', closable=FALSE, width=12, status='primary'
-                                  # boxplot.plot(id='cell_filtering_tab-umi_per_cell'),
-                                  # knee.plot(id='cell_filtering_tab-umi_per_cell'),
-                                  # density_line.plot(id='cell_filtering_tab-umi_per_cell')
-                                  )),
-                 fluidRow(boxPlus(title='Features per cell', closable=FALSE, width=12, status='primary'
-                                  # boxplot.plot(id='cell_filtering_tab-picked_feature'),
-                                  # knee.plot(id='cell_filtering_tab-picked_feature'),
-                                  # density_line.plot(id='cell_filtering_tab-picked_feature')
-                                  )),
-                 fluidRow(boxPlus(title='Mitochondrial UMI', closable=FALSE, width=12, status='primary'
-                                  # boxplot.plot(id='cell_filtering_tab-mt_umi'),
-                                  # knee.plot(id='cell_filtering_tab-mt_umi'),
-                                  # density_line.plot(id='cell_filtering_tab-mt_umi')
-                                  ))),
+                 fluidRow(boxPlus(title='UMI per cell', closable=FALSE, width=12, status='primary',
+                                  column(width=2, offset=1, boxplot.plot(id=NS('cell_filtering_tab', 'n_umi'))),
+                                  column(width=3, offset=0, knee.plot(id=NS('cell_filtering_tab', 'n_umi'))),
+                                  column(width=4, offset=1, density.plot(id=NS('cell_filtering_tab', 'n_umi'))))),
+                 fluidRow(boxPlus(title='Features per cell', closable=FALSE, width=12, status='primary',
+                                  column(width=2, offset=1, boxplot.plot(id=NS('cell_filtering_tab', 'n_features'))),
+                                  column(width=3, offset=0, knee.plot(id=NS('cell_filtering_tab', 'n_features'))),
+                                  column(width=4, offset=1, density.plot(id=NS('cell_filtering_tab', 'n_features'))))),
+                 fluidRow(boxPlus(title='Mitochondrial UMI', closable=FALSE, width=12, status='primary',
+                                  column(width=2, offset=1, boxplot.plot(id=NS('cell_filtering_tab', 'proportion_mt'))),
+                                  column(width=3, offset=0, knee.plot(id=NS('cell_filtering_tab', 'proportion_mt'))),
+                                  column(width=4, offset=1, density.plot(id=NS('cell_filtering_tab', 'proportion_mt')))))),
          tabItem(tabName='dimensionality_tab',
                  h1('Determine the dimensionality of a dataset'),
                  fluidRow(project_name_text_box.ui(id=NS('dimensionality_tab', 'project_name'), width=12)),
@@ -41,14 +38,28 @@ cell_filtering_tab.server <- function(input, output, session, server_input, serv
     tab <- 'cell_filtering_tab'
     if(server_input$left_sidebar==tab) {    
       tab %<>% str_c('-')
-      renderUI({tagList(filter_umi_per_cell.ui(id=tab, seurat=seurat),
-                        filter_features_per_cell.ui(id=tab, seurat=seurat, resolution=TRUE, label_switch=TRUE),
-                        filter_mt_umi.ui(id=tab, seurat=seurat),
-                        show_filtering_paramters.ui())})  -> server_output$right_sidebar.data_opts
+      # renderUI({tagList(filter_umi_per_cell.ui(id=tab, seurat=seurat),
+      #                   filter_features_per_cell.ui(id=tab, seurat=seurat, resolution=TRUE, label_switch=TRUE),
+      #                   filter_mt_umi.ui(id=tab, seurat=seurat),
+      #                   show_filtering_paramters.ui())})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
+  filtering_parameters <- callModule(module=dataset_filtering.server, id='filtering', seurat=seurat)
+
   callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
+
+  callModule(module=boxplot_plot.n_features.server, id='n_features', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=boxplot_plot.n_umi.server, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=boxplot_plot.proportion_mt.server, id='proportion_mt', seurat=seurat, cell_filtering=filtering_parameters)
+
+  callModule(module=knee_plot.n_features.server, id='n_features', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=knee_plot.n_umi.server, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=knee_plot.proportion_mt.server, id='proportion_mt', seurat=seurat, cell_filtering=filtering_parameters)
+
+  callModule(module=density_plot.n_features.server, id='n_features', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=density_plot.n_umi.server, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=density_plot.proportion_mt.server, id='proportion_mt', seurat=seurat, cell_filtering=filtering_parameters)
 }
 
 dimensionality_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {

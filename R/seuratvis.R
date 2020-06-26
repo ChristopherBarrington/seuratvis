@@ -82,11 +82,12 @@ shinyAppServer <- function(input, output, session) {
   ## Seurat object interaction modules
   available_seurats <- callModule(module=available_seurats_tab.server, id='configuration_tab', server_input=input, server_output=output, server_session=session)
   seurat <- callModule(module=process_seurat.server, id='process_seurat', server_input=input, server_output=output, server_session=session, available_seurats=available_seurats)
-  
+
   ## load the filter_seurat module
-  # cell_filtering <- callModule(module=cell_filtering.server, id='seuratvis', seurat=seurat)
+  # dataset_filtering <- reactiveValues(foo='bar') #callModule(module=cell_filtering.server, id='seuratvis', seurat=seurat)
 
   ## load the servers for the analysis windows (menuItem or menuSubItem from the sidebar)
+  callModule(module=cell_filtering_tab.server, id='cell_filtering_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=highlight_feature_tab.server, id='highlight_feature_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=highlight_feature_and_clusters_tab.server, id='highlight_feature_and_clusters_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=gene_module_score_in_clusters_tab.server, id='gene_module_score_in_clusters_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
