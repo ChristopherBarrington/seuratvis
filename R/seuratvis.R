@@ -102,7 +102,7 @@ shinyAppServer <- function(input, output, session) {
   # callModule(module=available_seurats.server, id='load_dataset')
   # seurat <- callModule(module=seurat_object.server, id='load_dataset')  # callModule(module=load_a_seurat.server, id='load_dataset')
   available_seurats <- callModule(module=available_seurats_tab.server, id='configuration_tab', server_input=input, server_output=output, server_session=session)
-  seurat <- callModule(module=process_seurat.server, id='configuration_tab', server_input=input, server_output=output, server_session=session, available_seurats=available_seurats)
+  seurat <- callModule(module=process_seurat.server, id='process_seurat', server_input=input, server_output=output, server_session=session, available_seurats=available_seurats)
   # renderUI({checkboxInput(inputId='foo', label='bar', choices=available_seurats$choiceName)}) -> output$right_sidebar.config_opts
   
   ## render the seurat config right sidebar ui

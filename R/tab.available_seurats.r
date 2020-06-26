@@ -28,37 +28,6 @@ available_seurats_tab.server <- function(input, output, session, server_input, s
       renderUI({p('No options')}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
-  callModule(seurats_in_workspace.server, id='seurats_table')
+  return(callModule(seurats_in_workspace.server, id='seurats_table'))
 }
 
-#'
-#' 
-process_seurat.server <- function(input, output, session, server_input, server_output, server_session, available_seurats) {
-  seurat <- reactiveValues()
-
-  # render the config right sidebar tab when the server starts
-  renderUI({tagList(prettyRadioButtons(inputId=NS('process_seurat','picker'), label='Available Seurat objects!',
-                                       choiceNames=available_seurats$choiceName, choiceValues=available_seurats$choiceValue, selected='',
-                                       icon=icon('check'), bigger=TRUE, animation='jelly'),
-                    seurat_object_options.ui(id='process_seurat', seurat=seurat))}) -> server_output$right_sidebar.config_opts
-
-  callModule(module=seurat_object_options.server, id='process_seurat', server_input=server_input, server_session=server_session, seurat=seurat)
-
-  # react when a seurat is selected
-  observeEvent(server_input[['process_seurat-picker']], {
-    s <- eval(parse(text=server_input[['process_seurat-picker']]))
-    seurat$object <- s
-    seurat$formatted_project_name <- Project(s) %>% reformat_project_name()
-    seurat$metadata <- s@meta.data
-    seurat$features_in_assays <- list()
-    seurat$reductions <- Reductions(s)
-    seurat$assays <- Assays(s)
-    seurat$gene_module_scores <- select_at(s@meta.data, vars(starts_with('GeneModule-')))
-    seurat$gene_modules <- s@misc$gene_modules
-    seurat$cluster_resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))
-    seurat$all_idents <- {resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}
-  })
-
-  # return the reactive
-  seurat
-}
