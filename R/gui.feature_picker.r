@@ -111,13 +111,13 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
 
   ## use the selected feature (it may be a feature or metadata)
   # observeEvent(eventExpr=input$picked_feature, handlerExpr={
-  observeEvent(eventExpr=picked_feature$name, handlerExpr={
+  observe(label='feature_picker/fetch', x={
     # make sure these elements are defined
     req(seurat$object)
     req(input$feature_type)
+    req(picked_feature$name)
 
     # create variables for shorthand
-    picked <- input$picked_feature
     picked <- picked_feature$name
 
     # get the values for the selected feature(s) from the loaded Seurat
