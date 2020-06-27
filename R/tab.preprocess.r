@@ -27,10 +27,10 @@ preprocessing.tab <- function() {
          tabItem(tabName='dimensionality_tab',
                  h1('Determine the dimensionality of a dataset'),
                  fluidRow(dataset_info_text_box.ui(id=NS('dimensionality_tab', 'project_name'), width=12)),
-                 fluidRow(boxPlus(title='Elbow plot', closable=FALSE, width=6, status='primary'),
-                          boxPlus(title='Top contributing features', closable=FALSE, width=6, status='primary'),
-                          boxPlus(title='JackStraw plot', closable=FALSE, width=6, status='primary'),
-                          boxPlus(title='JackStraw p-values', closable=FALSE, width=6, status='primary')))) -> content
+                 fluidRow(boxPlus(title='Elbow plot', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','elbow'))),
+                          boxPlus(title='Top contributing features', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','top_features'))),
+                          boxPlus(title='JackStraw plot', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','jackstraw'))),
+                          boxPlus(title='JackStraw p-values', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','jackstraw_pvalue')))))) -> content
 
     menus %<>% append(list(menu_item))
     contents %<>% append(content)})
@@ -82,9 +82,20 @@ dimensionality_tab.server <- function(input, output, session, server_input, serv
     tab <- 'dimensionality_tab'
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
-      renderUI({tagList()})  -> server_output$right_sidebar.data_opts
+      renderUI({tagList(dimension_reduction.ui(id=tab, seurat=seurat, regex='^pca'),
+                        components_selector.ui(id=tab),
+                        component_picker.ui(id=tab),
+                        tags$style(type='text/css', '.irs-slider.from, .to {visibility: hidden !important;}'))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
+  reduction_picker <- callModule(module=dimension_reduction.server, id='', seurat=seurat)
+  components_picker <- callModule(module=components_selector.server, id='', seurat=seurat, picked_reduction=reduction_picker)
+
   callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
+
+  callModule(module=dimensionality.elbow, id='elbow', seurat=seurat, picked_reduction=reduction_picker)
+  callModule(module=dimensionality.jackstraw, id='jackstraw', seurat=seurat, picked_reduction=reduction_picker, picked_components=components_picker)
+  callModule(module=dimensionality.jackstraw_pvalue, id='jackstraw_pvalue', seurat=seurat, picked_reduction=reduction_picker)
+  callModule(module=dimensionality.top_features_pca_heatmap, id='top_features', seurat=seurat, picked_reduction=reduction_picker, picked_components=components_picker)
 }
