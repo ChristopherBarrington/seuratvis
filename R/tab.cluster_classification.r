@@ -11,11 +11,11 @@ cluster_classification.tab <- function() {
 
     list(tabItem(tabName='findmarkers_results_tab',
                  h1('TITLE'),
-                 fluidRow(project_name_text_box.ui(id=NS('findmarkers_results_tab', 'project_name'), width=12)),
+                 fluidRow(dataset_info_text_box.ui(id=NS('findmarkers_results_tab', 'project_name'), width=12)),
                  fluidRow(boxPlus(title='Results table', closable=FALSE, width=12, status='primary'))),
          tabItem(tabName='gene_module_score_in_clusters_tab',
                  h1('Gene module score in clusters'),
-                 fluidRow(project_name_text_box.ui(id=NS('gene_module_score_in_clusters_tab', 'project_name'), width=12)),
+                 fluidRow(dataset_info_text_box.ui(id=NS('gene_module_score_in_clusters_tab', 'project_name'), width=12)),
                  column(width=7,
                         boxPlus(title='Gene module score', closable=FALSE, width=12, height='75vh', status='primary', 
                                 feature_ridges.plot(id=NS('gene_module_score_in_clusters_tab', 'scores_plot')))),
@@ -26,7 +26,7 @@ cluster_classification.tab <- function() {
                                 genes_in_modules.table(id=NS('gene_module_score_in_clusters_tab', 'modules_table'))))),
          tabItem(tabName='gene_module_scores_in_a_cluster_tab',
                  h1('Gene modules'),
-                 fluidRow(project_name_text_box.ui(id=NS('gene_module_scores_in_a_cluster_tab', 'project_name'), width=12)),
+                 fluidRow(dataset_info_text_box.ui(id=NS('gene_module_scores_in_a_cluster_tab', 'project_name'), width=12)),
                  fluidRow(column(width=12, feature_ridges.plot(id=NS('gene_module_scores_in_a_cluster_tab', 'scores_plot')))))) -> content
 
     menus %<>% append(list(menu_item))
@@ -45,7 +45,7 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
-  callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
+  callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
 }
 
 #'
@@ -67,7 +67,7 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
   feature_picker <- callModule(module=feature_picker.server, id='', seurat=seurat)
   colour_picker <- list(low='linen', mid='white', high='darkviolet', background=rgb(255, 255, 255, 255, max=255))
 
-  callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
+  callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
   callModule(module=feature_ridge_by_idents.server, id='scores_plot', picked_feature=feature_picker, picked_clusters=cluster_resolution)
   callModule(module=dimension_reduction.show_selected_clusters.server, id='map', dimension_reduction=dimension_reduction, point_size=list(size=0.6), cluster_resolution=cluster_resolution, picked_colours=colour_picker)
   callModule(module=genes_in_modules.server, id='modules_table', seurat=seurat, picked_feature=feature_picker)

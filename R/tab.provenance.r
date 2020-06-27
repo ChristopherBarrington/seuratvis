@@ -8,7 +8,7 @@ provenance.tab <- function() {
 
     tabItem(tabName=tab,
             h1('View the functions used to create this Seurat object'),
-            fluidRow(project_name_text_box.ui(id=NS(tab, 'project_name'), width=12)),
+            fluidRow(dataset_info_text_box.ui(id=NS(tab, 'project_name'), width=12)),
             ace_editor.ui(id=NS(tab, 'editor'))) -> content
 
     menus %<>% append(list(menu_item))
@@ -29,6 +29,6 @@ provenance_tab.server <- function(input, output, session, server_input, server_o
   # call the modules for this tab
   provenace_picker <- callModule(module=provenace_picker.server, id='', seurat=seurat)
 
-  callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
+  callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
   callModule(module=ace_editor.server, id='editor', display_text=provenace_picker$script)
 }

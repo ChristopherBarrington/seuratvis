@@ -55,7 +55,7 @@ shinyAppUI <- function(...) {
     dashboardBody(rclipboardSetup(), cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
 
   # sidebar definition
-  menus %>% append(list(actionButton(inputId='clickme', label='!', icon=icon('radiation'), with='70x'))) %>%
+  menus %>% append(list(actionButton(inputId='clickme', label='', icon=icon('radiation'), with='70x'))) %>%
     sidebarMenu(id='left_sidebar') %>%
     dashboardSidebar() -> left_dashboard_sidebar
 

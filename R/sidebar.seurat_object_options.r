@@ -56,6 +56,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$project <- Project(s)
     seurat$formatted_project_name <- seurat$project %>% reformat_project_name()
     seurat$metadata <- s@meta.data
+    seurat$n_cells <- nrow(seurat$metadata)
     seurat$features_in_assays <- list()
     seurat$reductions <- Reductions(s)
     seurat$assays <- Assays(s)
@@ -101,6 +102,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
 
     seurat$n_umi_variable <- input$n_umi_picker
     seurat$n_umi_values <- select(seurat$metadata, input$n_umi_picker) %>% unlist(use.names=FALSE)
+    seurat$n_umi_sum <- sum(seurat$n_umi_values)
     seurat$n_umi_values_min <- min(seurat$n_umi_values)
     seurat$n_umi_values_max <- max(seurat$n_umi_values)
     seurat$n_umi_values_mean <- mean(seurat$n_umi_values)

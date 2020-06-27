@@ -7,7 +7,11 @@ preprocessing.tab <- function() {
 
     list(tabItem(tabName='cell_filtering_tab',
                  h1('Identify cells that can be removed with quality filters'),
-                 fluidRow(project_name_text_box.ui(id=NS('cell_filtering_tab', 'project_name'), width=12)),
+                 fluidRow(dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'project_name'), width=12),
+                          dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'n_umi'), width=3),
+                          dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'n_cells'), width=3),
+                          dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'n_umi_per_cell'), width=3),
+                          dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'n_features_per_cell'), width=3)),
                  fluidRow(boxPlus(title='UMI per cell', closable=FALSE, width=12, status='primary',
                                   column(width=2, offset=1, boxplot.plot(id=NS('cell_filtering_tab', 'n_umi'))),
                                   column(width=3, offset=0, knee.plot(id=NS('cell_filtering_tab', 'n_umi'))),
@@ -22,7 +26,7 @@ preprocessing.tab <- function() {
                                   column(width=4, offset=1, density.plot(id=NS('cell_filtering_tab', 'proportion_mt')))))),
          tabItem(tabName='dimensionality_tab',
                  h1('Determine the dimensionality of a dataset'),
-                 fluidRow(project_name_text_box.ui(id=NS('dimensionality_tab', 'project_name'), width=12)),
+                 fluidRow(dataset_info_text_box.ui(id=NS('dimensionality_tab', 'project_name'), width=12)),
                  fluidRow(boxPlus(title='Elbow plot', closable=FALSE, width=6, status='primary'),
                           boxPlus(title='Top contributing features', closable=FALSE, width=6, status='primary'),
                           boxPlus(title='JackStraw plot', closable=FALSE, width=6, status='primary'),
@@ -46,8 +50,12 @@ cell_filtering_tab.server <- function(input, output, session, server_input, serv
 
   # call the modules for this tab
   filtering_parameters <- callModule(module=dataset_filtering.server, id='filtering', seurat=seurat)
-
-  callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
+  
+  callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
+  callModule(module=dataset_info_text_box.n_filtered_umi, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=dataset_info_text_box.n_filtered_cells, id='n_cells', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=dataset_info_text_box.n_umi_per_filtered_cell, id='n_umi_per_cell', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=dataset_info_text_box.n_features_per_filtered_cell, id='n_features_per_cell', seurat=seurat, cell_filtering=filtering_parameters)
 
   callModule(module=filter_n_umi.server, id='', cell_filtering=filtering_parameters)
   callModule(module=filter_n_features.server, id='', cell_filtering=filtering_parameters)
@@ -78,5 +86,5 @@ dimensionality_tab.server <- function(input, output, session, server_input, serv
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
-  callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
+  callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
 }

@@ -7,14 +7,14 @@ highlight_features.tab <- function() {
 
     list(tabItem(tabName='highlight_feature_tab',
                  h1('Highlight a feature on a map'),
-                 fluidRow(project_name_text_box.ui(id=NS('highlight_feature_tab', 'project_name'), width=6),
+                 fluidRow(dataset_info_text_box.ui(id=NS('highlight_feature_tab', 'project_name'), width=6),
                           picked_feature_and_description_text_box.ui(id=NS('highlight_feature_tab', 'feature_description'), width=6)),
                  fluidRow(boxPlus(title='All clusters in map', closable=FALSE, width=4, dimension_reduction.plot(id='highlight_feature_tab-all_clusters')),
                           boxPlus(title='Selected feature', closable=FALSE, width=4, dimension_reduction.plot(id='highlight_feature_tab-picked_feature')),
                           boxPlus(title='Feature values in clusters', closable=FALSE, width=4, feature_value_per_cluster.plot(id='highlight_feature_tab-feature_value_per_cluster')))),
          tabItem(tabName='highlight_feature_and_clusters_tab',
                  h1('Highlight a feature and clusters'),
-                 fluidRow(project_name_text_box.ui(id=NS('highlight_feature_and_clusters_tab', 'project_name'), width=6),
+                 fluidRow(dataset_info_text_box.ui(id=NS('highlight_feature_and_clusters_tab', 'project_name'), width=6),
                           picked_feature_and_description_text_box.ui(id=NS('highlight_feature_and_clusters_tab', 'feature_description'), width=6)),
                  fluidRow(boxPlus(title='All clusters in map', closable=FALSE, width=3, dimension_reduction.plot(id='highlight_feature_and_clusters_tab-all_clusters')),
                           boxPlus(title='Selected feature', closable=FALSE, width=3, dimension_reduction.plot(id='highlight_feature_and_clusters_tab-picked_feature')),
@@ -49,7 +49,7 @@ highlight_feature_tab.server <- function(input, output, session, server_input, s
   callModule(module=dimension_reduction.highlight_feature.server, id='picked_feature', dimension_reduction=dimension_reduction, picked_feature=feature_picker, picked_colours=colour_picker, opacity=opacity, point_size=point_size)
   callModule(module=feature_value_per_cluster.server, id='feature_value_per_cluster', picked_feature=feature_picker, cluster_resolution=cluster_resolution, picked_colours=colour_picker)
 
-  callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
+  callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
   callModule(module=picked_feature_and_description_text_box.server, id='feature_description', seurat=seurat, picked_feature=feature_picker)
 }
 
@@ -78,6 +78,6 @@ highlight_feature_and_clusters_tab.server <- function(input, output, session, se
   callModule(module=dimension_reduction.show_selected_clusters.server, id='picked_clusters', dimension_reduction=dimension_reduction, picked_colours=colour_picker, point_size=point_size, cluster_resolution=cluster_resolution)
   callModule(module=feature_value_per_cluster.server, id='feature_value_per_cluster', picked_feature=feature_picker, cluster_resolution=cluster_resolution, picked_colours=colour_picker)
 
-  callModule(module=project_name_text_box.server, id='project_name', seurat=seurat)
+  callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
   callModule(module=picked_feature_and_description_text_box.server, id='feature_description', seurat=seurat, picked_feature=feature_picker)
 }
