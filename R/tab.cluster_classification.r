@@ -27,7 +27,19 @@ cluster_classification.tab <- function() {
          tabItem(tabName='gene_module_scores_in_a_cluster_tab',
                  h1('Gene modules'),
                  fluidRow(dataset_info_text_box.ui(id=NS('gene_module_scores_in_a_cluster_tab', 'project_name'), width=12)),
-                 fluidRow(column(width=12, feature_ridges.plot(id=NS('gene_module_scores_in_a_cluster_tab', 'scores_plot')))))) -> content
+
+                 # fluidRow(column(width=12, feature_ridges.plot(id=NS('gene_module_scores_in_a_cluster_tab', 'scores_plot'))))
+
+                 column(width=7,
+                        boxPlus(title='Gene module score', closable=FALSE, width=12, height='75vh', status='primary', 
+                                feature_ridges.plot(id=NS('gene_module_scores_in_a_cluster_tab', 'scores_plot')))),
+                 column(width=5,
+                        boxPlus(title='Map', closable=FALSE, width=12, height='35vh', status='primary',
+                                dimension_reduction.plot(id=NS('gene_module_scores_in_a_cluster_tab', 'map'))),
+                        boxPlus(title='Genes', closable=FALSE, width=12, height='35vh', status='primary',
+                                genes_in_modules.table(id=NS('gene_module_scores_in_a_cluster_tab', 'modules_table'))))
+
+                 )) -> content
 
     menus %<>% append(list(menu_item))
     contents %<>% append(content)})
@@ -62,13 +74,39 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
-  dimension_reduction <- callModule(module=dimension_reduction.server, id='', seurat=seurat, regex='.*')
+  dimension_reduction <- callModule(module=dimension_reduction.server, id='', seurat=seurat)
   cluster_resolution <- callModule(module=cluster_picker.server, id='', seurat=seurat)
   feature_picker <- callModule(module=feature_picker.server, id='', seurat=seurat)
   colour_picker <- list(low='linen', mid='white', high='darkviolet', background=rgb(255, 255, 255, 255, max=255))
 
   callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
   callModule(module=feature_ridge_by_idents.server, id='scores_plot', picked_feature=feature_picker, picked_clusters=cluster_resolution)
+  callModule(module=dimension_reduction.show_selected_clusters.server, id='map', dimension_reduction=dimension_reduction, point_size=list(size=0.6), cluster_resolution=cluster_resolution, picked_colours=colour_picker)
+  callModule(module=genes_in_modules.server, id='modules_table', seurat=seurat, picked_feature=feature_picker)
+}
+
+
+#'
+#' 
+gene_module_scores_in_a_cluster_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
+  # build the sidebar ui
+  observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
+    tab <- 'gene_module_scores_in_a_cluster_tab'
+    if(server_input$left_sidebar==tab) {
+      tab %<>% str_c('-')
+      renderUI({tagList(cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=FALSE, multi_picker=FALSE),
+                        feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=TRUE), include_feature_type=FALSE, include_values_range=FALSE),
+                        dimension_reduction.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
+      renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
+
+  # call the modules for this tab
+  dimension_reduction <- callModule(module=dimension_reduction.server, id='', seurat=seurat)
+  cluster_resolution <- callModule(module=cluster_picker.server, id='', seurat=seurat)
+  feature_picker <- callModule(module=feature_picker.server, id='', seurat=seurat)
+  colour_picker <- list(low='linen', mid='white', high='darkviolet', background=rgb(255, 255, 255, 255, max=255))
+
+  callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
+  callModule(module=feature_ridges_by_ident.server, id='scores_plot', picked_feature=feature_picker, picked_clusters=cluster_resolution)
   callModule(module=dimension_reduction.show_selected_clusters.server, id='map', dimension_reduction=dimension_reduction, point_size=list(size=0.6), cluster_resolution=cluster_resolution, picked_colours=colour_picker)
   callModule(module=genes_in_modules.server, id='modules_table', seurat=seurat, picked_feature=feature_picker)
 }

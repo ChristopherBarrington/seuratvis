@@ -1,6 +1,6 @@
 #'
 #' 
-cluster_picker.ui <- function(id, seurat, resolution=TRUE, picker=TRUE, label_switch=TRUE) {
+cluster_picker.ui <- function(id, seurat, resolution=TRUE, picker=TRUE, label_switch=TRUE, multi_picker=TRUE) {
   if(!missing(resolution) && is.logical(resolution) && resolution) resolution <- list()
   if(!missing(picker) && is.logical(picker) && picker) picker <- list()
   if(!missing(label_switch) && is.logical(label_switch) && label_switch) label_switch <- list()
@@ -13,7 +13,7 @@ cluster_picker.ui <- function(id, seurat, resolution=TRUE, picker=TRUE, label_sw
               do.call(what=selectInput),
           if(is.list(picker))
             list(inputId=NS(id, 'ident_picker'), label='Cluster selection',
-                 choices=seurat$all_idents$seurat_clusters, selected=seurat$all_idents$seurat_clusters, multiple=TRUE,
+                 choices=seurat$all_idents$seurat_clusters, selected=seurat$all_idents$seurat_clusters, multiple=multi_picker,
                  options=list(`actions-box`=TRUE, header='Cluster selection', title='Cluster selection',
                               `selected-text-format`='count>5', `count-selected-text`='{0} cluster(s)')) %>%
               modifyList(val=picker) %>%

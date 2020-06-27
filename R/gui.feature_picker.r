@@ -33,7 +33,7 @@ feature_picker.ui <- function(id, seurat, label='Feature selection', choices=lis
 
   ## gene modules drop down box
   list(inputId=ns(id='feature_picker_gene_module'), label=NULL,
-       choices=feature_picker_options$gene_modules, selected=feature_picker_selected$gene_modules, multiple=FALSE,
+       choices=feature_picker_options$gene_modules, selected=feature_picker_options$gene_modules, multiple=FALSE,
        options=list(`actions-box`=TRUE, header='Gene module(s) selection', title='Gene module selection',
                     `selected-text-format`='count', `count-selected-text`='{0} module(s)')) %>%
     modifyList(val=gene_modules_opts) %>%

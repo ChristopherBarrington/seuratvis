@@ -32,4 +32,31 @@ feature_ridge_by_idents.server <- function(input, output, session, picked_featur
 
 #'
 #' 
-feature_ridges_by_ident <- function() {}
+feature_ridges_by_ident.server <- function(input, output, session, picked_feature, picked_clusters)
+  renderPlot({
+    req(picked_clusters$idents)
+    req(picked_clusters$picked_idents)
+    req(picked_feature$values)
+
+    cbind(ident=picked_clusters$idents,
+          picked_feature$values) %>%
+      filter(ident==picked_clusters$picked_idents) %>%
+      gather(key=gene_module, value=module_score, -ident) %>%
+      ggplot() +
+      aes(x=module_score, y=gene_module) +
+      labs(x='Gene module score', y='Gene module') +
+      geom_density_ridges(alpha=0.8, size=0.7, colour='black') +
+      scale_fill_cyclical(values=c('grey50','grey70')) +
+      theme_bw() +
+      theme(axis.text.y=element_text(vjust=0),
+            legend.position='none',
+            panel.grid.major.x=element_blank(),
+            panel.grid.minor.x=element_blank())
+
+
+
+
+
+
+
+  }) -> output$ridges
