@@ -1,9 +1,9 @@
 
 highlight_features.tab <- function() {
   bquote({
-    menuItem(text='Highlight features', icon=icon('search'), startExpanded=TRUE,
-             menuSubItem(text='Highlight feature', tabName='highlight_feature_tab'),
-             menuSubItem(text='Highlight feature and cluster', tabName='highlight_feature_and_clusters_tab')) -> menu_item
+    menuItem(text='Highlight features', icon=icon('highlighter'), startExpanded=TRUE,
+             menuSubItem(text='Highlight feature', tabName='highlight_feature_tab', icon=icon('search')),
+             menuSubItem(text='Highlight feature and cluster', tabName='highlight_feature_and_clusters_tab', icon=icon('search-plus'))) -> menu_item
 
     list(tabItem(tabName='highlight_feature_tab',
                  h1('Highlight a feature on a map'),
