@@ -16,7 +16,7 @@ dimensionality.jackstraw_pvalue <- function(input, output, session, seurat, pick
       ggplot() +
       aes(x=PC, y=-log10(Score)) +
       labs(x='Principle component', y='-log10(score)') +
-      geom_smooth() +
+      geom_smooth(method='loess') +
       geom_point(shape=4) +
       theme_bw() +
       theme(legend.background=element_blank(),
@@ -29,12 +29,12 @@ dimensionality.jackstraw <- function(input, output, session, seurat, picked_redu
   renderPlot(expr={
     req(seurat$object)
     req(picked_reduction$method)
-    req(picked_components$range)
+    req(picked_components$picked)
 
     # make variables for shorthand    
     object <- seurat$object
     reduction_name <- picked_reduction$method
-    components_range <- picked_components$range
+    components_range <- picked_components$picked
     min_component <- min(components_range)
     max_component <- max(components_range)
 

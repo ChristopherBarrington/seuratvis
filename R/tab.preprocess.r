@@ -83,9 +83,7 @@ dimensionality_tab.server <- function(input, output, session, server_input, serv
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
       renderUI({tagList(dimension_reduction.ui(id=tab, seurat=seurat, regex='^pca'),
-                        components_selector.ui(id=tab),
-                        component_picker.ui(id=tab),
-                        tags$style(type='text/css', '.irs-slider.from, .to {visibility: hidden !important;}'))})  -> server_output$right_sidebar.data_opts
+                        component_picker_slider.ui(id=tab))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
