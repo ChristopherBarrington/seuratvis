@@ -45,7 +45,6 @@ shinyAppUI <- function(...) {
 
   # dashboard body definition
   tags$head(tags$style(HTML(text='table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'))) -> cssDT
-  # tags$style(type='text/css', '.ace_editor {height: calc(65vh) !important;}') -> cssAce # apply this to class `ace_editor`
   tags$style(type='text/css', '#provenance_tab-editor-ace_editor {height: calc(65vh) !important;} #cell_filtering_tab--ace_verbatim_text_output-ace_editor {height: 150px !important;') -> cssAce # apply this to class `ace_editor`
   tags$style(type='text/css', '.boy, .girl {font-size: x-large} .boy {color: #347DC1} .girl {color: #CC6594') -> cssSex
 
@@ -124,7 +123,14 @@ observeEvent(input$clickme, {
     # runjs("$('.nav-tabs a[href=\"#control-sidebar-plotting_opts-tab\"]').tab('show');")
     runjs("$('.nav-tabs a[href=\"#control-sidebar-data_opts-tab\"]').tab('show');")
     if(input$left_sidebar=='configuration_tab')
-      runjs("$('.nav-tabs a[href=\"#control-sidebar-config_opts-tab\"]').tab('show');")})
+      runjs("$('.nav-tabs a[href=\"#control-sidebar-config_opts-tab\"]').tab('show');")
+
+    if(input$left_sidebar!='configuration_tab' & !isTruthy(seurat$object)) {
+      sendSweetAlert(session=session, title='SOS', btn_labels='OK', html=TRUE, closeOnClickOutside=TRUE, type='error',
+                     text=tags$span('Select One Seurat', br(), br(), 'Use the config tab of the right sidebar to select a Seurat object to use in the app.'))
+      updateNavbarPage(session=session, inputId='left_sidebar', selected='configuration_tab')
+    }
+  })
 
   # ###############################################################################################
   # any code to exectue when the session ends
