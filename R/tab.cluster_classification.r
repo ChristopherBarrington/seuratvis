@@ -10,9 +10,10 @@ cluster_classification.tab <- function() {
               modify_stop_propagation()) -> menu_item
 
     list(tabItem(tabName='findmarkers_results_tab',
-                 h1('TITLE'),
+                 h1('Feature markers of clusters'),
                  fluidRow(dataset_info_text_box.ui(id=NS('findmarkers_results_tab', 'project_name'), width=12)),
-                 fluidRow(boxPlus(title='Results table', closable=FALSE, width=12, status='primary'))),
+                 fluidRow(boxPlus(title='Results table', closable=FALSE, width=12, status='primary'), DT::dataTableOutput(outputId=NS('findmarkers_results_tab', 'table')) %>% withSpinner())),
+         
          tabItem(tabName='gene_module_score_in_clusters_tab',
                  h1('Gene module score in clusters'),
                  fluidRow(dataset_info_text_box.ui(id=NS('gene_module_score_in_clusters_tab', 'project_name'), width=12)),
@@ -24,6 +25,7 @@ cluster_classification.tab <- function() {
                                 dimension_reduction.plot(id=NS('gene_module_score_in_clusters_tab', 'map'))),
                         boxPlus(title='Genes', closable=FALSE, width=12, height='35vh', status='primary',
                                 genes_in_modules.table(id=NS('gene_module_score_in_clusters_tab', 'modules_table'))))),
+         
          tabItem(tabName='gene_module_scores_in_a_cluster_tab',
                  h1('Gene modules'),
                  fluidRow(dataset_info_text_box.ui(id=NS('gene_module_scores_in_a_cluster_tab', 'project_name'), width=12)),
@@ -52,12 +54,57 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
     tab <- 'findmarkers_results_tab'
     if(server_input$left_sidebar==tab) {
-      tab %<>% str_c('-')
-      renderUI({tagList()})  -> server_output$right_sidebar.data_opts
-      renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
+      # tab %<>% str_c('-')
+      renderUI({tagList(filterDF_UI(id=NS(tab, 'filter_parameters')))})  -> server_output$right_sidebar.data_opts
+      renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts
+
+      sendSweetAlert(session=session, type='warning',
+                     title='Notice', btn_labels='OK',
+                     text='For some reason you have to reload the Seurat object from the config tab in the right sidebar before the table will render. This will be fixed later.',
+                     closeOnClickOutside=TRUE, showCloseButton=FALSE)
+    }})
 
   # call the modules for this tab
   callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
+
+  # handle the data.frame filtering
+  ## call the data.frame filtering filtering module
+  callModule(session=session, module=filterDF, id='filter_parameters',
+             picker=TRUE, drop_ids=FALSE,
+             data_name=reactive(seurat$formatted_project_name), 
+             data_table=reactive(seurat$FindMarkersResults$table),
+             data_vars=reactive(seurat$FindMarkersResults$vars)) -> results_filter
+
+  DT::renderDataTable({
+    DT::datatable(data=results_filter$data_filtered(),
+                  rownames=FALSE,
+                  options=list(columnDefs=list(list(className='dt-right', targets=c(1,6))),
+                               ordering=FALSE,
+                               dom='litp'),
+                  style='bootstrap4',
+                  class='stripe') %>%
+    formatRound(columns=c('Cluster detection', 'Map detection'), digits=2) %>%
+    formatRound(columns=c('Avg. logFC'), digits=3)}) -> output$table
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 #'
