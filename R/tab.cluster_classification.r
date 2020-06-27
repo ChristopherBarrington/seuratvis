@@ -3,11 +3,12 @@
 cluster_classification.tab <- function() {
   bquote({
     menuItem(text='Cluster classification', icon=icon('object-group'), startExpanded=TRUE,
-             menuSubItem(text='FindMarkers results', tabName='findmarkers_results_tab', icon=icon('layer-group')),
-             menuItem(text='Gene modules', startExpanded=TRUE,
-                      menuSubItem(text='Score in clusters', tabName='gene_module_score_in_clusters_tab', icon=icon('balance-scale-left')),
-                      menuSubItem(text='Scores in a cluster', tabName='gene_module_scores_in_a_cluster_tab', icon=icon('balance-scale-right'))) %>%
-              modify_stop_propagation()) -> menu_item
+             menuSubItem(text='FindMarkers results', tabName='findmarkers_results_tab', icon=menuSubItem_icon()),
+             menuItem(text='Gene modules', startExpanded=TRUE, icon=icon('layer-group'),
+                      menuSubItem(text='Score in clusters', tabName='gene_module_score_in_clusters_tab', icon=menuSubItem_icon()),
+                      menuSubItem(text='Scores in a cluster', tabName='gene_module_scores_in_a_cluster_tab', icon=menuSubItem_icon())) %>%
+              modify_stop_propagation()) %>%
+      modify_stop_propagation() -> menu_item
 
     list(tabItem(tabName='findmarkers_results_tab',
                  h1('Feature markers of clusters'),

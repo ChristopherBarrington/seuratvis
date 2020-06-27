@@ -27,7 +27,7 @@ seurats_in_workspace.server <- function(input, output, session) {
         if(length(unique(x$env))==1) {
           x %>% mutate(choiceName=value)
         } else {
-          x %>% mutate(choiceName=str_c(str_remove_all(string=env, pattern='\\(\\)$'), value, sep=' : '))
+          x %>% mutate(choiceName=sprintf('%s [%s]', str_replace_all(string=value, pattern='_', replacement=' '), str_remove_all(string=str_replace_all(string=env, pattern='_', replacement=' '), pattern='\\(\\)$')))
         }}) %>%
       arrange(choiceName) %>%
       mutate(env=as.character(env)) -> available_objects # add varaibles for where to find the objects and what to call them

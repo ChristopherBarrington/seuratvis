@@ -55,7 +55,7 @@ shinyAppUI <- function(...) {
     dashboardBody(rclipboardSetup(), cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
 
   # sidebar definition
-  menus %>% append(list(actionButton(inputId='clickme', label='', icon=icon('radiation'), with='70x'))) %>%
+  menus %>% append(list(actionButton(inputId='clickme', label='', icon=icon('user-secret')))) %>%
     sidebarMenu(id='left_sidebar') %>%
     dashboardSidebar() -> left_dashboard_sidebar
 
@@ -63,8 +63,8 @@ shinyAppUI <- function(...) {
   rightSidebar(title='Right Sidebar',
                background='dark',
                rightSidebarTabContent(id='data_opts', title='Options', icon='wrench', active=TRUE, uiOutput(outputId='right_sidebar.data_opts')),
-               rightSidebarTabContent(id='plotting_opts', title='Plotting', icon='glasses', active=FALSE, uiOutput(outputId='right_sidebar.plotting_opts')),
-               rightSidebarTabContent(id='config_opts', title='Configure', icon='map', active=FALSE, uiOutput(outputId='right_sidebar.config_opts'))) -> right_dashboard_sidebar
+               rightSidebarTabContent(id='plotting_opts', title='Plotting', icon='palette', active=FALSE, uiOutput(outputId='right_sidebar.plotting_opts')),
+               rightSidebarTabContent(id='config_opts', title='Configure', icon='dna', active=FALSE, uiOutput(outputId='right_sidebar.config_opts'))) -> right_dashboard_sidebar
 
   # assemble the final UI
   list(header=dashboard_header,

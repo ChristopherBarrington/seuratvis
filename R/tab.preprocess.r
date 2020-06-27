@@ -2,8 +2,9 @@
 preprocessing.tab <- function() {
   bquote({
     menuItem(text='Preprocessing', icon=icon('toolbox'), startExpanded=TRUE,
-             menuSubItem(text='Cell filtering', tabName='cell_filtering_tab', icon=icon('sort-amount-up')),
-             menuSubItem(text='Dimensionality', tabName='dimensionality_tab', icon=icon('memory'))) -> menu_item
+             menuSubItem(text='Cell filtering', tabName='cell_filtering_tab', icon=menuSubItem_icon()),
+             menuSubItem(text='Dimensionality', tabName='dimensionality_tab', icon=menuSubItem_icon())) %>%
+      modify_stop_propagation() -> menu_item
 
     list(tabItem(tabName='cell_filtering_tab',
                  h1('Identify cells that can be removed with quality filters'),

@@ -4,7 +4,7 @@ available_seurats.tab <- function() {
   bquote({
 
     tab <- 'configuration_tab'
-    menuItem(text='Configure', tabName=tab, icon=icon('map'), selected=TRUE) -> menu_item
+    menuItem(text='Configure', tabName=tab, icon=icon('dna'), selected=TRUE) -> menu_item
 
     tabItem(tabName='configuration_tab',
             h1('Available Seurat objects'),
