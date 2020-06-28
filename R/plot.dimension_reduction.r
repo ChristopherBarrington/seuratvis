@@ -1,7 +1,23 @@
 #'
 #' 
-dimension_reduction.plot <- function(id)
-  NS(id, 'map') %>% plotOutput() %>% withSpinner()
+dimension_reduction.plot <- function(id) 
+  tagList(NS(id, 'map') %>% plotOutput() %>% withSpinner())
+
+#'
+#' 
+dimension_reduction.plotbox <- function(id, n=0) {
+  # make the ui elements
+  ## drop down config
+  dropdownButton(inputId=NS(id,'ddn')%>%print(),
+                 uiOutput(outputId=NS(id,'dropdown')),
+                 circle=TRUE, status='primary', icon=icon('wrench')) -> dropdown_menu
+
+  ## map plot output
+  NS(id, 'map') %>% plotOutput() %>% withSpinner() -> plot_output
+
+  # return the box
+  tagList(div(id=str_c('boxid', n), boxPlus(title=str_c('Feature ', n), closable=FALSE, width=3, dropdown_menu, plot_output)))
+}
 
 #'
 #' 
@@ -70,12 +86,16 @@ dimension_reduction.show_selected_clusters.server <- function(input, output, ses
 #' 
 dimension_reduction.highlight_feature.server <- function(input, output, session, dimension_reduction, picked_feature, picked_colours, opacity, point_size) {
   renderPlot(bg='transparent', expr={
+print('////////////////////')
     req(dimension_reduction$embeddings)
     req(picked_feature$values)
+    # req(seurat$object)
+    # dimension_reduction <- list(embeddings=Embeddings(seurat$object)[,1:2] %>% as.data.frame())
+    # picked_feature <- list(values=data.frame(z=rnorm(ncol(seurat$object))), values_range=c(-1,1))
 
     # prepare the data and start the plot
     cbind(dimension_reduction$embeddings %>% set_names(c('X','Y')),
-          picked_feature$values %>% set_names('value')) %>%
+          picked_feature$values %>% set_names('value')) %>% (function(x) {print(head(x)); x}) %>%
       ggplot() +
       aes(x=X, y=Y, colour=value) +
       geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
@@ -98,9 +118,9 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
 
       # if the values cross zero, make a new colour scale
       if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1)) {
-        c_low <- 'cyan'
-        c_high <- 'magenta'
-        colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
+         c_low <- 'cyan'
+         c_high <- 'magenta'
+         colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
                                                   values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
                                                   limits=c_range, breaks=0)
       }
@@ -127,6 +147,7 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
       map <- map + facet_wrap(~value, scales='fixed')
     }
 
+print('////////////////////')
     # return the plot
     map}) -> output$map
 }
