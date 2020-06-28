@@ -8,15 +8,17 @@ dimension_reduction.plot <- function(id)
 dimension_reduction.plotbox <- function(id, n=0) {
   # make the ui elements
   ## drop down config
-  dropdownButton(inputId=NS(id,'ddn')%>%print(),
-                 uiOutput(outputId=NS(id,'dropdown')),
-                 circle=TRUE, status='primary', icon=icon('wrench')) -> dropdown_menu
+  dropdownButton(inputId=NS(id,'ddn'),
+                 circle=TRUE, status='primary', icon=icon('wrench'), size='xs',
+                 uiOutput(outputId=NS(id,'dropdown'))) -> dropdown_menu
+
+  tags$head(tags$style(HTML(sprintf('#%s {background: #222D32 !important;}', NS(NS('dropdown-menu',id),'ddn'))))) -> css
 
   ## map plot output
   NS(id, 'map') %>% plotOutput() %>% withSpinner() -> plot_output
 
   # return the box
-  tagList(div(id=str_c('boxid', n), boxPlus(title=str_c('Feature ', n), closable=FALSE, width=3, dropdown_menu, plot_output)))
+  tagList(div(id=str_c('boxid', n), boxPlus(title=textOutput(outputId=NS(id, 'box_title')), status='primary', closable=FALSE, width=4, dropdown_menu, css, plot_output)))
 }
 
 #'
@@ -85,17 +87,18 @@ dimension_reduction.show_selected_clusters.server <- function(input, output, ses
 #'
 #' 
 dimension_reduction.highlight_feature.server <- function(input, output, session, dimension_reduction, picked_feature, picked_colours, opacity, point_size) {
+  # render the box title if defined
+  renderText({ifelse(is.null(picked_feature$name), 'Select feature using dropdown', picked_feature$name)}) -> output$box_title
+
+  # render the plot
   renderPlot(bg='transparent', expr={
-print('////////////////////')
     req(dimension_reduction$embeddings)
     req(picked_feature$values)
-    # req(seurat$object)
-    # dimension_reduction <- list(embeddings=Embeddings(seurat$object)[,1:2] %>% as.data.frame())
-    # picked_feature <- list(values=data.frame(z=rnorm(ncol(seurat$object))), values_range=c(-1,1))
 
     # prepare the data and start the plot
     cbind(dimension_reduction$embeddings %>% set_names(c('X','Y')),
-          picked_feature$values %>% set_names('value')) %>% (function(x) {print(head(x)); x}) %>%
+          picked_feature$values %>% set_names('value')) %>%
+      arrange(value) %>%
       ggplot() +
       aes(x=X, y=Y, colour=value) +
       geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
@@ -147,7 +150,6 @@ print('////////////////////')
       map <- map + facet_wrap(~value, scales='fixed')
     }
 
-print('////////////////////')
     # return the plot
     map}) -> output$map
 }

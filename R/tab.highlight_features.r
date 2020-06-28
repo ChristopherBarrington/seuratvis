@@ -4,7 +4,7 @@ highlight_features.tab <- function() {
     menuItem(text='Highlight features', icon=icon('highlighter'), startExpanded=TRUE,
              menuSubItem(text='Highlight feature', tabName='highlight_feature_tab', icon=menuSubItem_icon()),
              menuSubItem(text='Highlight feature and cluster', tabName='highlight_feature_and_clusters_tab', icon=menuSubItem_icon()),
-             menuSubItem(text='Highlight multiple features', tabName='highlight_multiple_features_tab', icon=icon('tools'))) %>%
+             menuSubItem(text='Highlight multiple features', tabName='highlight_multiple_features_tab', icon=menuSubItem_icon())) %>%
     modify_stop_propagation() -> menu_item
 
     list(tabItem(tabName='highlight_feature_tab',
@@ -101,12 +101,11 @@ highlight_multiple_features.server <- function(input, output, session, server_in
                         )})  -> server_output$right_sidebar.data_opts
       renderUI({tagList(point_size.ui(id=tab),
                         opacity.ui(id=tab))}) -> server_output$right_sidebar.plotting_opts
-
-      renderUI({tagList(feature_picker.ui(id=str_c(tab, 'feature0'), seurat=seurat))}) -> output[['feature0-dropdown']]
+      renderUI({tagList(feature_picker.ui(id=str_c(tab, 'feature0'), seurat=seurat))}) -> output$`feature0-dropdown`
     }})
 
   # react to the action button being pressed
-  observeEvent(input$add_plot_ui, {
+  observeEvent(eventExpr=input$add_plot_ui, label='highlight_multiple_features/add_plot', handlerExpr={
     feature_n <- input$add_plot_ui
     feature_id <- str_c('feature', feature_n)
     box_id <- NS('highlight_multiple_features_tab', feature_id)
@@ -118,9 +117,7 @@ highlight_multiple_features.server <- function(input, output, session, server_in
     renderUI({tagList(feature_picker.ui(id=box_id, seurat=seurat))}) -> output[[ddn_id]]
  
     feature_pickers[[feature_id]] <- callModule(module=feature_picker.server, id=feature_id, seurat=seurat)
-    callModule(module=dimension_reduction.highlight_feature.server, id=feature_id, dimension_reduction=dimension_reduction, picked_feature=feature_pickers[[feature_id]], picked_colours=colour_picker, opacity=opacity, point_size=point_size)
-
-  })
+    callModule(module=dimension_reduction.highlight_feature.server, id=feature_id, dimension_reduction=dimension_reduction, picked_feature=feature_pickers[[feature_id]], picked_colours=colour_picker, opacity=opacity, point_size=point_size)})
 
   # call the modules for this tab
   opacity <- callModule(module=opacity.server, id='')
@@ -130,5 +127,4 @@ highlight_multiple_features.server <- function(input, output, session, server_in
 
   feature_pickers <- list(feature0=callModule(module=feature_picker.server, id='feature0', seurat=seurat))
   callModule(module=dimension_reduction.highlight_feature.server, id='feature0', dimension_reduction=dimension_reduction, picked_feature=feature_pickers$feature0, picked_colours=colour_picker, opacity=opacity, point_size=point_size)
-
 }
