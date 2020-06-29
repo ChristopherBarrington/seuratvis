@@ -1,42 +1,62 @@
-
+#'
+#' 
 preprocessing.tab <- function() {
   bquote({
+    # define the menu for this group of tabs
     menuItem(text='Preprocessing', icon=icon('toolbox'), startExpanded=TRUE,
              menuSubItem(text='Cell filtering', tabName='cell_filtering_tab', icon=menuSubItem_icon()),
-             menuSubItem(text='Dimensionality', tabName='dimensionality_tab', icon=menuSubItem_icon())) %>%
+             menuSubItem(text='Dimensionality', tabName='dimensionality_tab', icon=menuSubItem_icon()),
+             menuSubItem(text='Cluster filtering', tabName='cluster_filtering_tab', icon=under_construction_icon())) %>%
       modify_stop_propagation() -> menu_item
 
-    list(tabItem(tabName='cell_filtering_tab',
-                 h1('Identify cells that can be removed with quality filters'),
-                 fluidRow(dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'project_name'), width=12),
-                          dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'n_umi'), width=3),
-                          dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'n_cells'), width=3),
-                          dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'n_umi_per_cell'), width=3),
-                          dataset_info_text_box.ui(id=NS('cell_filtering_tab', 'n_features_per_cell'), width=3)),
-                 fluidRow(boxPlus(title='UMI per cell', closable=FALSE, width=12, status='primary',
-                                  column(width=2, offset=1, boxplot.plot(id=NS('cell_filtering_tab', 'n_umi'))),
-                                  column(width=3, offset=0, knee.plot(id=NS('cell_filtering_tab', 'n_umi'))),
-                                  column(width=4, offset=1, density.plot(id=NS('cell_filtering_tab', 'n_umi'))))),
-                 fluidRow(boxPlus(title='Features per cell', closable=FALSE, width=12, status='primary',
-                                  column(width=2, offset=1, boxplot.plot(id=NS('cell_filtering_tab', 'n_features'))),
-                                  column(width=3, offset=0, knee.plot(id=NS('cell_filtering_tab', 'n_features'))),
-                                  column(width=4, offset=1, density.plot(id=NS('cell_filtering_tab', 'n_features'))))),
-                 fluidRow(boxPlus(title='Mitochondrial UMI', closable=FALSE, width=12, status='primary',
-                                  column(width=2, offset=1, boxplot.plot(id=NS('cell_filtering_tab', 'proportion_mt'))),
-                                  column(width=3, offset=0, knee.plot(id=NS('cell_filtering_tab', 'proportion_mt'))),
-                                  column(width=4, offset=1, density.plot(id=NS('cell_filtering_tab', 'proportion_mt')))))),
-         tabItem(tabName='dimensionality_tab',
-                 h1('Determine the dimensionality of a dataset'),
-                 fluidRow(dataset_info_text_box.ui(id=NS('dimensionality_tab', 'project_name'), width=12)),
-                 fluidRow(boxPlus(title='Elbow plot', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','elbow'))),
-                          boxPlus(title='Top contributing features', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','top_features'))),
-                          boxPlus(title='JackStraw plot', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','jackstraw'))),
-                          boxPlus(title='JackStraw p-values', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','jackstraw_pvalue')))))) -> content
+    # define the content of each tab
+    ## filter cells by per-cell metrics
+    tab_name <- 'cell_filtering_tab'
+    tabItem(tabName=tab_name,
+            h1('Identify cells that can be removed with quality filters'),
+            fluidRow(dataset_info_text_box.ui(id=NS(tab_name, 'project_name'), width=12),
+                     dataset_info_text_box.ui(id=NS(tab_name, 'n_umi'), width=3),
+                     dataset_info_text_box.ui(id=NS(tab_name, 'n_cells'), width=3),
+                     dataset_info_text_box.ui(id=NS(tab_name, 'n_umi_per_cell'), width=3),
+                     dataset_info_text_box.ui(id=NS(tab_name, 'n_features_per_cell'), width=3)),
+            fluidRow(boxPlus(title='UMI per cell', closable=FALSE, width=12, status='primary',
+                             column(width=2, offset=1, boxplot.plot(id=NS(tab_name, 'n_umi'))),
+                             column(width=3, offset=0, knee.plot(id=NS(tab_name, 'n_umi'))),
+                             column(width=4, offset=1, density.plot(id=NS(tab_name, 'n_umi'))))),
+            fluidRow(boxPlus(title='Features per cell', closable=FALSE, width=12, status='primary',
+                             column(width=2, offset=1, boxplot.plot(id=NS(tab_name, 'n_features'))),
+                             column(width=3, offset=0, knee.plot(id=NS(tab_name, 'n_features'))),
+                             column(width=4, offset=1, density.plot(id=NS(tab_name, 'n_features'))))),
+            fluidRow(boxPlus(title='Mitochondrial UMI', closable=FALSE, width=12, status='primary',
+                             column(width=2, offset=1, boxplot.plot(id=NS(tab_name, 'proportion_mt'))),
+                             column(width=3, offset=0, knee.plot(id=NS(tab_name, 'proportion_mt'))),
+                             column(width=4, offset=1, density.plot(id=NS(tab_name, 'proportion_mt')))))) -> cell_filtering_tab
+    ## dimensionality tab
+    tab_name <- 'dimensionality_tab'
+    tabItem(tabName='dimensionality_tab',
+            h1('Determine the dimensionality of a dataset'),
+            fluidRow(dataset_info_text_box.ui(id=NS('dimensionality_tab', 'project_name'), width=12)),
+            fluidRow(boxPlus(title='Elbow plot', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','elbow'))),
+                     boxPlus(title='Top contributing features', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','top_features'))),
+                     boxPlus(title='JackStraw plot', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','jackstraw'))),
+                     boxPlus(title='JackStraw p-values', closable=FALSE, width=6, status='primary', dimensionality.plot(id=NS('dimensionality_tab','jackstraw_pvalue'))))) -> dimensionality_tab
+    
+    ## filter clusters using cluster-wide metrics
+    tab_name <- 'cluster_filtering_tab'
+    tabItem(tabName=tab_name,
+            h1('Remove clusters of cells before reanalysis'),
+            p('Use these tools to identify clusters from the reduced dimension map that could be removed. Clusters that represent contaminant or are characterised by high proportion of mitochondrial RNA, for example, may be suitable for removal before the remaining cell set is re-analysed.')) -> cluster_filtering_tab
 
+    # collect all of the contents for this tab group
+    content <- list(cell_filtering_tab, dimensionality_tab, cluster_filtering_tab)
+
+    # add this menu and content to the app
     menus %<>% append(list(menu_item))
     contents %<>% append(content)})
 }
 
+#'
+#' 
 cell_filtering_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
   # build the sidebar ui
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
@@ -77,6 +97,8 @@ cell_filtering_tab.server <- function(input, output, session, server_input, serv
   callModule(module=show_filtering_parameters.server, id='', seurat=seurat, cell_filtering=filtering_parameters)
 }
 
+#'
+#' 
 dimensionality_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
   # build the sidebar ui
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
