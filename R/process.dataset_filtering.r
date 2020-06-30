@@ -38,9 +38,9 @@ dataset_filtering.server <- function(input, output, session, seurat, filters) {
 
     # save the filtered data to the reactive
     filtering_parameters$n_cells <- nrow(filtered_cell_metadata)
+    filtering_parameters$n_umi_values <- filtered_n_umi_values
     filtering_parameters$n_umi <- sum(filtered_n_umi_values)
     filtering_parameters$n_features_values <- filtered_n_features_values
-    filtering_parameters$n_umi_values <- filtered_n_umi_values
     filtering_parameters$done <- rnorm(1)})
 
   # return the reactive values list
