@@ -9,6 +9,7 @@ dataset_filtering.server <- function(input, output, session, seurat, filters) {
     req(seurat$n_umi_values)
     req(seurat$n_features_values)
     req(seurat$proportion_mt_values)
+    
     # get the values in the list of reactives
     lapply(filters, reactiveValuesToList)  %>%
       plyr::ldply(as.data.frame) -> filters_df
