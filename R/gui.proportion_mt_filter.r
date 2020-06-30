@@ -13,7 +13,9 @@ filter_proportion_mt.ui <- function(id, label='Proportion Mt', seurat) {
 
 #'
 #'
-filter_proportion_mt.server <- function(input, output, session, cell_filtering) {
+filter_proportion_mt.server <- function(input, output, session, seurat, cell_filtering, linked_density_plot) {
+  filtering <- reactiveValues()
+
   # react to the input elements
   ## max proportion mitochondrial umi
   observeEvent(eventExpr=input$max_percent_mt, ignoreInit=TRUE, handlerExpr={
@@ -23,15 +25,23 @@ filter_proportion_mt.server <- function(input, output, session, cell_filtering) 
       value %<>% add(0.05) %>% round(digits=1)
 
     cell_filtering$proportion_mt_max <- value
-    cell_filtering$updated_parameter <- rnorm(1)})
+    filtering$max <- value})
 
   # react to the cell filtering parameter being changed eg by the brush
   ## max proportion mitochondrial umi
-  observeEvent(eventExpr=cell_filtering$proportion_mt_max, handlerExpr={
+  observeEvent(eventExpr=linked_density_plot$max, handlerExpr={
     req(input$max_percent_mt)
-    high <- cell_filtering$proportion_mt_max
+    high <- linked_density_plot$max
     if(high != sprintf(fmt='%.1f', high)) # if the value is not already 1dp formatted, reformat it
-      high <- cell_filtering$proportion_mt_max %>% add(0.05) %>% round(digits=1)
+      high <- linked_density_plot$max %>% add(0.05) %>% round(digits=1)
     if(high != input$max_percent_mt)
       updateNumericInput(session=session, inputId='max_percent_mt', value=high)})
+
+  # react to a new seurat being loaded
+  observeEvent(eventExpr=seurat$proportion_mt_updated, label='filter_proportion_mt/object', handlerExpr={
+    filtering$variable <- seurat$proportion_mt_variable
+    filtering$max <- seurat$proportion_mt_values_max %>% add(0.05) %>% round(digits=1)})
+
+  # return the reactiveValues
+  return(filtering)
 }

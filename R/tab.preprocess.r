@@ -77,17 +77,22 @@ cell_filtering_tab.server <- function(input, output, session, server_input, serv
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
-  filtering_parameters <- callModule(module=dataset_filtering.server, id='filtering', seurat=seurat)
   
+  n_umi_output <- callModule(module=density_plot.n_umi.server, id='n_umi', seurat=seurat)
+  n_features_output <- callModule(module=density_plot.n_features.server, id='n_features', seurat=seurat)
+  proportion_mt_output <- callModule(module=density_plot.proportion_mt.server, id='proportion_mt', seurat=seurat)
+
+  filtering_parameters <- reactiveValues()
+  n_umi_filter <- callModule(module=filter_n_umi.server, id='', seurat=seurat, cell_filtering=filtering_parameters, linked_density_plot=n_umi_output)
+  n_features_filter <- callModule(module=filter_n_features.server, id='', seurat=seurat, cell_filtering=filtering_parameters, linked_density_plot=n_features_output)
+  proportion_mt_filter <- callModule(module=filter_proportion_mt.server, id='', seurat=seurat, cell_filtering=filtering_parameters, linked_density_plot=proportion_mt_output)
+  filtering_parameters <- callModule(module=dataset_filtering.server, id='filtering', seurat=seurat, filters=list(n_umi_filter, n_features_filter, proportion_mt_filter))
+
   callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
   callModule(module=dataset_info_text_box.n_filtered_umi, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=dataset_info_text_box.n_filtered_cells, id='n_cells', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=dataset_info_text_box.n_umi_per_filtered_cell, id='n_umi_per_cell', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=dataset_info_text_box.n_features_per_filtered_cell, id='n_features_per_cell', seurat=seurat, cell_filtering=filtering_parameters)
-
-  callModule(module=filter_n_umi.server, id='', cell_filtering=filtering_parameters)
-  callModule(module=filter_n_features.server, id='', cell_filtering=filtering_parameters)
-  callModule(module=filter_proportion_mt.server, id='', cell_filtering=filtering_parameters)
 
   callModule(module=boxplot_plot.n_features.server, id='n_features', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=boxplot_plot.n_umi.server, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
@@ -96,10 +101,6 @@ cell_filtering_tab.server <- function(input, output, session, server_input, serv
   callModule(module=knee_plot.n_features.server, id='n_features', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=knee_plot.n_umi.server, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=knee_plot.proportion_mt.server, id='proportion_mt', seurat=seurat, cell_filtering=filtering_parameters)
-
-  callModule(module=density_plot.n_features.server, id='n_features', seurat=seurat, cell_filtering=filtering_parameters)
-  callModule(module=density_plot.n_umi.server, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
-  callModule(module=density_plot.proportion_mt.server, id='proportion_mt', seurat=seurat, cell_filtering=filtering_parameters)
 
   callModule(module=show_filtering_parameters.server, id='', seurat=seurat, cell_filtering=filtering_parameters)
 }
@@ -147,14 +148,14 @@ cluster_filtering_tab.server <- function(input, output, session, server_input, s
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
-  callModule(module=filter_n_umi.server, id='', cell_filtering=filtering_parameters)
-  # callModule(module=filter_n_features.server, id='', cell_filtering=filtering_parameters)
-  callModule(module=filter_proportion_mt.server, id='', cell_filtering=filtering_parameters)
+  # n_umi_filter <- callModule(module=filter_n_umi.server, id='')
+  # n_features_filter <- callModule(module=filter_n_features.server, id='')
+  # proportion_mt_filter <- callModule(module=filter_proportion_mt.server, id='')
 
   dimension_reduction <- callModule(module=dimension_reduction.server, id='', seurat=seurat, regex='.*')
   cluster_resolution <- callModule(module=cluster_picker.server, id='', seurat=seurat)
   feature_picker <- callModule(module=feature_picker.server, id='', seurat=seurat)
-  filtering_parameters <- callModule(module=dataset_filtering.server, id='filtering', seurat=seurat)
+  # filtering_parameters <- callModule(module=dataset_filtering.server, id='filtering', seurat=seurat, filters=NULL)
   # point_size <- callModule(module=point_size.server, id='')
   # opacity <- callModule(module=opacity.server, id='')
   colour_picker <- list(low='linen', mid='white', high='darkviolet', background=rgb(255, 255, 255, 255, max=255))

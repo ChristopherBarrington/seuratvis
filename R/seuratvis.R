@@ -89,7 +89,7 @@ shinyAppServer <- function(input, output, session) {
   ## load the servers for the analysis windows (menuItem or menuSubItem from the sidebar)
   callModule(module=cell_filtering_tab.server, id='cell_filtering_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=dimensionality_tab.server, id='dimensionality_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
-  callModule(module=cluster_filtering_tab.server, id='cluster_filtering_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
+  # callModule(module=cluster_filtering_tab.server, id='cluster_filtering_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=highlight_feature_tab.server, id='highlight_feature_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=highlight_feature_and_clusters_tab.server, id='highlight_feature_and_clusters_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=highlight_multiple_features.server, id='highlight_multiple_features_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)

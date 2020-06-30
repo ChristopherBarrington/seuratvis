@@ -13,7 +13,9 @@ density_plot.add_common <- function(ggplot_object)
 
 #'
 #'
-density_plot.n_features.server <- function(input, output, session, seurat, cell_filtering) {
+density_plot.n_features.server <- function(input, output, session, seurat) {
+  plot_brush <- reactiveValues()
+
   renderPlot(expr={
     req(seurat$n_features_values)
 
@@ -25,7 +27,7 @@ density_plot.n_features.server <- function(input, output, session, seurat, cell_
        scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))} %>%
       density_plot.add_common()}) -> output$density
 
-  # update cell_filtering when the brush is used
+  # update plot_brush when the brush is used
   observe(label='density_plot/n_features/brush', x={
     req(input$brush)
 
@@ -34,13 +36,18 @@ density_plot.n_features.server <- function(input, output, session, seurat, cell_
     high <- ceiling(input$brush$xmax)
 
     # update the reactive
-    cell_filtering$n_features_min <- low
-    cell_filtering$n_features_max <- high})
+    plot_brush$min <- low
+    plot_brush$max <- high})
+
+  # return the reactiveValues
+  return(plot_brush)
 }
 
 #'
 #'
-density_plot.n_umi.server <- function(input, output, session, seurat, cell_filtering) {
+density_plot.n_umi.server <- function(input, output, session, seurat) {
+  plot_brush <- reactiveValues()
+
   renderPlot(expr={
     req(seurat$n_umi_values)
 
@@ -52,7 +59,7 @@ density_plot.n_umi.server <- function(input, output, session, seurat, cell_filte
        scale_x_log10(breaks=major_breaks_log10, minor_breaks=minor_breaks_log10, labels=function(x) scales::comma(x, accuracy=1))} %>%
       density_plot.add_common()}) -> output$density
 
-  # update cell_filtering when the brush is used
+  # update plot_brush when the brush is used
   observe(label='density_plot/n_umi/brush', x={
     req(input$brush)
 
@@ -61,13 +68,18 @@ density_plot.n_umi.server <- function(input, output, session, seurat, cell_filte
     high <- ceiling(input$brush$xmax)
 
     # update the reactive
-    cell_filtering$n_umi_min <- low
-    cell_filtering$n_umi_max <- high})
+    plot_brush$min <- low
+    plot_brush$max <- high})
+
+  # return the reactiveValues
+  return(plot_brush)
 }
 
 #'
 #'
-density_plot.proportion_mt.server <- function(input, output, session, seurat, cell_filtering) {
+density_plot.proportion_mt.server <- function(input, output, session, seurat) {
+  plot_brush <- reactiveValues()
+
   renderPlot(expr={
     req(seurat$proportion_mt_values)
 
@@ -78,7 +90,7 @@ density_plot.proportion_mt.server <- function(input, output, session, seurat, ce
        stat_density(geom='line', trim=TRUE, size=2)} %>%
       density_plot.add_common()}) -> output$density
 
-  # update cell_filtering when the brush is used
+  # update plot_brush when the brush is used
   observe(label='density_plot/proportion_mt/brush', x={
     req(input$brush)
 
@@ -86,7 +98,10 @@ density_plot.proportion_mt.server <- function(input, output, session, seurat, ce
     high <- round(input$brush$xmax+0.05, digits=1)
 
     # update the reactive
-    cell_filtering$proportion_mt_max <- high})
+    plot_brush$max <- high})
+
+  # return the reactiveValues
+  return(plot_brush)
 }
 
 

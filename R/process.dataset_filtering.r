@@ -1,41 +1,35 @@
 #'
 #'
-dataset_filtering.server <- function(input, output, session, seurat) {
+dataset_filtering.server <- function(input, output, session, seurat, filters) {
   reactiveValues() -> filtering_parameters
 
   # update the reactive when the filters are changed
-  observe(, label='dataset_filtering/reaction', x={
-    req(filtering_parameters$n_umi_min)
-    req(filtering_parameters$n_umi_max)
-    req(filtering_parameters$n_features_min)
-    req(filtering_parameters$n_features_max)
-    req(filtering_parameters$proportion_mt_max)
-
+  observe({
+    req(seurat$metadata)
     req(seurat$n_umi_values)
     req(seurat$n_features_values)
     req(seurat$proportion_mt_values)
-    req(seurat$n_umi_variable)
-    req(seurat$n_features_variable)
-    req(seurat$proportion_mt_variable)
+    # get the values in the list of reactives
+    lapply(filters, reactiveValuesToList)  %>%
+      plyr::ldply(as.data.frame) -> filters_df
 
-    # copy the variables
-    min_umi_per_cell <- filtering_parameters$n_umi_min
-    max_umi_per_cell <- filtering_parameters$n_umi_max
-    min_features_per_cell <- filtering_parameters$n_features_min
-    max_features_per_cell <- filtering_parameters$n_features_max
-    max_percent_mitochondria <- filtering_parameters$proportion_mt_max
+    # prepare a condition to filter the metadata
+    ## by default, select all cells (no filtering)
+    filter_condition <- 'TRUE'
 
-    # check that all thresholds are non-zero
-    if(!all(min_umi_per_cell>0 & max_umi_per_cell>0 &
-            min_features_per_cell>0 & max_features_per_cell>0 &
-            max_percent_mitochondria>0))
-      return(NULL)
+    ## if there are some filters, prepare a condition to filter the cells
+    if(nrow(filters_df)>0)
+      filters_df %>%
+        gather(key=logic, value=value, -variable) %>%
+        drop_na() %>%
+        mutate(logic=factor(logic),
+               logic=fct_recode(logic, `>=`='min', `<=`='max'),
+               value=str_trim((value))) %>%
+        apply(1, str_c, collapse='') %>%
+        str_c(collapse=' & ') -> filter_condition
 
-    # filter the value vectors
-    ({seurat$n_umi_values %>% between(left=min_umi_per_cell, right=max_umi_per_cell)} &
-     {seurat$n_features_values %>% between(left=min_features_per_cell, right=max_features_per_cell)} &
-     {seurat$proportion_mt_values<=max_percent_mitochondria}) %>%
-      filter(.data=seurat$metadata) -> filtered_cell_metadata
+    # filter the cells
+    filtered_cell_metadata <- filter(.data=seurat$metadata, eval(parse(text=filter_condition)))
 
     # pull out the filtered variables
     filtered_n_umi_values <- pluck(filtered_cell_metadata, seurat$n_umi_variable)
@@ -48,22 +42,6 @@ dataset_filtering.server <- function(input, output, session, seurat) {
     filtering_parameters$n_features_values <- filtered_n_features_values
     filtering_parameters$n_umi_values <- filtered_n_umi_values
     filtering_parameters$done <- rnorm(1)})
-
-  # react to a new seurat being loaded
-  observeEvent(eventExpr=c(seurat$n_features_updated, seurat$n_umi_updated, seurat$proportion_mt_updated), label='dataset_filtering/object', handlerExpr={
-    req(seurat$n_features_updated)
-    req(seurat$n_umi_updated)
-    req(seurat$proportion_mt_updated)
-
-    # wipe the reactive values
-    for(i in names(filtering_parameters)) filtering_parameters[[i]] <- NULL
-
-    # set the starting thresholds
-    filtering_parameters$n_umi_min <- seurat$n_umi_values_min
-    filtering_parameters$n_umi_max <- seurat$n_umi_values_max
-    filtering_parameters$n_features_min <- seurat$n_features_values_min
-    filtering_parameters$n_features_max <- seurat$n_features_values_max
-    filtering_parameters$proportion_mt_max <- seurat$proportion_mt_values_max %>% add(0.05) %>% round(digits=1)})
 
   # return the reactive values list
   return(filtering_parameters)

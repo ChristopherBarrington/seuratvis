@@ -14,14 +14,16 @@ filter_n_features.ui <- function(id, label='Features per cell', seurat, low=TRUE
 
 #'
 #'
-filter_n_features.server <- function(input, output, session, cell_filtering) {
+filter_n_features.server <- function(input, output, session, seurat, cell_filtering, linked_density_plot) {
+  filtering <- reactiveValues()
+
   # react to the input elements
   ## min features
   observeEvent(eventExpr=input$min_features, handlerExpr={
     # check that max>min and update the reactive
     if(input$min_features<=input$max_features) {
       cell_filtering$n_features_min <- round(input$min_features, digits=0)
-      cell_filtering$updated_parameter <- rnorm(1)
+      filtering$min <- round(input$min_features, digits=0)
     } else {
       updateNumericInput(session=session, inputId='min_features', value=input$max_features)
     }})
@@ -31,17 +33,26 @@ filter_n_features.server <- function(input, output, session, cell_filtering) {
     # check that max>min and update the reactive
     if(input$max_features>=input$min_features) {
       cell_filtering$n_features_max <- round(input$max_features, digits=0)
-      cell_filtering$updated_parameter <- rnorm(1)
+      filtering$max <- round(input$max_features, digits=0)
     } else {
       updateNumericInput(session=session, inputId='max_features', value=input$min_features)
     }})
 
   # react to the cell filtering parameter being changed eg by the brush
   ## min features
-  observeEvent(eventExpr=cell_filtering$n_features_min, ignoreInit=TRUE, handlerExpr={
-    updateNumericInput(session=session, inputId='min_features', value=cell_filtering$n_features_min)})
+  observeEvent(eventExpr=linked_density_plot$min, ignoreInit=TRUE, handlerExpr={
+    updateNumericInput(session=session, inputId='min_features', value=linked_density_plot$min)})
 
   ## max features
-  observeEvent(eventExpr=cell_filtering$n_features_max, ignoreInit=TRUE, handlerExpr={
-    updateNumericInput(session=session, inputId='max_features', value=cell_filtering$n_features_max)})
+  observeEvent(eventExpr=linked_density_plot$max, ignoreInit=TRUE, handlerExpr={
+    updateNumericInput(session=session, inputId='max_features', value=linked_density_plot$max)})
+
+  # react to a new seurat being loaded
+  observeEvent(eventExpr=seurat$n_features_updated, label='filter_n_features/object', handlerExpr={
+    filtering$variable <- seurat$n_features_variable
+    filtering$min <- seurat$n_features_values_min
+    filtering$max <- seurat$n_features_values_max})
+
+  # return the reactiveValues
+  return(filtering)
 }

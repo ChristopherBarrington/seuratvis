@@ -14,14 +14,16 @@ filter_n_umi.ui <- function(id, label='UMI per cell', seurat, low=TRUE, high=TRU
 
 #'
 #'
-filter_n_umi.server <- function(input, output, session, cell_filtering) {
+filter_n_umi.server <- function(input, output, session, seurat, cell_filtering, linked_density_plot) {
+  filtering <- reactiveValues()
+
   # react to the input elements
   ## min_umi
   observeEvent(eventExpr=input$min_umi, handlerExpr={
     # check that max>min and update the reactive
     if(input$min_umi<=input$max_umi) {
       cell_filtering$n_umi_min <- round(input$min_umi, digits=0)
-      cell_filtering$updated_parameter <- rnorm(1)
+      filtering$min <- round(input$min_umi, digits=0)
     } else {
       updateNumericInput(session=session, inputId='min_umis', value=input$max_umis)
     }})
@@ -31,17 +33,26 @@ filter_n_umi.server <- function(input, output, session, cell_filtering) {
     # check that max>min and update the reactive
     if(input$max_umi>=input$min_umi) {
       cell_filtering$n_umi_max <- round(input$max_umi, digits=0)
-      cell_filtering$updated_parameter <- rnorm(1)
+      filtering$max <- round(input$max_umi, digits=0)
     } else {
       updateNumericInput(session=session, inputId='max_umis', value=input$min_umis)
     }})
 
   # react to the cell filtering parameter being changed eg by the brush
   ## min umi
-  observeEvent(eventExpr=cell_filtering$n_umi_min, ignoreInit=TRUE, handlerExpr={
-    updateNumericInput(session=session, inputId='min_umi', value=cell_filtering$n_umi_min)})
+  observeEvent(eventExpr=linked_density_plot$min, ignoreInit=TRUE, handlerExpr={
+    updateNumericInput(session=session, inputId='min_umi', value=linked_density_plot$min)})
 
   ## max umi
-  observeEvent(eventExpr=cell_filtering$n_umi_max, ignoreInit=TRUE, handlerExpr={
-    updateNumericInput(session=session, inputId='max_umi', value=cell_filtering$n_umi_max)})
+  observeEvent(eventExpr=linked_density_plot$max, ignoreInit=TRUE, handlerExpr={
+    updateNumericInput(session=session, inputId='max_umi', value=linked_density_plot$max)})
+
+  # react to a new seurat being loaded
+  observeEvent(eventExpr=seurat$n_umi_updated, label='filter_n_umi/object', handlerExpr={
+    filtering$variable <- seurat$n_umi_variable
+    filtering$min <- seurat$n_umi_values_min
+    filtering$max <- seurat$n_umi_values_max})
+
+  # return the reactiveValues
+  return(filtering)
 }

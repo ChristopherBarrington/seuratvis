@@ -17,13 +17,16 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
 
 #' 
 #' 
-show_filtering_parameters.server <- function(input, output, session, seurat, cell_filtering) {
+show_filtering_parameters.server <- function(input, output, session, seurat, cell_filtering) { ########## try passing a list of reactiveValues and dynamically using them
   format_subset_conditional <- function(x, fmt) ifelse(is.na(x), NA, sprintf(fmt=fmt, x))
   group_format_subset_conditional <- function(x, sep=' & ') x %>% na.omit() %>% paste(collapse=sep)
   filtering_arguments <- reactiveValues()
 
   display_text <- reactiveVal('empty')
   callModule(module=ace_editor.server, id='ace_verbatim_text_output', display_text=display_text)
+
+
+
 
   # observeEvent(eventExpr=reactiveValuesToList(filtering_parameters.reactions), handlerExpr={
   observeEvent(eventExpr=cell_filtering$done, handlerExpr={
