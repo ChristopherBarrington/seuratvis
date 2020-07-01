@@ -29,7 +29,7 @@ dataset_info_text_box.n_umi <- function(input, output, session, seurat) {
   renderValueBox(expr={
     req(seurat$n_umi_sum)
 
-    list(value=seurat$n_umi_sum %>% scales::comma(),
+    list(value=comma(seurat$n_umi_sum),
          subtitle='Total UMI in cells') %>%
       modifyList(x=dataset_info_text_box.defaults()) %>%
       do.call(what=valueBox)}) -> output$box
@@ -45,9 +45,11 @@ dataset_info_text_box.n_filtered_umi <- function(input, output, session, seurat,
 
     n_reference <- seurat$n_umi_sum
     n_filtered <- cell_filtering$n_umi
+    n_removed <- n_reference-n_filtered
+    subtitle <- sprintf(fmt='%s UMI removed (%.1f%% remain)', comma(n_removed), n_filtered/n_reference*100)
 
-    list(value=n_filtered %>% scales::comma(),
-         subtitle=sprintf(fmt='Total UMI remaining (%.1f%%)', n_filtered/n_reference*100)) %>%
+    list(value=comma(n_filtered),
+         subtitle=subtitle) %>%
       modifyList(x=dataset_info_text_box.defaults()) %>%
       do.call(what=valueBox)}) -> output$box
 }
@@ -59,7 +61,7 @@ dataset_info_text_box.n_cells <- function(input, output, session, seurat) {
   renderValueBox(expr={
     req(seurat$n_cells)
 
-    list(value=seurat$n_cells %>% scales::comma(),
+    list(value=comma(seurat$n_cells),
          subtitle='Cells in map') %>%
       modifyList(x=dataset_info_text_box.defaults()) %>%
       do.call(what=valueBox)}) -> output$box
@@ -75,9 +77,11 @@ dataset_info_text_box.n_filtered_cells <- function(input, output, session, seura
 
     n_reference <- seurat$n_cells
     n_filtered <- cell_filtering$n_cells
+    n_removed <- n_reference-n_filtered
+    subtitle <- sprintf(fmt='%s cells removed (%.1f%% remain)', comma(n_removed), n_filtered/n_reference*100)
 
     list(value=n_filtered %>% scales::comma(),
-         subtitle=sprintf(fmt='Cells remaining (%.1f%%)', n_filtered/n_reference*100)) %>%
+         subtitle=subtitle) %>%
       modifyList(x=dataset_info_text_box.defaults()) %>%
       do.call(what=valueBox)}) -> output$box
 }

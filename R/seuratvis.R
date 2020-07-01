@@ -47,12 +47,12 @@ shinyAppUI <- function(...) {
   tags$head(tags$style(HTML(text='table.dataTable tr.active td, table.dataTable td.active {background-color: #3C8DBC !important;}'))) -> cssDT
   tags$style(type='text/css', '#provenance_tab-editor-ace_editor {height: calc(65vh) !important;} #cell_filtering_tab--ace_verbatim_text_output-ace_editor {height: 150px !important;') -> cssAce # apply this these `ace_editor` IDs
   tags$style(type='text/css', '.boy, .girl {font-size: x-large} .boy {color: #347DC1} .girl {color: #CC6594') -> cssSex # change these classes
-  tags$style(type='text/css', '.control-sidebar, .control-sidebar-bg {width: 20% !important; max-width: 400px !important}') -> cssRightSidebar
+  tags$style(type='text/css', '.control-sidebar, .control-sidebar-bg {width: 20% !important; max-width: 400px !important}') -> cssRightSidebar # TODO: fix this when sidebar is closed
 
   append(contents,
          list()) %>%
     do.call(what=tabItems) %>%
-    dashboardBody(rclipboardSetup(), cssRightSidebar, cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
+    dashboardBody(rclipboardSetup(), cssDT, cssAce, shinyDashboardThemes(theme='grey_dark')) -> dashboard_body
 
   # sidebar definition
   menus %>% append(list(actionButton(inputId='clickme', label='', icon=icon('user-secret')))) %>%

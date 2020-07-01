@@ -45,7 +45,7 @@ cluster_picker.server <- function(input, output, session, seurat, ...) {
   # react to idents being picked
   observeEvent(eventExpr=input$ident_picker, label='cluster_picker/ident_picker', handlerExpr={
     clusters$picked_idents <- input$ident_picker
-    clusters$in_set <- input$ident_picker %>% str_c(collapse='","') %>% sprintf(fmt='c("%s")')})
+    clusters$in_set <- input$ident_picker %>% str_c(collapse="', '") %>% sprintf(fmt="c('%s')")})
 
   # react to idents being picked
   observeEvent(eventExpr=input$label_clusters, label='cluster_picker/label_clusters', handlerExpr={

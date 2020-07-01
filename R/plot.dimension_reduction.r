@@ -39,7 +39,8 @@ dimension_reduction.show_cluster_idents.server <- function(input, output, sessio
       geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
       geom_point(size=point_size$size, alpha=opacity$alpha) +
       theme_void() +
-      theme(legend.position='none',
+      theme(aspect.ratio=1,
+            legend.position='none',
             panel.background=element_rect(fill=picked_colours$background)) -> map
  
     # if labels should be included, add them here
@@ -62,7 +63,7 @@ dimension_reduction.show_cluster_idents.server <- function(input, output, sessio
 #'
 #'
 dimension_reduction.show_selected_clusters.server <- function(input, output, session, dimension_reduction, picked_colours, point_size, cluster_resolution) {
-  renderPlot({
+  renderPlot(bg='transparent', expr={
     req(dimension_reduction$embeddings)
     req(cluster_resolution$idents)
  
@@ -77,7 +78,8 @@ dimension_reduction.show_selected_clusters.server <- function(input, output, ses
       geom_point(size=point_size$size) +
       scale_alpha_manual(values=c(`FALSE`=0.05, `TRUE`=1)) +
       theme_void() +
-      theme(legend.position='none',
+      theme(aspect.ratio=1,
+            legend.position='none',
             panel.background=element_rect(fill=picked_colours$background)) -> map
 
     # return the plot
@@ -104,7 +106,8 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
       geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
       geom_point(size=point_size$size, alpha=opacity$alpha) +
       theme_void() +
-      theme(legend.position='none',
+      theme(aspect.ratio=1,
+            legend.position='none',
             panel.background=element_rect(fill=picked_colours$background, colour='black'),
             strip.background=element_rect(fill=picked_colours$background, colour='black')) -> map
 
@@ -121,8 +124,8 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
 
       # if the values cross zero, make a new colour scale
       if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1)) {
-         c_low <- 'cyan'
-         c_high <- 'magenta'
+         c_low <- 'blue'
+         c_high <- 'red'
          colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
                                                   values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
                                                   limits=c_range, breaks=0)
