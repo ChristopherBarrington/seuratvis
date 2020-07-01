@@ -27,6 +27,7 @@ cluster_picker.ui <- function(id, seurat, resolution=TRUE, picker=TRUE, label_sw
 
 #'
 #' @import gtools
+#' @import scales
 #' 
 cluster_picker.server <- function(input, output, session, seurat, ...) {
   clusters <- reactiveValues()
@@ -40,7 +41,16 @@ cluster_picker.server <- function(input, output, session, seurat, ...) {
     clusters$variable <- input$resolution_picker
     clusters$idents <- FetchData(object=seurat$object, vars=input$resolution_picker) %>% unlist()
     clusters$distinct_idents <- unique(clusters$idents) %>% mixedsort()
-    updatePickerInput(session=session, inputId='ident_picker', choices=seurat$all_idents[[input$resolution_picker]], selected=seurat$all_idents[[input$resolution_picker]])})
+
+    choices <- seurat$all_idents[[input$resolution_picker]]
+    table(clusters$idents)[choices] %>%
+      as.vector() %>%
+      comma(accuracy=1) %>%
+      sprintf(fmt=' (n=%s)') %>%
+      str_c(choices, .) -> choice_names
+      choices %<>% set_names(choice_names)
+
+    updatePickerInput(session=session, inputId='ident_picker', choices=choices, selected=seurat$all_idents[[input$resolution_picker]])})
 
   # react to idents being picked
   observeEvent(eventExpr=input$ident_picker, label='cluster_picker/ident_picker', handlerExpr={
