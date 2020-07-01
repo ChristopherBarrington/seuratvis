@@ -1,18 +1,31 @@
 #'
 #'
-dataset_filtering.server <- function(input, output, session, seurat, filters) {
+dataset_filtering.server <- function(input, output, session, seurat, filters=list()) {
   reactiveValues() -> filtering_parameters
 
   # update the reactive when the filters are changed
   observe({
     req(seurat$metadata)
-    req(seurat$n_umi_values)
-    req(seurat$n_features_values)
-    req(seurat$proportion_mt_values)
-    
+    # req(seurat$n_umi_values)
+    # req(seurat$n_features_values)
+    # req(seurat$proportion_mt_values)
+
+    # if there are no filters provided
+    if(length(filters)==0)
+      return(NULL)
+
+    # if any of the filters are not uet initialised
+    if(lapply(filters, reactiveValuesToList) %>% sapply(length) %>% equals(0) %>% any())
+      return(NULL)
+
     # get the values in the list of reactives
+    # lapply(filters, reactiveValuesToList)  %>%
+    #   plyr::ldply(as.data.frame) -> filters_df
     lapply(filters, reactiveValuesToList)  %>%
-      plyr::ldply(as.data.frame) -> filters_df
+      lapply(function(x) x %>% extract(str_detect(string=names(x), pattern='variable|min|max|in_set'))) %>% # pick out the elements we can use
+      plyr::ldply(as.data.frame) %>%
+      gather(key=logic, value=value, -variable) %>%
+      drop_na() -> filters_df
 
     # prepare a condition to filter the metadata
     ## by default, select all cells (no filtering)
@@ -21,10 +34,10 @@ dataset_filtering.server <- function(input, output, session, seurat, filters) {
     ## if there are some filters, prepare a condition to filter the cells
     if(nrow(filters_df)>0)
       filters_df %>%
-        gather(key=logic, value=value, -variable) %>%
-        drop_na() %>%
-        mutate(logic=factor(logic),
-               logic=fct_recode(logic, `>=`='min', `<=`='max'),
+        # gather(key=logic, value=value, -variable) %>%
+        # drop_na() %>%
+        mutate(logic=factor(logic, levels=c('min', 'max', 'in_set')),
+               logic=fct_recode(logic, `>=`='min', `<=`='max', ` %in% `='in_set'),
                value=str_trim((value))) %>%
         apply(1, str_c, collapse='') %>%
         str_c(collapse=' & ') -> filter_condition

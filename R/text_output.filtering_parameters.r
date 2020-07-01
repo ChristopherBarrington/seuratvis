@@ -17,7 +17,7 @@ show_filtering_parameters.ui <- function(id, label='Cell filtering parameters', 
 
 #' 
 #' 
-show_filtering_parameters.server <- function(input, output, session, seurat, cell_filtering, filters) {
+show_filtering_parameters.server <- function(input, output, session, seurat, cell_filtering, filters=list()) {
   filtering_arguments <- reactiveValues()
 
   display_text <- reactiveVal()
@@ -26,24 +26,31 @@ show_filtering_parameters.server <- function(input, output, session, seurat, cel
   # react to changes in the filters
   observe({
     req(seurat$project)
-    req(seurat$metadata)
-    req(seurat$n_umi_variable)
-    req(seurat$n_features_variable)
-    req(seurat$proportion_mt_variable)
-    
+
+    # if there are no filters provided
+    if(length(filters)==0)
+      return(NULL)
+
+    # if any of the filters are not uet initialised
+    if(lapply(filters, reactiveValuesToList) %>% sapply(length) %>% equals(0) %>% any())
+      return(NULL)
+
     # get the values in the list of reactives
     lapply(filters, reactiveValuesToList)  %>%
-      plyr::ldply(as.data.frame) -> filters_df
+      lapply(function(x) x %>% extract(str_detect(string=names(x), pattern='variable|min|max|in_set'))) %>% # pick out the elements we can use
+      plyr::ldply(as.data.frame) %>%
+      gather(key=logic, value=value, -variable) %>%
+      drop_na() -> filters_df
 
     # prepare the condition filter(s)
-    filters_df %>%
-      gather(key=logic, value=value, -variable) %>%
-      drop_na() %>%
-      mutate(logic=factor(logic),
-             logic=fct_recode(logic, `>=`='min', `<=`='max'),
-             value=str_trim((value))) %>%
-      arrange(variable, value) %>%
-      apply(1, str_c, collapse='') -> all_subset_conditions
+    all_subset_conditions <- NULL
+    if(nrow(filters_df)>0)
+      filters_df %>%
+        mutate(logic=factor(logic, levels=c('min', 'max', 'in_set')),
+               logic=fct_recode(logic, `>=`='min', `<=`='max', ` %in% `='in_set'),
+               value=str_trim((value))) %>%
+        arrange(variable, value) %>%
+        apply(1, str_c, collapse='') -> all_subset_conditions
 
     # combine all output lines
     list(project_line={seurat$project %>% sprintf(fmt='# %s')},

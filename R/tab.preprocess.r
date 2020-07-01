@@ -50,9 +50,10 @@ preprocessing.tab <- function() {
                      dataset_info_text_box.ui(id=ns('n_cells'), width=3),
                      dataset_info_text_box.ui(id=ns('n_umi_per_cell'), width=3),
                      dataset_info_text_box.ui(id=ns('n_features_per_cell'), width=3)),
-            fluidRow(boxPlus(title='Selected feature', closable=FALSE, width=4, dimension_reduction.plot(id=ns('picked_feature'))),
-                     boxPlus(title='Selected cluster(s)', closable=FALSE, width=4, dimension_reduction.plot(id=ns('picked_clusters'))),
-                     boxPlus(title='Feature values in clusters', closable=FALSE, width=4, feature_value_per_cluster.plot(id=ns('feature_value_per_cluster'))))) -> cluster_filtering_tab
+            fluidRow(boxPlus(title='All clusters in map', closable=FALSE, width=6, dimension_reduction.plot(id=ns('all_clusters'))),
+                     boxPlus(title='Selected feature', closable=FALSE, width=6, dimension_reduction.plot(id=ns('picked_feature'))),
+                     boxPlus(title='Selected cluster(s)', closable=FALSE, width=6, dimension_reduction.plot(id=ns('picked_clusters'))),
+                     boxPlus(title='Feature values in clusters', closable=FALSE, width=6, feature_value_per_cluster.plot(id=ns('feature_value_per_cluster'))))) -> cluster_filtering_tab
 
     # collect all of the contents for this tab group
     content <- list(cell_filtering_tab, dimensionality_tab, cluster_filtering_tab)
@@ -138,7 +139,7 @@ cluster_filtering_tab.server <- function(input, output, session, server_input, s
     if(server_input$left_sidebar==tab) {    
       tab %<>% str_c('-')
       renderUI({tagList(dimension_reduction.ui(id=tab, seurat=seurat),
-                        cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=FALSE, label_switch=TRUE),
+                        cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=TRUE),
                         feature_picker.ui(id=tab, seurat=seurat),
                         show_filtering_parameters.ui(id=tab, label='Cell filtering parameters'))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
@@ -163,6 +164,8 @@ cluster_filtering_tab.server <- function(input, output, session, server_input, s
   point_size <- list(size=0.6)
   opacity <- list(alpha=1)
 
+  filtering_parameters <- callModule(module=dataset_filtering.server, id='filtering', seurat=seurat, filters=list(cluster_resolution))
+
   callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
   callModule(module=picked_feature_and_description_text_box.server, id='feature_description', seurat=seurat, picked_feature=feature_picker)
   callModule(module=dataset_info_text_box.n_filtered_umi, id='n_umi', seurat=seurat, cell_filtering=filtering_parameters)
@@ -170,8 +173,9 @@ cluster_filtering_tab.server <- function(input, output, session, server_input, s
   callModule(module=dataset_info_text_box.n_umi_per_filtered_cell, id='n_umi_per_cell', seurat=seurat, cell_filtering=filtering_parameters)
   callModule(module=dataset_info_text_box.n_features_per_filtered_cell, id='n_features_per_cell', seurat=seurat, cell_filtering=filtering_parameters)
 
-  callModule(module=show_filtering_parameters.server, id='', seurat=seurat, cell_filtering=filtering_parameters)
+  callModule(module=show_filtering_parameters.server, id='', seurat=seurat, cell_filtering=filtering_parameters, filters=list(cluster_resolution))
 
+  callModule(module=dimension_reduction.show_cluster_idents.server, id='all_clusters', dimension_reduction=dimension_reduction, picked_colours=colour_picker, opacity=opacity, point_size=point_size, cluster_resolution=cluster_resolution)
   callModule(module=dimension_reduction.highlight_feature.server, id='picked_feature', dimension_reduction=dimension_reduction, picked_feature=feature_picker, picked_colours=colour_picker, opacity=opacity, point_size=point_size)
   callModule(module=dimension_reduction.show_selected_clusters.server, id='picked_clusters', dimension_reduction=dimension_reduction, picked_colours=colour_picker, point_size=point_size, cluster_resolution=cluster_resolution)
   callModule(module=feature_value_per_cluster.server, id='feature_value_per_cluster', picked_feature=feature_picker, cluster_resolution=cluster_resolution, picked_colours=colour_picker)
