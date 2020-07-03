@@ -156,3 +156,77 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
     # return the plot
     map}) -> output$map
 }
+
+#'
+#' 
+dimension_reduction.split_highlight_feature.server <- function(input, output, session, dimension_reduction, picked_feature, picked_colours, opacity, point_size, picked_splitter) {
+  # render the plot
+  renderPlot(bg='transparent', expr={
+    req(dimension_reduction$embeddings)
+    req(picked_feature$values)
+    req(picked_splitter$values)
+
+    # prepare the data and start the plot
+    cbind(dimension_reduction$embeddings %>% set_names(c('X','Y')),
+          picked_feature$values %>% set_names('value'),
+          picked_splitter$values %>% set_names('splitter')) %>%
+      (function(x) rbind(x, mutate(x, splitter='unsplit dataset'))) %>%
+      arrange(value) %>%
+      ggplot() +
+      aes(x=X, y=Y, colour=value) +
+      geom_hline(yintercept=0, colour='grey90') + geom_vline(xintercept=0, colour='grey90') +
+      geom_point(size=point_size$size, alpha=opacity$alpha) +
+      facet_wrap(~splitter) +
+      theme_void() +
+      theme(aspect.ratio=1,
+            legend.position='none',
+            panel.background=element_rect(fill=picked_colours$background, colour='black'),
+            strip.background=element_rect(fill='white', colour='black'),
+            strip.text=element_text(size=15)) -> map
+
+    # if the feature is numeric, colour the points otherwise facet the plot
+    if(is.numeric(map$data$value)) {
+      # get the colour values and range
+      c_low <- picked_colours$low
+      c_mid <- picked_colours$mid
+      c_high <- picked_colours$high
+      c_range <- picked_feature$values_range
+
+      # make a colour scale
+      colour_gradient <- scale_colour_gradient(low=c_low, high=c_high, limits=c_range, oob=scales::squish)
+
+      # if the values cross zero, make a new colour scale
+      if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1)) {
+         c_low <- 'blue'
+         c_high <- 'red'
+         colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
+                                                  values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
+                                                  limits=c_range, breaks=0)
+      }
+
+      # add the colour scale and a legend
+      map +
+        colour_gradient +
+        # labs(colour=picked_feature$name) +
+        guides(colour=guide_colourbar(title.position='top',
+                                      title.hjust=1,
+                                      frame.colour='black',
+                                      ticks=TRUE)) +
+        theme(legend.direction='horizontal',
+              legend.justification=c(1,0),
+              legend.key.height=unit(0.5,'line'),
+              legend.key.width=unit(0.5,'line'),
+              legend.position=c(1,0),
+              legend.text=element_blank(),
+              legend.title=element_blank(),
+              legend.title.align=0,
+              panel.background=element_rect(fill=picked_colours$background, colour='black'),
+              strip.background=element_rect(fill='white', colour='black')) -> map
+    } else {
+      # facet the map by the factor levels
+      map <- map + facet_wrap(~value, scales='fixed')
+    }
+
+    # return the plot
+    map}, height=900) -> output$map
+}

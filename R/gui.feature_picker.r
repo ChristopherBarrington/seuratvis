@@ -1,12 +1,16 @@
 #' 
 #' 
-feature_picker.ui <- function(id, seurat, label='Feature selection', choices=list(`Features`='features', `Metadata`='metadata', `Gene modules`='gene_modules'), selected='features', include_feature_type=TRUE, include_values_range=TRUE, gene_modules_opts=list(), features_regex='.*', metadata_regex='.*') {
+feature_picker.ui <- function(id, seurat, label='Feature selection', selected='features', include_feature_type=TRUE, include_values_range=TRUE,
+                              choices=list(`Features`='features', `Metadata`='metadata', `Gene modules`='gene_modules'),
+                              features_opts=list(), metadata_opts=list(), gene_modules_opts=list(),
+                              features_regex='.*', metadata_regex='.*', gene_modules_regex='.*',
+                              metadata_filter=function(x) x) {
   ns <- NS(id)
 
   # get the possible features and values
   ## get names of features and metadata
   list(features=rownames(seurat$object),
-       metadata=colnames(seurat$metadata),
+       metadata=seurat$metadata %>% metadata_filter() %>% colnames(),
        gene_modules=colnames(seurat$gene_module_scores)) -> feature_picker_options
 
   ## filter the options using the regex
@@ -27,8 +31,14 @@ feature_picker.ui <- function(id, seurat, label='Feature selection', choices=lis
     conditionalPanel(condition=sprintf('input["%s"]=="features"', ns(id='feature_type'))) -> feature_names_picker_conditional
 
   ## metadata names drop down box
-  selectizeInput(inputId=ns(id='feature_picker_metadata'), label=NULL,
-                 choices=feature_picker_options$metadata, selected=feature_picker_selected$metadata, multiple=FALSE) %>%
+  # selectizeInput(inputId=ns(id='feature_picker_metadata'), label=NULL,
+  #                choices=feature_picker_options$metadata, selected=feature_picker_selected$metadata, multiple=FALSE) %>%
+  #   conditionalPanel(condition=sprintf('input["%s"]=="metadata"', ns(id='feature_type'))) -> metadata_picker_conditional
+
+  list(inputId=ns(id='feature_picker_metadata'), label=NULL,
+       choices=feature_picker_options$metadata, selected=feature_picker_selected$metadata, multiple=FALSE) %>%
+    modifyList(val=metadata_opts) %>%
+    do.call(what=selectizeInput) %>%
     conditionalPanel(condition=sprintf('input["%s"]=="metadata"', ns(id='feature_type'))) -> metadata_picker_conditional
 
   ## gene modules drop down box
