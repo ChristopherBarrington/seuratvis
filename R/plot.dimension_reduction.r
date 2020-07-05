@@ -123,13 +123,10 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
       colour_gradient <- scale_colour_gradient(low=c_low, high=c_high, limits=c_range, oob=scales::squish)
 
       # if the values cross zero, make a new colour scale
-      if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1)) {
-         c_low <- 'blue'
-         c_high <- 'red'
-         colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
+      if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1))
+        colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
                                                   values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
                                                   limits=c_range, breaks=0)
-      }
 
       # add the colour scale and a legend
       map +
@@ -196,13 +193,10 @@ dimension_reduction.split_highlight_feature.server <- function(input, output, se
       colour_gradient <- scale_colour_gradient(low=c_low, high=c_high, limits=c_range, oob=scales::squish)
 
       # if the values cross zero, make a new colour scale
-      if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1)) {
-         c_low <- 'blue'
-         c_high <- 'red'
-         colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
+      if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1))
+        colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
                                                   values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
                                                   limits=c_range, breaks=0)
-      }
 
       # add the colour scale and a legend
       map +
