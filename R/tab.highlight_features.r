@@ -80,7 +80,6 @@ highlight_feature_tab.server <- function(input, output, session, server_input, s
   point_size <- callModule(module=point_size.server, id='')
   opacity <- callModule(module=opacity.server, id='')
   feature_picker <- callModule(module=feature_picker.server, id='', seurat=seurat)
-  # colour_picker <- list(low='linen', mid='white', high='darkviolet', background=rgb(255, 255, 255, 255, max=255))
   colour_picker <- callModule(module=colour_picker.server, id='')
 
   callModule(module=dimension_reduction.show_cluster_idents.server, id='all_clusters', dimension_reduction=dimension_reduction, picked_colours=colour_picker, opacity=opacity, point_size=point_size, cluster_resolution=cluster_resolution)
