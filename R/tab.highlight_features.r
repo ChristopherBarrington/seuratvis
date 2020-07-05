@@ -163,7 +163,7 @@ visualise_dataset_tab.server <- function(input, output, session, server_input, s
       renderUI({tagList(dimension_reduction.ui(id=tab, seurat=seurat),
                         cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=FALSE, label_switch=TRUE),
                         feature_picker.ui(id=tab, seurat=seurat),
-                        feature_picker.ui(id=NS('visualise_dataset_tab', 'split'), seurat=seurat, label='Split map', selected='metadata', include_feature_type=FALSE, include_values_range=FALSE, choices=list(`Metadata`='metadata'), metadata_filter=function(x) select_if(x, function(x) {is.character(x) | is.factor(x)})))})  -> server_output$right_sidebar.data_opts
+                        feature_picker.ui(id=NS('visualise_dataset_tab', 'split'), seurat=seurat, label='Split map', selected='metadata', include_feature_type=TRUE, include_values_range=FALSE, choices=list(`Metadata`='metadata'), metadata_filter=function(x) select_if(x, function(x) {is.character(x) | is.factor(x)})))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList(point_size.ui(id=tab),
                         opacity.ui(id=tab))}) -> server_output$right_sidebar.plotting_opts}})
 
