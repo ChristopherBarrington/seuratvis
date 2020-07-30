@@ -67,15 +67,17 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$provenance <- s@misc$provenance
 
     # FindMarkers results
-    s@misc$FindMarkersResults %>%
-      pluck('wilcox') %>%
-      mutate(p_adj_group={p_val_adj %>% cut(breaks=c(0, 0.1/100, 1/100, 5/100, 10/100, 100/100), labels=c('<0.1%','<1%','<5%','<10%','NS'), include.lowest=TRUE, right=TRUE)}) %>%
-      dplyr::select(cluster_set, ident.1, gene, pct.1, pct.2, avg_logFC, p_adj_group) %>%
-      rename(`Cluster set`='cluster_set', `Cluster ID`='ident.1', `Gene`='gene', `Cluster detection`='pct.1', `Map detection`='pct.2', `Avg. logFC`='avg_logFC', `Adj. P`='p_adj_group') -> tidied_results
+    if(!is.null(s@misc$FindMarkersResults$wilcox)) {
+      s@misc$FindMarkersResults %>%
+        pluck('wilcox') %>%
+        mutate(p_adj_group={p_val_adj %>% cut(breaks=c(0, 0.1/100, 1/100, 5/100, 10/100, 100/100), labels=c('<0.1%','<1%','<5%','<10%','NS'), include.lowest=TRUE, right=TRUE)}) %>%
+        dplyr::select(cluster_set, ident.1, gene, pct.1, pct.2, avg_logFC, p_adj_group) %>%
+        rename(`Cluster set`='cluster_set', `Cluster ID`='ident.1', `Gene`='gene', `Cluster detection`='pct.1', `Map detection`='pct.2', `Avg. logFC`='avg_logFC', `Adj. P`='p_adj_group') -> tidied_results
 
-    ## update the reactive(s)
-    seurat$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Gene', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
-    seurat$FindMarkersResults$table <- tidied_results
+      ## update the reactive(s)
+      seurat$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Gene', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
+      seurat$FindMarkersResults$table <- tidied_results
+    }
 
     # update ui elements
     ## get the numeric metadata variables
