@@ -144,10 +144,13 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     req(seurat$metadata)
 
     gm_regex <- input$gene_modules_regex_text
-    
-    seurat$gene_modules <- seurat$object@misc$gene_modules %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
-    seurat$gene_modules_regex <- gm_regex
-    seurat$gene_module_scores <- select(seurat$metadata, matches(input$gene_modules_regex_text)) %>% purrr::set_names(str_remove, pattern=regex(gm_regex))})
+
+    seurat$gene_modules <- ''
+
+    if(!is.null(seurat$object@misc$gene_modules))
+      seurat$gene_modules <- seurat$object@misc$gene_modules %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
+    seurat$gene_module_scores <- select(seurat$metadata, matches(gm_regex)) %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
+    seurat$gene_modules_regex <- gm_regex})
 
   # return the reactive
   seurat
