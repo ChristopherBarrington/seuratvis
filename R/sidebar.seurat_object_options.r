@@ -214,7 +214,6 @@ process_seurat.server <- function(input, output, session, server_input, server_o
       biomaRt::useMart(biomart='ensembl', host=input$mart_url_picker) %>%
         biomaRt::useDataset(dataset=sprintf('%s_gene_ensembl', input$mart_species_picker)) -> seurat$mart})
 
-  observe({message('////////'); print(seurat$mart); message('') ; message('////////')})
   # return the reactive
   seurat
 }
