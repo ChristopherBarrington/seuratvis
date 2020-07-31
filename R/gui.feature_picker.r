@@ -13,6 +13,12 @@ feature_picker.ui <- function(id, seurat, label='Feature selection', selected='f
        metadata=seurat$metadata %>% metadata_filter() %>% colnames(),
        gene_modules=colnames(seurat$gene_module_scores)) -> feature_picker_options
 
+  ## filter the list for non-empty sets
+  feature_picker_options <- feature_picker_options[sapply(feature_picker_options, length)>0]
+  
+  ## only use choices with non-empty option sets
+  choices <- choices[unlist(choices) %in% names(feature_picker_options)]
+
   ## filter the options using the regex
   feature_picker_options$features %<>% str_subset(pattern=regex(pattern=features_regex, ignore_case=TRUE))
   feature_picker_options$metadata %<>% str_subset(pattern=regex(pattern=metadata_regex, ignore_case=TRUE))
@@ -167,6 +173,11 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
   observeEvent(eventExpr=input$value_range, ignoreInit=TRUE, handlerExpr={
     picked_feature$refreshed <- rnorm(1)
     picked_feature$values_range <- input$value_range})
+
+  # reset the reactive when the seurat is (re)loaded
+  observeEvent(eventExpr=seurat$object, handlerExpr={
+    for(i in names(picked_feature))
+      picked_feature[[i]] <- NULL})
 
   # return the reactiveValues list
   return(picked_feature)
