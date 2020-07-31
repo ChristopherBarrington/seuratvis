@@ -39,7 +39,8 @@ feature_value_per_cluster.server <- function(input, output, session, picked_feat
         ggplot() +
         aes(x=x, fill=value) +
         labs(y='Frequency') +
-        geom_bar(position='dodge') -> feature_plot
+        geom_bar(position=position_dodge2(width=0.9, preserve='single')) -> feature_plot
+        # geom_bar(position=position_dodge2(width=0.9, preserve='single')) -> feature_plot
     }
 
     # add the shared plotting elements
