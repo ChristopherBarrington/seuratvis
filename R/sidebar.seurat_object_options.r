@@ -81,7 +81,13 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$assays <- Assays(s)
     seurat$cluster_resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))
     seurat$all_idents <- {resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}
-    seurat$provenance <- s@misc$provenance
+
+    # initialise the provenance of the seurat
+    provenance <- s@misc$provenance
+    if(is.null(provenance))
+      provenance <- list('aperture'='there is no cake')
+    seurat$provenance <- provenance
+
     # initialise the metadata selector variables to NULL
     seurat$n_features_variable <- NULL
     seurat$n_umi_variable <- NULL
