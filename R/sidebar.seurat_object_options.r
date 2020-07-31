@@ -88,11 +88,6 @@ process_seurat.server <- function(input, output, session, server_input, server_o
       provenance <- list('aperture'='there is no cake')
     seurat$provenance <- provenance
 
-    # initialise the metadata selector variables to NULL
-    seurat$n_features_variable <- NULL
-    seurat$n_umi_variable <- NULL
-    seurat$proportion_mt_variable <- NULL
-
     # save biomaRt to reactive, if available
     mart_included <- !is.null(s@misc$mart)
     seurat$mart <- NULL
@@ -114,6 +109,11 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     }
 
     # update ui elements
+    ## initialise the metadata selector variables to NULL
+    seurat$n_features_variable <- NULL
+    seurat$n_umi_variable <- NULL
+    seurat$proportion_mt_variable <- NULL
+
     ## get the numeric metadata variables
     sapply(seurat$metadata, is.numeric) %>% subset(x=colnames(seurat$metadata)) -> numeric_choices
     sapply(seurat$metadata, is.character) %>% subset(x=colnames(seurat$metadata)) -> character_choices
