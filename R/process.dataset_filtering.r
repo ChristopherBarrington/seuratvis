@@ -6,9 +6,9 @@ dataset_filtering.server <- function(input, output, session, seurat, filters=lis
   # update the reactive when the filters are changed
   observe({
     req(seurat$metadata)
-    # req(seurat$n_umi_values)
-    # req(seurat$n_features_values)
-    # req(seurat$proportion_mt_values)
+    req(seurat$n_umi_variables)
+    req(seurat$n_features_variables)
+    req(seurat$proportion_mt_variables)
 
     # if there are no filters provided
     if(length(filters)==0)

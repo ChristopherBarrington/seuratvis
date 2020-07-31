@@ -82,6 +82,10 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$cluster_resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))
     seurat$all_idents <- {resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}
     seurat$provenance <- s@misc$provenance
+    # initialise the metadata selector variables to NULL
+    seurat$n_features_variable <- NULL
+    seurat$n_umi_variable <- NULL
+    seurat$proportion_mt_variable <- NULL
 
     # save biomaRt to reactive, if available
     mart_included <- !is.null(s@misc$mart)
@@ -124,6 +128,9 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     req(input$n_features_picker)
     req(seurat$metadata)
 
+    if(!is.element(el=input$n_features_picker, set=names(seurat$metadata)))
+      return(NULL)
+
     seurat$n_features_variable <- input$n_features_picker
     seurat$n_features_values <- select(seurat$metadata, input$n_features_picker) %>% unlist(use.names=FALSE)
     seurat$n_features_values_min <- min(seurat$n_features_values)
@@ -137,6 +144,9 @@ process_seurat.server <- function(input, output, session, server_input, server_o
   observe(label='process_seurat/n_umi_picker', x={
     req(input$n_umi_picker)
     req(seurat$metadata)
+
+    if(!is.element(el=input$n_umi_picker, set=names(seurat$metadata)))
+      return(NULL)
 
     seurat$n_umi_variable <- input$n_umi_picker
     seurat$n_umi_values <- select(seurat$metadata, input$n_umi_picker) %>% unlist(use.names=FALSE)
@@ -152,6 +162,9 @@ process_seurat.server <- function(input, output, session, server_input, server_o
   observe(label='process_seurat/proportion_mt_picker', x={
     req(input$proportion_mt_picker)
     req(seurat$metadata)
+
+    if(!is.element(el=input$proportion_mt_picker, set=names(seurat$metadata)))
+      return(NULL)
 
     seurat$proportion_mt_variable <- input$proportion_mt_picker
     seurat$proportion_mt_values <- select(seurat$metadata, input$proportion_mt_picker) %>% unlist(use.names=FALSE)
@@ -184,7 +197,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
       biomaRt::useMart(biomart='ensembl', host=input$mart_url_picker) %>%
         biomaRt::listDatasets() %>%
         pluck('dataset') %>%
-        str_remove('_gene_ensembl') %>% print() %>%
+        str_remove('_gene_ensembl') %>%
         updatePickerInput(session=session, inputId='mart_species_picker', label=NULL, selected=NULL)})
 
   observe(label='process_seurat/configure_biomart', x={

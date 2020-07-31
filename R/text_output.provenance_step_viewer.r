@@ -14,7 +14,6 @@ provenance_step_viewer.server <- function(input, output, session, picked_provena
   })
 }
 
-
 ace_editor.ui <- function(id, ...)
   aceEditor(outputId=NS(id, 'ace_editor'), placeholder='R script',
             mode='r', tabSize=2, useSoftTabs=TRUE, wordWrap=TRUE,
