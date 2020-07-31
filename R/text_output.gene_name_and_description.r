@@ -9,7 +9,7 @@ picked_feature_and_description_text_box.ui <- function(id, width=12) {
 picked_feature_and_description_text_box.server <- function(input, output, session, seurat, picked_feature) {
   renderValueBox(expr={
     req(picked_feature$name)
-    req(seurat$mart)
+    # req(seurat$mart)
     
     # create variables for shorthand
     picked_feature <- picked_feature$name
