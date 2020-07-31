@@ -4,17 +4,34 @@ seurat_object_options.ui <- function(id, seurat) {
   pickerInput_defaults <- list(choices=NULL, selected=NULL, multiple=FALSE, inline=FALSE, width=NULL)
   textInput_defaults <- list(value='value', width=NULL, placeholder='placeholder')
 
-  list(inputId=NS(id, 'n_features_picker'), label='Features', options=list(title='Features')) %>% modifyList(x=pickerInput_defaults) %>% do.call(what=pickerInput) -> n_features_picker
-  list(inputId=NS(id, 'n_umi_picker'), label='UMI', options=list(title='UMI')) %>% modifyList(x=pickerInput_defaults) %>% do.call(what=pickerInput) -> n_umi_picker
-  list(inputId=NS(id, 'proportion_mt_picker'), label='Mitochondrial proportion', options=list(title='Mitochondrial proportion')) %>% modifyList(x=pickerInput_defaults) %>% do.call(what=pickerInput) -> proportion_mt_picker
+  list(inputId=NS(id, 'n_features_picker'), label='Features', options=list(title='Features', size=5)) %>% modifyList(x=pickerInput_defaults) %>% do.call(what=pickerInput) -> n_features_picker
+  list(inputId=NS(id, 'n_umi_picker'), label='UMI', options=list(title='UMI', size=5)) %>% modifyList(x=pickerInput_defaults) %>% do.call(what=pickerInput) -> n_umi_picker
+  list(inputId=NS(id, 'proportion_mt_picker'), label='Mitochondrial proportion', options=list(title='Mitochondrial proportion', size=5)) %>% modifyList(x=pickerInput_defaults) %>% do.call(what=pickerInput) -> proportion_mt_picker
   list(inputId=NS(id, 'gene_modules_regex_text'), value='^GeneModule-', label='Gene modules regex', placeholder='regex') %>% modifyList(x=textInput_defaults) %>% do.call(what=textInput) -> gene_modules_picker
+
+  # define the biomaRt options
+  biomaRt::listEnsemblArchives() %>% filter(str_detect(url, 'archive')) %>% transmute(label=sprintf(fmt='%s [%s]', name, date), value=url) %>% deframe() -> mart_urls
+  list(inputId=NS(id, 'mart_url_picker'), label='Ensembl version', options=list(size=5), choices=mart_urls, selected='http://jul2018.archive.ensembl.org') %>%
+    modifyList(x=pickerInput_defaults) %>%
+    do.call(what=pickerInput) %>%
+    conditionalPanel(condition=sprintf('input["%s"]==false', NS(id, 'mart_included'))) -> mart_url_picker
+
+  list(inputId=NS(id, 'mart_species_picker'), label='Species', options=list(title='Species', size=5), choices=c('hsapiens','mmusculus')) %>%
+    modifyList(x=pickerInput_defaults) %>%
+    do.call(what=pickerInput) %>%
+    conditionalPanel(condition=sprintf('input["%s"]==false', NS(id, 'mart_included'))) -> mart_species_picker
+
+  switchInput(inputId=NS(id, 'mart_included'), value=TRUE) %>% hidden() -> mart_included_switch
 
   # return ui element(s)
   tagList(tags$label('Configure metadata columns'),
           n_features_picker,
           n_umi_picker,
           proportion_mt_picker,
-          gene_modules_picker)
+          gene_modules_picker,
+          mart_url_picker,
+          mart_species_picker,
+          mart_included_switch)
 }
 
 #'
@@ -27,6 +44,7 @@ seurat_object_choices.ui <- function(id, available_seurats) {
 
 #'
 #' @import purrr
+#' @import biomaRt
 #' 
 process_seurat.server <- function(input, output, session, server_input, server_output, server_session, available_seurats) {
   seurat <- reactiveValues()
@@ -63,8 +81,14 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$assays <- Assays(s)
     seurat$cluster_resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))
     seurat$all_idents <- {resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% plyr::llply(levels)}
-    seurat$mart <- s@misc$mart
     seurat$provenance <- s@misc$provenance
+
+    # save biomaRt to reactive, if available
+    mart_included <- !is.null(s@misc$mart)
+    seurat$mart <- NULL
+    if(mart_included)
+      seurat$mart <- s@misc$mart
+    updateSwitchInput(session=session, inputId='mart_included', value=mart_included)
 
     # FindMarkers results
     if(!is.null(s@misc$FindMarkersResults$wilcox)) {
@@ -149,9 +173,29 @@ process_seurat.server <- function(input, output, session, server_input, server_o
 
     if(!is.null(seurat$object@misc$gene_modules))
       seurat$gene_modules <- seurat$object@misc$gene_modules %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
-    seurat$gene_module_scores <- select(seurat$metadata, matches(gm_regex)) %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
+    seurat$gene_module_scores <- dplyr::select(seurat$metadata, matches(gm_regex)) %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
     seurat$gene_modules_regex <- gm_regex})
 
+  ## configure the biomaRt object
+  observe(label='process_seurat/update_mart_species', x={
+    req(input$mart_url_picker)
+
+    if(!input$mart_included)
+      biomaRt::useMart(biomart='ensembl', host=input$mart_url_picker) %>%
+        biomaRt::listDatasets() %>%
+        pluck('dataset') %>%
+        str_remove('_gene_ensembl') %>% print() %>%
+        updatePickerInput(session=session, inputId='mart_species_picker', label=NULL, selected=NULL)})
+
+  observe(label='process_seurat/configure_biomart', x={
+    req(input$mart_url_picker)
+    req(input$mart_species_picker)
+
+    if(!input$mart_included)
+      biomaRt::useMart(biomart='ensembl', host=input$mart_url_picker) %>%
+        biomaRt::useDataset(dataset=sprintf('%s_gene_ensembl', input$mart_species_picker)) -> seurat$mart})
+
+  observe({message('////////'); print(seurat$mart); message('') ; message('////////')})
   # return the reactive
   seurat
 }
