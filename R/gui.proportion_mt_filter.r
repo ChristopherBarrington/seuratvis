@@ -38,8 +38,10 @@ filter_proportion_mt.server <- function(input, output, session, seurat, cell_fil
       updateNumericInput(session=session, inputId='max_percent_mt', value=high)})
 
   # react to a new seurat being loaded
-  observeEvent(eventExpr=seurat$proportion_mt_updated, label='filter_proportion_mt/object', handlerExpr={
-    filtering$variable <- seurat$proportion_mt_variable
+  observe(label='filter_proportion_mt/variable', x={
+    filtering$variable <- seurat$proportion_mt_variable})
+
+  observe(label='filter_proportion_mt/value', x={
     filtering$max <- seurat$proportion_mt_values_max %>% add(0.05) %>% round(digits=1)})
 
   # return the reactiveValues

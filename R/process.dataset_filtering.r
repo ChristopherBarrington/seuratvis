@@ -4,11 +4,8 @@ dataset_filtering.server <- function(input, output, session, seurat, filters=lis
   reactiveValues() -> filtering_parameters
 
   # update the reactive when the filters are changed
-  observe({
+  observe(label='dataset_filtering/observe', priority=-999, x={
     req(seurat$metadata)
-    req(seurat$n_umi_variables)
-    req(seurat$n_features_variables)
-    req(seurat$proportion_mt_variables)
 
     # if there are no filters provided
     if(length(filters)==0)
@@ -18,9 +15,16 @@ dataset_filtering.server <- function(input, output, session, seurat, filters=lis
     if(lapply(filters, reactiveValuesToList) %>% sapply(length) %>% equals(0) %>% any())
       return(NULL)
 
+    # if any of the variables are null
+    if(lapply(filters, reactiveValuesToList) %>% sapply(function(x) is.null(pluck(x, 'variable'))) %>% any())
+      return(NULL)
+
+    # if any of the variables are missing from the metadata
+    if(!lapply(filters, reactiveValuesToList) %>% sapply(function(x) pluck(x, 'variable')) %>% is.element(set=names(seurat$metadata)) %>% all())
+      return(NULL)
+
     # get the values in the list of reactives
-    # lapply(filters, reactiveValuesToList)  %>%
-    #   plyr::ldply(as.data.frame) -> filters_df
+
     lapply(filters, reactiveValuesToList)  %>%
       lapply(function(x) x %>% extract(str_detect(string=names(x), pattern='variable|min|max|in_set'))) %>% # pick out the elements we can use
       plyr::ldply(as.data.frame) %>%

@@ -123,6 +123,10 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     n_umi_picker_default <- preferred_choice(x=numeric_choices, preferences=c('nCount_RNA','nCount_SCT'))
     proportion_mt_picker_default <- preferred_choice(x=numeric_choices, preferences=c('percent.mt', 'percent_mt', 'prop.mt', 'prop_mt'))
 
+    seurat$n_features_variable <- n_features_picker_default
+    seurat$n_umi_variable <- n_umi_picker_default
+    seurat$proportion_mt_variable <- proportion_mt_picker_default
+
     ## define the choices and default in the input ui elements
     updatePickerInput(session=session, inputId='n_features_picker', choices=numeric_choices, selected=n_features_picker_default)
     updatePickerInput(session=session, inputId='n_umi_picker', choices=numeric_choices, selected=n_umi_picker_default)
