@@ -84,10 +84,9 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$all_idents <- {resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% lapply(function(x) {if(is.factor(x)) {levels(x)} else {unique(x)}}) %>% lapply(gtools::mixedsort)}
 
     # initialise the provenance of the seurat
-    provenance <- s@misc$provenance
-    if(is.null(provenance))
-      provenance <- list('aperture'='there is no cake')
-    seurat$provenance <- provenance
+    seurat$provenance <- s@misc$provenance
+    seurat$provenance_missing <- is.null(seurat$provenance)
+    if(seurat$provenance_missing) seurat$provenance <- list('aperture'='there is no cake')
 
     # save biomaRt to reactive, if available
     mart_included <- !is.null(s@misc$mart)

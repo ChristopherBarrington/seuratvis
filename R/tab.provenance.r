@@ -22,6 +22,12 @@ provenance_tab.server <- function(input, output, session, server_input, server_o
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
     tab <- 'provenance_tab'
     if(server_input$left_sidebar==tab) {
+      if(seurat$provenance_missing) {
+        sendSweetAlert(session=session, title='Analysis history', btn_labels='OK', html=TRUE, closeOnClickOutside=TRUE, type='error',
+                       text='This Seurat object does not have a saved history.')
+        go_to_config(session=server_session)
+      }
+
       tab %<>% str_c('-')
       renderUI({provenace_picker.ui(id=tab, seurat=seurat)})  -> server_output$right_sidebar.data_opts
       renderUI({p('No options')}) -> server_output$right_sidebar.plotting_opts}})
