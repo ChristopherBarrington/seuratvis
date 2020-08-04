@@ -126,7 +126,7 @@ dataset_info_text_box.n_features_per_cell <- function(input, output, session, se
     req(seurat$n_features_values)
 
     n_reference <- seurat$n_features_values %>% unlist() %>% sf()
-    subtitle <- sprintf('%s reads per cell', str_to_title(sf_name))
+    subtitle <- sprintf('%s features per cell', str_to_title(sf_name))
 
     list(value=n_reference %>% scales::comma(), subtitle=subtitle) %>%
       modifyList(x=dataset_info_text_box.defaults()) %>%
@@ -143,7 +143,7 @@ dataset_info_text_box.n_features_per_filtered_cell <- function(input, output, se
 
     n_reference <- seurat$n_features_values %>% unlist() %>% sf()
     n_filtered <- cell_filtering$n_features_values %>% unlist() %>%  (function(x) ifelse(is.null(x), 0, sf(x)))
-    subtitle <- sprintf(fmt='%s reads per cell (%s)', str_to_title(sf_name), comma(n_filtered-n_reference) %>% ifelse(str_detect(., '^-'), ., str_c('+', .)))
+    subtitle <- sprintf(fmt='%s features per cell (%s)', str_to_title(sf_name), comma(n_filtered-n_reference) %>% ifelse(str_detect(., '^-'), ., str_c('+', .)))
 
     list(value=n_filtered %>% scales::comma(), subtitle=subtitle) %>%
       modifyList(x=dataset_info_text_box.defaults()) %>%
