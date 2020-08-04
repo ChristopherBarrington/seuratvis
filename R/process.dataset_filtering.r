@@ -24,7 +24,6 @@ dataset_filtering.server <- function(input, output, session, seurat, filters=lis
       return(NULL)
 
     # get the values in the list of reactives
-
     lapply(filters, reactiveValuesToList)  %>%
       lapply(function(x) x %>% extract(str_detect(string=names(x), pattern='variable|min|max|in_set'))) %>% # pick out the elements we can use
       plyr::ldply(as.data.frame) %>%
@@ -38,8 +37,6 @@ dataset_filtering.server <- function(input, output, session, seurat, filters=lis
     ## if there are some filters, prepare a condition to filter the cells
     if(nrow(filters_df)>0)
       filters_df %>%
-        # gather(key=logic, value=value, -variable) %>%
-        # drop_na() %>%
         mutate(logic=factor(logic, levels=c('min', 'max', 'in_set')),
                logic=fct_recode(logic, `>=`='min', `<=`='max', ` %in% `='in_set'),
                value=str_trim((value))) %>%
