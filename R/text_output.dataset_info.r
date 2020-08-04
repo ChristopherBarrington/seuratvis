@@ -111,7 +111,12 @@ dataset_info_text_box.n_umi_per_filtered_cell <- function(input, output, session
 
     n_reference <- seurat$n_umi_values %>% unlist() %>% sf()
     n_filtered <- cell_filtering$n_umi_values %>% unlist() %>%  (function(x) ifelse(is.null(x), 0, sf(x)))
-    subtitle <- sprintf(fmt='%s reads per cell (%s)', str_to_title(sf_name), comma(n_filtered-n_reference) %>% ifelse(str_detect(., '^-'), ., str_c('+', .)))
+
+    n_change <- comma(n_filtered-n_reference) %>% ifelse(str_detect(., '^-'), ., str_c('+', .))
+    percent_change <- n_filtered %>% subtract(n_reference) %>% divide_by(n_reference) %>% scales::percent() %>% ifelse(str_detect(., '^-'), ., str_c('+', .))
+
+    # subtitle <- sprintf(fmt='%s features per cell (%s | %s)', str_to_title(sf_name), n_change, percent_change)
+    subtitle <- sprintf(fmt='%s reads per cell (%s / %s)', str_to_title(sf_name), n_change, percent_change)
 
     list(value=n_filtered %>% scales::comma(), subtitle=subtitle) %>%
       modifyList(x=dataset_info_text_box.defaults()) %>%
@@ -143,7 +148,11 @@ dataset_info_text_box.n_features_per_filtered_cell <- function(input, output, se
 
     n_reference <- seurat$n_features_values %>% unlist() %>% sf()
     n_filtered <- cell_filtering$n_features_values %>% unlist() %>%  (function(x) ifelse(is.null(x), 0, sf(x)))
-    subtitle <- sprintf(fmt='%s features per cell (%s)', str_to_title(sf_name), comma(n_filtered-n_reference) %>% ifelse(str_detect(., '^-'), ., str_c('+', .)))
+
+    n_change <- comma(n_filtered-n_reference) %>% ifelse(str_detect(., '^-'), ., str_c('+', .))
+    percent_change <- n_filtered %>% subtract(n_reference) %>% divide_by(n_reference) %>% scales::percent() %>% ifelse(str_detect(., '^-'), ., str_c('+', .))
+
+    subtitle <- sprintf(fmt='%s features per cell (%s / %s)', str_to_title(sf_name), n_change, percent_change)
 
     list(value=n_filtered %>% scales::comma(), subtitle=subtitle) %>%
       modifyList(x=dataset_info_text_box.defaults()) %>%
