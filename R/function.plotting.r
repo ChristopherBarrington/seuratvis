@@ -5,5 +5,5 @@
 
 #'
 #' 
-missing_data_plot <- function(label='Nothing to see here')
+missing_data_plot <- function(label='Data for this plot is unavailable')
   ggplot()+aes()+annotate(geom='text', label=label, x=0, y=0)+theme_void()
