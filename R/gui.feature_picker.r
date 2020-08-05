@@ -90,11 +90,10 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
   observeEvent(eventExpr=input$feature_picker_feature_names, handlerExpr={
     # make sure these elements are defined
     req(input$feature_picker_feature_names)
-   
+
     # update hidden ui element
     if(input$feature_type=='features')
       picked_feature$name <- input$feature_picker_feature_names})
-      # updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_feature_names)})
 
   ## if a metadata column is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_metadata, handlerExpr={
@@ -104,7 +103,6 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
     # update hidden ui element
     if(input$feature_type=='metadata')
       picked_feature$name <- input$feature_picker_metadata})
-      # updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_metadata)})
 
   ## if a gene module column is selected, copy it to the reactive
   observeEvent(eventExpr=input$feature_picker_gene_module, handlerExpr={
@@ -114,19 +112,17 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
     # update hidden ui element
     if(input$feature_type=='gene_modules')
       picked_feature$name <- input$feature_picker_gene_module})
-      # updateTextInput(session=session, inputId='picked_feature', value=input$feature_picker_gene_module)})
 
   ## update the hidden ui element when a feature type is selected
   observeEvent(eventExpr=input$feature_type, handlerExpr={
+
     # pick the feature to revert to
     input_name <- switch(input$feature_type, features='feature_picker_feature_names', metadata='feature_picker_metadata', gene_modules='feature_picker_gene_module')
 
     # update hidden ui element
     picked_feature$name <- input[[input_name]]})
-    # updateTextInput(session=session, inputId='picked_feature', value=input[[input_name]])})
 
   ## use the selected feature (it may be a feature or metadata)
-  # observeEvent(eventExpr=input$picked_feature, handlerExpr={
   observe(label='feature_picker/fetch', x={
     # make sure these elements are defined
     req(seurat$object)

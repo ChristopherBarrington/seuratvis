@@ -69,7 +69,6 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
   # call the modules for this tab
   callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
 
-# if(!is.null(reactive(seurat$FindMarkersResults))) {
   # handle the data.frame filtering
   ## call the data.frame filtering filtering module
   callModule(session=session, module=filterDF, id='filter_parameters',
@@ -88,7 +87,6 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
                   class='stripe') %>%
     formatRound(columns=c('Cluster detection', 'Map detection'), digits=2) %>%
     formatRound(columns=c('Avg. logFC'), digits=3)}) -> output$table
-# }
 }
 
 #'
@@ -100,7 +98,7 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
       renderUI({tagList(cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=FALSE),
-                        # feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE),
+                        feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE),
                         dimension_reduction.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
@@ -125,7 +123,7 @@ gene_module_scores_in_a_cluster_tab.server <- function(input, output, session, s
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
       renderUI({tagList(cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=FALSE, multi_picker=FALSE),
-                        # feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=TRUE), include_feature_type=FALSE, include_values_range=FALSE),
+                        feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=TRUE), include_feature_type=FALSE, include_values_range=FALSE),
                         dimension_reduction.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 

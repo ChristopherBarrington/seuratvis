@@ -197,13 +197,14 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     req(input$gene_modules_regex_text)
     req(seurat$metadata)
 
+    seurat$gene_modules <- c(dummy_module='normal distribution')
+    seurat$gene_module_scores <- seurat$metadata %>% select(NULL) %>% mutate(dummy_module=rnorm(n()))
     gm_regex <- input$gene_modules_regex_text
 
-    seurat$gene_modules <- ''
-
-    if(!is.null(seurat$object@misc$gene_modules))
+    if(!is.null(seurat$object@misc$gene_modules)) {
       seurat$gene_modules <- seurat$object@misc$gene_modules %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
-    seurat$gene_module_scores <- dplyr::select(seurat$metadata, matches(gm_regex)) %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
+      seurat$gene_module_scores <- dplyr::select(seurat$metadata, matches(gm_regex)) %>% purrr::set_names(str_remove, pattern=regex(gm_regex))
+    }
     seurat$gene_modules_regex <- gm_regex})
 
   ## configure the biomaRt object
