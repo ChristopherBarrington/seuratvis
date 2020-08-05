@@ -90,12 +90,9 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$provenance_missing <- is.null(seurat$provenance)
     if(seurat$provenance_missing) seurat$provenance <- list('aperture'='there is no cake')
 
-    # save biomaRt to reactive, if available
-    mart_included <- !is.null(s@misc$mart)
+    # setup mart creation or assignment
     seurat$mart <- NULL
-    if(mart_included)
-      seurat$mart <- s@misc$mart
-    updateSwitchInput(session=session, inputId='mart_included', value=mart_included)
+    seurat$mart_included <- !is.null(s@misc$mart)
 
     # FindMarkers results
     if(!is.null(s@misc$FindMarkersResults$wilcox)) {
@@ -210,21 +207,28 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$gene_modules_regex <- gm_regex})
 
   ## configure the biomaRt object
-  observe(label='process_seurat/update_mart_species', x={
+  observeEvent(eventExpr=c(seurat$object, input$mart_url_picker), handlerExpr={
+    req(seurat$object)
     req(input$mart_url_picker)
 
-    if(!input$mart_included)
+    if(seurat$mart_included) {
+      seurat$mart <- seurat$object@misc$mart
+      updateSwitchInput(session=session, inputId='mart_included', value=TRUE)
+    } else {
       biomaRt::useMart(biomart='ensembl', host=input$mart_url_picker) %>%
         biomaRt::listDatasets() %>%
         pluck('dataset') %>%
         str_remove('_gene_ensembl') %>%
-        updatePickerInput(session=session, inputId='mart_species_picker', label=NULL, selected=NULL)})
+        updatePickerInput(session=session, inputId='mart_species_picker', label=NULL, selected=NULL)
+      updateSwitchInput(session=session, inputId='mart_included', value=FALSE)
+    }
+  })
 
   observe(label='process_seurat/configure_biomart', x={
     req(input$mart_url_picker)
     req(input$mart_species_picker)
 
-    if(!input$mart_included)
+    if(!seurat$mart_included)
       biomaRt::useMart(biomart='ensembl', host=input$mart_url_picker) %>%
         biomaRt::useDataset(dataset=sprintf('%s_gene_ensembl', input$mart_species_picker)) -> seurat$mart})
 
