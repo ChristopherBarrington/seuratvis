@@ -100,6 +100,7 @@ shinyAppServer <- function(input, output, session) {
   callModule(module=gene_module_score_in_clusters_tab.server, id='gene_module_score_in_clusters_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=gene_module_scores_in_a_cluster_tab.server, id='gene_module_scores_in_a_cluster_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
   callModule(module=provenance_tab.server, id='provenance_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
+  callModule(module=add_feature_module_tab.server, id='add_feature_module_tab', server_input=input, server_output=output, server_session=session, seurat=seurat)
 
 observeEvent(input$clickme, {
   # seurat$object <- rnorm(1)

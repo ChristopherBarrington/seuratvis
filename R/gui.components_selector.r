@@ -48,10 +48,10 @@ components_selector.server <- function(input, output, session, seurat, picked_re
 
     # update ui elements
     ## update the range slider
-    updateSliderInput(session=session, inputId='components_slider', max=max_value)
+    updateSliderInput(session=session, inputId='components_slider', max=max_value, value=c(1,2))
 
     ## update the picker slider
-    updateSliderInput(session=session, inputId='component_slider', max=max_value, value=max_value)
+    updateSliderInput(session=session, inputId='component_slider', max=max_value, value=1)
 
     ## update the picker
     updatePickerInput(session=session, inputId='component_picker', choices=seq(max_value), selected=min_value)})
