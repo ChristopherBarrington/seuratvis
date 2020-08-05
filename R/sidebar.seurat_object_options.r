@@ -36,11 +36,12 @@ seurat_object_options.ui <- function(id, seurat) {
 
 #'
 #' 
-seurat_object_choices.ui <- function(id, available_seurats) {
-  prettyRadioButtons(inputId=NS(id,'picker'), label='Select a Seurat object',
-                     choiceNames=available_seurats$choiceName, choiceValues=available_seurats$choiceValue, selected='',
-                     icon=icon('check'), bigger=TRUE, animation='jelly')
-}
+seurat_object_choices.ui <- function(id, available_seurats)
+  available_seurats %>%
+    plyr::dlply(~env, select, choiceName, choiceValue) %>%
+    lapply(deframe) %>%
+    pickerInput(inputId=NS(id,'picker'), label='Select a Seurat object',
+                multiple=FALSE, options=list(liveSearch=TRUE, title='Objects in environments'))
 
 #'
 #' @import purrr
@@ -58,6 +59,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
 
   # react when a seurat is selected
   observeEvent(eventExpr=input$picker, label='process_seurat/picker', handlerExpr={
+    req(input$picker)
     s <- eval(parse(text=input$picker))
 
     # check that there are clusters, if not add a fake one
