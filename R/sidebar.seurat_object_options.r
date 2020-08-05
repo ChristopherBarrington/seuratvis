@@ -11,12 +11,12 @@ seurat_object_options.ui <- function(id, seurat) {
 
   # define the biomaRt options
   biomaRt::listEnsemblArchives() %>% filter(str_detect(url, 'archive')) %>% transmute(label=sprintf(fmt='%s [%s]', name, date), value=url) %>% deframe() -> mart_urls
-  list(inputId=NS(id, 'mart_url_picker'), label='Ensembl version', options=list(size=5), choices=mart_urls, selected='http://jul2018.archive.ensembl.org') %>%
+  list(inputId=NS(id, 'mart_url_picker'), label='Ensembl version', options=list(`live-search`=TRUE, size=5), choices=mart_urls, selected='http://jul2018.archive.ensembl.org') %>%
     modifyList(x=pickerInput_defaults) %>%
     do.call(what=pickerInput) %>%
     conditionalPanel(condition=sprintf('input["%s"]==false', NS(id, 'mart_included'))) -> mart_url_picker
 
-  list(inputId=NS(id, 'mart_species_picker'), label='Species', options=list(title='Species', size=5), choices=c('hsapiens','mmusculus')) %>%
+  list(inputId=NS(id, 'mart_species_picker'), label='Species', options=list(title='Species', `live-search`=TRUE, size=5), choices=c('hsapiens','mmusculus')) %>%
     modifyList(x=pickerInput_defaults) %>%
     do.call(what=pickerInput) %>%
     conditionalPanel(condition=sprintf('input["%s"]==false', NS(id, 'mart_included'))) -> mart_species_picker
@@ -41,7 +41,7 @@ seurat_object_choices.ui <- function(id, available_seurats)
     plyr::dlply(~env, select, choiceName, choiceValue) %>%
     lapply(deframe) %>%
     pickerInput(inputId=NS(id,'picker'), label='Select a Seurat object',
-                multiple=FALSE, options=list(liveSearch=TRUE, title='Objects in environments'))
+                multiple=FALSE, options=list(`live-search`=TRUE, title='Objects in environments'))
 
 #'
 #' @import purrr
