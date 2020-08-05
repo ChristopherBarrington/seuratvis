@@ -11,9 +11,14 @@ dimensionality.jackstraw_pvalue <- function(input, output, session, seurat, pick
     req(seurat$object)
     req(picked_reduction$method)
 
+    Seurat::JS(object=seurat$object[[picked_reduction$method]], slot='overall') %>%
+      as.data.frame() -> plot_data
+
+    if(nrow(plot_data)==0)
+      return(missing_data_plot())
+
     # make a plot
-    as.data.frame(Seurat::JS(object=seurat$object[[picked_reduction$method]], slot='overall')) %>%
-      ggplot() +
+    ggplot(data=plot_data) +
       aes(x=PC, y=-log10(Score)) +
       labs(x='Principle component', y='-log10(score)') +
       geom_smooth(method='loess') +
@@ -39,7 +44,12 @@ dimensionality.jackstraw <- function(input, output, session, seurat, picked_redu
     max_component <- max(components_range)
 
     Seurat::JS(object=object[[reduction_name]], slot='empirical') %>%
-      as.data.frame() %>%
+      as.data.frame() -> plot_data
+
+    if(nrow(plot_data)==0)
+      return(missing_data_plot())
+
+    plot_data %>%
       rownames_to_column('Contig') %>%
       gather(key='PC', value='Value', -Contig) %>%
       mutate(PC={stringr::str_remove(PC, '^PC') %>% as.numeric()}) %>%
@@ -103,12 +113,12 @@ dimensionality.top_features_pca_heatmap <- function(input, output, session, seur
     # make variables for shorthand    
     object <- seurat$object
     reduction_name <- picked_reduction$method
-    selected_component <- picked_components$picked
+    selected_component <- pmin(seurat$n_principle_components[[picked_reduction$method]], picked_components$picked)
 
     # render the heatmap
     #! TODO: make this a nice ggplot
     if(!DefaultAssay(object=object[[reduction_name]]) %in% Assays(object)) {
-      ggplot()+aes()+annotate(geom='text', label='Nothing to see here', x=0, y=0)+theme_void()
+      missing_data_plot()
     } else {
       DefaultAssay(object=object) <- DefaultAssay(object=object[[reduction_name]])
       DimHeatmap(object=object, reduction=reduction_name,

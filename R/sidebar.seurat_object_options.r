@@ -85,6 +85,9 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     seurat$cluster_resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.'))
     seurat$all_idents <- {resolutions <- c('seurat_clusters', str_subset(colnames(s@meta.data), '_snn_res.')) ; select_at(s@meta.data, vars(all_of(resolutions))) %>% lapply(function(x) {if(is.factor(x)) {levels(x)} else {unique(x)}}) %>% lapply(gtools::mixedsort)}
 
+    # initialise a list of components in reductions
+    seurat$n_principle_components <- lapply(s@reductions, function(x) ncol(x))
+
     # initialise the provenance of the seurat
     seurat$provenance <- s@misc$provenance
     seurat$provenance_missing <- is.null(seurat$provenance)

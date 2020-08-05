@@ -1,23 +1,31 @@
 #'
 #' @details \code{tags$style(type='text/css', '.irs-slider.from, .irs-slider.to {visibility: hidden !important;}')} to remove hide the sliders
-components_picker_range.ui <- function(id, label='Principle components')
-  sliderInput(inputId=NS(id, 'components_slider'), label=label, min=0, max=1, step=1, value=c(0,1), dragRange=TRUE)
+components_picker_range.ui <- function(id, label='Principle components') {
+  sliderInput(inputId=NS(id, 'components_slider'), label=label, min=1, max=10, step=1, value=c(1,2), dragRange=TRUE) -> selector
+  numericInput(inputId=NS(id, 'refresh_components_slider'), label='refresh_selectors', value=rnorm(1)) %>% hidden() -> refresher
+  tagList(selector, refresher)
+}
 
 #'
 #' 
-component_picker_slider.ui <- function(id, label='Principle component')
-  sliderInput(inputId=NS(id, 'component_slider'), label=label, min=0, max=1, step=1, value=1, dragRange=FALSE)
+component_picker_slider.ui <- function(id, label='Principle component') {
+  sliderInput(inputId=NS(id, 'component_slider'), label=label, min=1, max=10, step=1, value=1, dragRange=FALSE) -> selector
+  numericInput(inputId=NS(id, 'refresh_component_slider'), label='refresh_selectors', value=rnorm(1)) %>% hidden() -> refresher
+  tagList(selector, refresher)
+}
 
 #'
 #' 
-component_picker.ui <- function(id, label='Principle component')
-  pickerInput(inputId=NS(id, 'component_picker'), label=label, choices=NULL, selected=NULL, multiple=FALSE)
-
+component_picker.ui <- function(id, label='Principle component') {
+  pickerInput(inputId=NS(id, 'component_picker'), label=label, choices=NULL, selected=NULL, multiple=FALSE) -> selector
+  numericInput(inputId=NS(id, 'refresh_component_picker'), label='refresh_selectors', value=rnorm(1)) %>% hidden() -> refresher
+  tagList(selector, refresher)
+}
 
 #'
 #' 
 components_selector.server <- function(input, output, session, seurat, picked_reduction, range_size=5) {
-  components <- reactiveValues(alpha=1)
+  components <- reactiveValues()
 
   # react to a selection of component(s)
   ## from the range slider
@@ -30,31 +38,23 @@ components_selector.server <- function(input, output, session, seurat, picked_re
   observe({req(input$component_picker); components$picked <- input$component_picker})
 
   # react to a change in reduction method
-  observe({
-    req(seurat$object)
+  observeEvent(eventExpr=c(input$refresh_components_slider, input$refresh_component_slider, input$refresh_component_picker), handlerExpr={
+    req(seurat$n_principle_components)
     req(picked_reduction$method)
 
     # get the number of components available in this reduction
-    Stdev(object=seurat$object, reduction=picked_reduction$method) %>%
-      seq_along() %>%
-      purrr::set_names() -> principle_components
-    min_value <- min(principle_components)
-    max_value <- max(principle_components)
+    min_value <- 1
+    max_value <- seurat$n_principle_components[[picked_reduction$method]]
 
     # update ui elements
     ## update the range slider
-    updateSliderInput(session=session, inputId='components_slider', min=-1)
-    updateSliderInput(session=session, inputId='components_slider',
-                      min=min_value, max=max_value, value=c(min_value,min_value+range_size-1))
+    updateSliderInput(session=session, inputId='components_slider', max=max_value)
 
     ## update the picker slider
-    updateSliderInput(session=session, inputId='component_slider', min=-1)
-    updateSliderInput(session=session, inputId='component_slider',
-                      min=min_value, max=max_value, value=max_value)
+    updateSliderInput(session=session, inputId='component_slider', max=max_value, value=max_value)
 
     ## update the picker
-    updatePickerInput(session=session, inputId='component_picker',
-                      choices=principle_components, selected=min_value)})
+    updatePickerInput(session=session, inputId='component_picker', choices=seq(max_value), selected=min_value)})
 
   # return the reactiveValues list
   components
