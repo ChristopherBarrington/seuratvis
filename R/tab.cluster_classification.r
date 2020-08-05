@@ -55,6 +55,12 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
   observeEvent(eventExpr=server_input$left_sidebar, handlerExpr={
     tab <- 'findmarkers_results_tab'
     if(server_input$left_sidebar==tab) {
+      if(nrow(seurat$FindMarkersResults$table)==0) {
+        error_alert(session=session, title='FindMarkers results', text='This Seurat object does not have any FindMarkers results.')
+        go_to_config(session=server_session)
+        return(NULL)
+      }
+
       # tab %<>% str_c('-')
       renderUI({tagList(filterDF_UI(id=NS(tab, 'filter_parameters')))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts
@@ -68,6 +74,7 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
   # call the modules for this tab
   callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
 
+# if(!is.null(reactive(seurat$FindMarkersResults))) {
   # handle the data.frame filtering
   ## call the data.frame filtering filtering module
   callModule(session=session, module=filterDF, id='filter_parameters',
@@ -86,26 +93,7 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
                   class='stripe') %>%
     formatRound(columns=c('Cluster detection', 'Map detection'), digits=2) %>%
     formatRound(columns=c('Avg. logFC'), digits=3)}) -> output$table
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# }
 }
 
 #'
@@ -132,7 +120,6 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
   callModule(module=dimension_reduction.show_selected_clusters.server, id='map', dimension_reduction=dimension_reduction, point_size=list(size=0.6), cluster_resolution=cluster_resolution, picked_colours=colour_picker)
   callModule(module=genes_in_modules.server, id='modules_table', seurat=seurat, picked_feature=feature_picker)
 }
-
 
 #'
 #' 

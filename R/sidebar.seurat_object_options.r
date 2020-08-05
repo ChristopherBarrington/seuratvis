@@ -106,6 +106,14 @@ process_seurat.server <- function(input, output, session, server_input, server_o
       ## update the reactive(s)
       seurat$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Gene', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
       seurat$FindMarkersResults$table <- tidied_results
+    } else {
+      # seurat$FindMarkersResults$vars <- c('Cluster set', 'Cluster ID', 'Gene', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection')
+      c('Cluster set', 'Cluster ID', 'Gene', 'Adj. P', 'Avg. logFC', 'Cluster detection', 'Map detection') %T>%
+        (function(x) seurat$FindMarkersResults$vars <- x) %>%
+        purrr::set_names() %>%
+        as.list() %>%
+        as.data.frame() %>%
+        filter(NA) -> seurat$FindMarkersResults$table
     }
 
     # update ui elements
