@@ -30,9 +30,6 @@ cluster_classification.tab <- function() {
          tabItem(tabName='gene_module_scores_in_a_cluster_tab',
                  h1('Gene modules'),
                  fluidRow(dataset_info_text_box.ui(id=NS('gene_module_scores_in_a_cluster_tab', 'project_name'), width=12)),
-
-                 # fluidRow(column(width=12, feature_ridges.plot(id=NS('gene_module_scores_in_a_cluster_tab', 'scores_plot'))))
-
                  column(width=7,
                         boxPlus(title='Gene module score', closable=FALSE, width=12, height='75vh', status='primary', 
                                 feature_ridges.plot(id=NS('gene_module_scores_in_a_cluster_tab', 'scores_plot')))),
@@ -40,9 +37,7 @@ cluster_classification.tab <- function() {
                         boxPlus(title='Map', closable=FALSE, width=12, height='35vh', status='primary',
                                 dimension_reduction.plot(id=NS('gene_module_scores_in_a_cluster_tab', 'map'))),
                         boxPlus(title='Genes', closable=FALSE, width=12, height='35vh', status='primary',
-                                genes_in_modules.table(id=NS('gene_module_scores_in_a_cluster_tab', 'modules_table'))))
-
-                 )) -> content
+                                genes_in_modules.table(id=NS('gene_module_scores_in_a_cluster_tab', 'modules_table')))))) -> content
 
     menus %<>% append(list(menu_item))
     contents %<>% append(content)})
@@ -105,7 +100,7 @@ gene_module_score_in_clusters_tab.server <- function(input, output, session, ser
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
       renderUI({tagList(cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=FALSE),
-                        feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE),
+                        # feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=FALSE), include_feature_type=FALSE, include_values_range=FALSE),
                         dimension_reduction.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 
@@ -130,7 +125,7 @@ gene_module_scores_in_a_cluster_tab.server <- function(input, output, session, s
     if(server_input$left_sidebar==tab) {
       tab %<>% str_c('-')
       renderUI({tagList(cluster_picker.ui(id=tab, seurat=seurat, resolution=TRUE, picker=TRUE, label_switch=FALSE, multi_picker=FALSE),
-                        feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=TRUE), include_feature_type=FALSE, include_values_range=FALSE),
+                        # feature_picker.ui(id=tab, seurat=seurat, choices=list(`Gene modules`='gene_modules'), selected='gene_modules', gene_modules_opts=list(multiple=TRUE), include_feature_type=FALSE, include_values_range=FALSE),
                         dimension_reduction.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList()}) -> server_output$right_sidebar.plotting_opts}})
 

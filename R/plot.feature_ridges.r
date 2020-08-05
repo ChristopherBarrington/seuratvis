@@ -3,15 +3,14 @@
 feature_ridges.plot <- function(id)
   plotOutput(outputId=NS(id, 'ridges'), height='70vh') %>% withSpinner()
 
-#'
+#' Plot ridges for a feature across all idents
+#' 
 #' @import ggridges
 #' 
 feature_ridge_by_idents.server <- function(input, output, session, picked_feature, picked_clusters) {
   renderPlot(expr={
-    # req(picked_clusters$idents)
-    # req(picked_feature$values)
     if(!isTruthy(picked_clusters$idents) | !isTruthy(picked_feature$values))
-      return(NULL)
+      return(missing_data_plot())
 
     cbind(ident=picked_clusters$idents,
           value=picked_feature$values) %>%
@@ -30,13 +29,14 @@ feature_ridge_by_idents.server <- function(input, output, session, picked_featur
             panel.grid.minor.x=element_blank())}) -> output$ridges
 }
 
-#'
+#' Plot ridges for multiple features in an ident class
 #' 
-feature_ridges_by_ident.server <- function(input, output, session, picked_feature, picked_clusters)
+#' @import ggridges
+#' 
+feature_ridges_by_ident.server <- function(input, output, session, picked_feature, picked_clusters) {
   renderPlot({
-    req(picked_clusters$idents)
-    req(picked_clusters$picked_idents)
-    req(picked_feature$values)
+    if(!isTruthy(picked_clusters$idents) | !isTruthy(picked_clusters$picked_idents) | !isTruthy(picked_feature$values))
+      return(missing_data_plot())
 
     cbind(ident=picked_clusters$idents,
           picked_feature$values) %>%
@@ -51,12 +51,5 @@ feature_ridges_by_ident.server <- function(input, output, session, picked_featur
       theme(axis.text.y=element_text(vjust=0),
             legend.position='none',
             panel.grid.major.x=element_blank(),
-            panel.grid.minor.x=element_blank())
-
-
-
-
-
-
-
-  }) -> output$ridges
+            panel.grid.minor.x=element_blank())}) -> output$ridges
+}
