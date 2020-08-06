@@ -168,6 +168,10 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
   # invalidate the reactive value when slider is changed but not after initialisation
   observeEvent(eventExpr=input$value_range, ignoreInit=TRUE, handlerExpr={
     picked_feature$refreshed <- rnorm(1)
+
+    # determine if the values are divergent
+    input$value_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1) -> picked_feature$is_divergent
+
     picked_feature$values_range <- input$value_range})
 
   # reset the reactive when the seurat is (re)loaded
