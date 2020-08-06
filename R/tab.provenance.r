@@ -23,7 +23,7 @@ provenance_tab.server <- function(input, output, session, server_input, server_o
     tab <- 'provenance_tab'
     if(server_input$left_sidebar==tab) {
       if(seurat$provenance_missing) {
-        error_alert(session=session, title='Analysis history', text='This Seurat object does not have a saved history.')
+        error_alert(title='Analysis history', text='This Seurat object does not have a saved history.')
         go_to_config(session=server_session)
       }
 

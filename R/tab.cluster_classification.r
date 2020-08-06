@@ -51,7 +51,7 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
     tab <- 'findmarkers_results_tab'
     if(server_input$left_sidebar==tab) {
       if(nrow(seurat$FindMarkersResults$table)==0) {
-        error_alert(session=session, title='FindMarkers results', text='This Seurat object does not have any FindMarkers results.')
+        error_alert(title='FindMarkers results', text='This Seurat object does not have any FindMarkers results.')
         go_to_config(session=server_session)
         return(NULL)
       }
