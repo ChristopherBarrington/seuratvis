@@ -2,12 +2,6 @@
 #' 
 available_seurats.tab <- function() {
   bquote({
-
-
-
-
-
-
     menuItem(text='Configuration', icon=icon('dna'), startExpanded=TRUE,
              menuSubItem(text='Object information', tabName='configuration_tab', icon=menuSubItem_icon(), selected=TRUE),
              menuSubItem(text='Add feature modules', tabName='add_feature_module_tab', icon=menuSubItem_icon())) %>%
@@ -22,21 +16,10 @@ available_seurats.tab <- function() {
          tabItem(tabName='add_feature_module_tab',
                  h1('Add feature modules'),
                  h5('Add a list of features and a feature module name below to add a feature module score to the Seurat object'),
-                 boxPlus(title='', closable=FALSE, width=12, status='primary',
-                         add_feature_module_score.ui(id=NS('add_feature_module_tab', 'add_feature_module'))))) -> content
+                 add_feature_module_score.ui(id=NS('add_feature_module_tab', 'add_feature_module')))) -> content
 
     menus %<>% append(list(menu_item))
     contents %<>% append(content)})
-
-
-
-
-
-
-
-
-
-
 }
 
 #'

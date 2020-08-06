@@ -199,8 +199,6 @@ process_seurat.server <- function(input, output, session, server_input, server_o
   observe(label='process_seurat/gene_modules_regex', x={
     req(input$gene_modules_regex_text)
     req(seurat$metadata)
-    
-print('process_seurat/gene_modules_regex')
 
     seurat$gene_modules <- c(dummy_module='normal distribution')
     seurat$gene_module_scores <- seurat$metadata %>% select(NULL) %>% mutate(dummy_module=rnorm(n()))
