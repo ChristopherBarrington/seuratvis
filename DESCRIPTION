@@ -18,9 +18,10 @@ Imports:
   ggrepel,
   ggridges,
   gtools,
-  shinyAce
+  RColorBrewer,
+  shinyAce,
+  viridis
 Depends:
-  esquisse,
   shiny,
   shinydashboard,
   shinydashboardPlus,

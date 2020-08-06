@@ -31,10 +31,28 @@ colour_picker.ui <- function(id, label='Plot colours', include=c(Low='low', Mid=
     modifyList(x=default_picker_options) %>%
     do.call(what=spectrumInput)) -> pickers
 
+  # make a dropdown of pre-defined spectra
+  list(`Brewer [d]`=c(`Spectral`='brewer:Spectral',
+                      `RdYlGn`='brewer:RdYlGn',
+                      `PRGn`='brewer:PRGn',
+                      `RdYlBu`='brewer:RdYlBu',
+                      `RdGy`='brewer:RdGy',
+                      `RdBu`='brewer:RdBu',
+                      `PuOr`='brewer:PuOr',
+                      `PiYG`='brewer:PiYG',
+                      `BrBG`='brewer:BrBG'),
+       `Viridis [c]`=c(`magma`='viridis:magma',
+                       `plasma`='viridis:plasma',
+                       `inferno`='viridis:inferno',
+                       `viridis`='viridis:viridis')) %>% print() %>%
+    pickerInput(inputId=NS(id,'predefined_palette'), label='Select a palette',
+                multiple=FALSE, options=list(`live-search`=TRUE, title='Colour spectra')) -> spectrum_picker
+
   # rerurn the ui
   tagList(tags$style(type='text/css', '.sp-dd {display:none !important} .sp-preview {width:100% !important}'),
           tags$label(label),
-          pickers)
+          pickers,
+          spectrum_picker)
 }
 
 #'
@@ -51,6 +69,9 @@ colour_picker.server <- function(input, output, session) {
 
   ## high
   observe({req(input$high); colours$high <- input$high})
+
+  ## spectrum
+  observe({req(input$predefined_palette); colours$palette <- input$predefined_palette %>% str_split(pattern=':') %>% pluck(1)})
 
   ## plot background
   observe({req(input$background); colours$background <- input$background})

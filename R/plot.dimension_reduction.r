@@ -87,6 +87,8 @@ dimension_reduction.show_selected_clusters.server <- function(input, output, ses
 }
 
 #'
+#' @import scales
+#' @import viridis
 #' 
 dimension_reduction.highlight_feature.server <- function(input, output, session, dimension_reduction, picked_feature, picked_colours, opacity, point_size) {
   # render the box title if defined
@@ -121,12 +123,39 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
 
       # make a colour scale
       colour_gradient <- scale_colour_gradient(low=c_low, high=c_high, limits=c_range, oob=scales::squish)
-
+      
       # if the values cross zero, make a new colour scale
-      if(c_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1))
+      if(picked_feature$is_divergent) {
         colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
                                                   values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
-                                                  limits=c_range, breaks=0)
+                                                  limits=c_range, breaks=0, oob=squish)
+      }
+
+      if(!is.null(picked_colours$palette) & picked_feature$is_divergent) {
+        palette_package <- picked_colours$palette[[1]]
+        picked_palette <- picked_colours$palette[[2]]
+
+        if(palette_package=='brewer') {
+          colour_gradient <- scale_color_distiller(palette=picked_palette, 
+                                                   values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
+                                                   limits=c_range, breaks=0, oob=squish)
+        } else if(palette_package=='viridis') {
+          colour_gradient <- scale_color_viridis(option=picked_palette, n=32, 
+                                                 values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
+                                                 limits=c_range, breaks=0, oob=squish)
+        }
+      }
+
+      if(!is.null(picked_colours$palette) & !picked_feature$is_divergent) {
+        palette_package <- picked_colours$palette[[1]]
+        picked_palette <- picked_colours$palette[[2]]
+
+        if(palette_package=='brewer') {
+          colour_gradient <- scale_color_distiller(palette=picked_palette, limits=c_range, oob=squish)
+        } else if(palette_package=='viridis') {
+          colour_gradient <- scale_color_viridis(option=picked_palette, n=32, limits=c_range, oob=squish)
+        }
+      }
 
       # add the colour scale and a legend
       map +
@@ -141,7 +170,7 @@ dimension_reduction.highlight_feature.server <- function(input, output, session,
               legend.key.height=unit(0.5,'line'),
               legend.key.width=unit(0.5,'line'),
               legend.position=c(1,0),
-              legend.text=element_blank(),
+              # legend.text=element_blank(),
               legend.title=element_blank(),
               legend.title.align=0,
               panel.background=element_rect(fill=picked_colours$background, colour='black')) -> map
