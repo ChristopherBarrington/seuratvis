@@ -175,7 +175,8 @@ visualise_dataset_tab.server <- function(input, output, session, server_input, s
                         feature_picker.ui(id=tab, seurat=seurat),
                         feature_picker.ui(id=NS('visualise_dataset_tab', 'split'), seurat=seurat, label='Split map', selected='metadata', include_feature_type=TRUE, include_values_range=FALSE, choices=list(`Metadata`='metadata'), metadata_filter=function(x) select_if(x, function(x) {is.character(x) | is.factor(x)})))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList(point_size.ui(id=tab),
-                        opacity.ui(id=tab))}) -> server_output$right_sidebar.plotting_opts}})
+                        opacity.ui(id=tab),
+                        colour_picker.ui(id=tab, include=c(`Background`='background')))}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
   dimension_reduction <- callModule(module=dimension_reduction.server, id='', seurat=seurat, regex='.*')
@@ -184,7 +185,7 @@ visualise_dataset_tab.server <- function(input, output, session, server_input, s
   opacity <- callModule(module=opacity.server, id='')
   feature_picker <- callModule(module=feature_picker.server, id='', seurat=seurat)
   split_picker <- callModule(module=feature_picker.server, id='split', seurat=seurat)
-  colour_picker <- list(low='linen', mid='white', high='darkviolet', background=rgb(255, 255, 255, 255, max=255))
+  colour_picker <- callModule(module=colour_picker.server, id='')
 
   callModule(module=dimension_reduction.split_highlight_feature.server, id='picked_feature', dimension_reduction=dimension_reduction, picked_feature=feature_picker, picked_colours=colour_picker, opacity=opacity, point_size=point_size, picked_splitter=split_picker)
   callModule(module=dataset_info_text_box.project_name, id='project_name', seurat=seurat)
