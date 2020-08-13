@@ -37,6 +37,8 @@ shinyAppUI <- function(...) {
   # header definition
   logo_lg <- htmltools::HTML("<p style='font-size:26px'>seurat<b>vis</b></p>")
   logo_sm <- htmltools::HTML("<p style='font-size:26px'>s<b>v</b></p>")
+  logo_sm <- icon('disease')
+  
   dashboardHeaderPlus(
     title=tagList(span(class='logo-lg', logo_lg),
                   span(class='logo-mini', logo_sm)),
