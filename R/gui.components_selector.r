@@ -1,6 +1,7 @@
 #'
-#' @details \code{tags$style(type='text/css', '.irs-slider.from, .irs-slider.to {visibility: hidden !important;}')} to remove hide the sliders
+#'
 components_picker_range.ui <- function(id, label='Principle components') {
+  # \code{tags$style(type='text/css', '.irs-slider.from, .irs-slider.to {visibility: hidden !important;}')} to remove hide the sliders
   sliderInput(inputId=NS(id, 'components_slider'), label=label, min=1, max=10, step=1, value=c(1,2), dragRange=TRUE) -> selector
   numericInput(inputId=NS(id, 'refresh_components_slider'), label='refresh_selectors', value=rnorm(1)) %>% hidden() -> refresher
   tagList(selector, refresher)

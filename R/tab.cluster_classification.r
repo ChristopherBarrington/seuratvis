@@ -44,6 +44,7 @@ cluster_classification.tab <- function() {
 }
 
 #'
+#' @import esquisse
 #' 
 findmarkers_results_tab.server <- function(input, output, session, server_input, server_output, server_session, seurat) {
   # build the sidebar ui

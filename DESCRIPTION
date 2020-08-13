@@ -15,6 +15,7 @@ Remotes:
   ChristopherBarrington/esquisse
 Imports:
   biomaRt,
+  esquisse,
   ggrepel,
   ggridges,
   gtools,

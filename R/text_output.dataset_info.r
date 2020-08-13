@@ -4,7 +4,7 @@ dataset_info_text_box.ui <- function(id, width=12)
   valueBoxOutput(outputId=NS(id, 'box'), width=width)
 
 #'
-#' @details Requires font-awesome version 5+ to be installed in shiny/www/shared/fontawesome
+#' Requires font-awesome version 5+ to be installed in shiny/www/shared/fontawesome
 #' 
 dataset_info_text_box.defaults <- function(...)
   list(color='purple',
