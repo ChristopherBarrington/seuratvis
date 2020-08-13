@@ -22,6 +22,7 @@ dimension_reduction.plotbox <- function(id, n=0) {
 }
 
 #'
+#' @import ggrepel
 #' 
 dimension_reduction.show_cluster_idents.server <- function(input, output, session, dimension_reduction, picked_colours, opacity, point_size, cluster_resolution) {
   renderPlot(bg='transparent', expr={
