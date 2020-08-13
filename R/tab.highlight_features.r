@@ -72,7 +72,7 @@ highlight_feature_tab.server <- function(input, output, session, server_input, s
                         feature_picker.ui(id=tab, seurat=seurat))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList(point_size.ui(id=tab),
                         opacity.ui(id=tab),
-                        colour_picker.ui(id=tab))}) -> server_output$right_sidebar.plotting_opts}})
+                        colour_picker.ui(id=tab, include=c(`Background`='background')))}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
   dimension_reduction <- callModule(module=dimension_reduction.server, id='', seurat=seurat, regex='.*')
