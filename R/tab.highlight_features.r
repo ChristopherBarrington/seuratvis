@@ -131,10 +131,10 @@ highlight_multiple_features.server <- function(input, output, session, server_in
       tab %<>% str_c('-')
       renderUI({tagList(dimension_reduction.ui(id=tab, seurat=seurat),
                         actionBttn(inputId=NS('highlight_multiple_features_tab','add_plot_ui'), label='Add a map',
-                                   style='bordered', color='primary', icon=icon('plus'))
-                        )})  -> server_output$right_sidebar.data_opts
+                                   style='bordered', color='primary', icon=icon('plus')))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList(point_size.ui(id=tab),
-                        opacity.ui(id=tab))}) -> server_output$right_sidebar.plotting_opts
+                        opacity.ui(id=tab),
+                        colour_picker.ui(id=tab, include=c(`Background`='background')))}) -> server_output$right_sidebar.plotting_opts
       renderUI({tagList(feature_picker.ui(id=str_c(tab, 'feature0'), seurat=seurat))}) -> output$`feature0-dropdown`}})
 
   # react to the action button being pressed
@@ -155,7 +155,7 @@ highlight_multiple_features.server <- function(input, output, session, server_in
   # call the modules for this tab
   opacity <- callModule(module=opacity.server, id='')
   point_size <- callModule(module=point_size.server, id='')
-  colour_picker <- list(low='linen', mid='white', high='darkviolet', background=rgb(255, 255, 255, 255, max=255))
+  colour_picker <- callModule(module=colour_picker.server, id='')
   dimension_reduction <- callModule(module=dimension_reduction.server, id='', seurat=seurat)
 
   feature_pickers <- list(feature0=callModule(module=feature_picker.server, id='feature0', seurat=seurat))
