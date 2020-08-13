@@ -213,45 +213,19 @@ dimension_reduction.split_highlight_feature.server <- function(input, output, se
     # if the feature is numeric, colour the points otherwise facet the plot
     if(is.numeric(map$data$value)) {
       # get the colour values and range
-      # c_low <- picked_colours$low
-      # c_mid <- picked_colours$mid
-      # c_high <- picked_colours$high
+      c_low <- picked_colours$low
+      c_mid <- picked_colours$mid
+      c_high <- picked_colours$high
       c_range <- picked_feature$values_range
 
       # make a colour scale
-      # colour_gradient <- scale_colour_gradient(low=c_low, high=c_high, limits=c_range, oob=scales::squish)
-      
+      colour_gradient <- scale_colour_gradient(low=c_low, high=c_high, limits=c_range, oob=scales::squish)
+
       # if the values cross zero, make a new colour scale
-      # if(picked_feature$is_divergent) {
-      #   colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
-      #                                             values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
-      #                                             limits=c_range, breaks=0, oob=squish)
-      # }
-
-      palette_package <- picked_colours$palette[[1]]
-      picked_palette <- picked_colours$palette[[2]]
-
-      if(picked_feature$is_divergent) {
-        if(palette_package=='brewer') {
-          colour_gradient <- scale_color_distiller(palette=picked_palette, direction=picked_colours$direction,
-                                                   values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
-                                                   limits=c_range, breaks=0, oob=squish)
-        } else if(palette_package=='viridis') {
-          colour_gradient <- scale_colour_viridis(option=picked_palette, n=32, direction=picked_colours$direction,
+      if(picked_feature$is_divergent)
+        colour_gradient <- scale_colour_gradientn(colours=c(low=c_low, mid=c_mid, high=c_high), 
                                                   values={c_range %>% c(0) %>% sort() %>% scales::rescale()},
-                                                  limits=c_range, breaks=0, oob=squish)
-        } else {
-          colour_gradient <- scale_colour_gradient()
-        }
-      } else {
-        if(palette_package=='brewer') {
-          colour_gradient <- scale_colour_distiller(palette=picked_palette, direction=picked_colours$direction, limits=c_range, oob=squish)
-        } else if(palette_package=='viridis') {
-          colour_gradient <- scale_colour_viridis_c(option=picked_palette, n=32, direction=picked_colours$direction, limits=c_range, oob=squish)
-        } else {
-          colour_gradient <- scale_colour_gradient()
-        }
-      }
+                                                  limits=c_range, breaks=0)
 
       # add the colour scale and a legend
       map +
