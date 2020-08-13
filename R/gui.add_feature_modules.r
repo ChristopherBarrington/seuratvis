@@ -30,7 +30,7 @@ add_feature_module_score.server <- function(input, output, session, seurat) {
     # if this is the first module and non were included, remove the dummy module
     if(names(seurat$gene_modules)[1]=='dummy_module') {
       seurat$gene_modules <- list()
-      seurat$gene_module_scores %<>% select(NULL)
+      seurat$gene_module_scores %<>% dplyr::select(NULL)
     }
 
     # if module name already exists, append to make it unique
@@ -45,7 +45,7 @@ add_feature_module_score.server <- function(input, output, session, seurat) {
     # calculate the scores
     Seurat::AddModuleScore(object=seurat$object, features=features_in_module, name='AddFeatureModuleServerGeneModule', ctrl=input$n_control) %>%
       slot(name='meta.data') %>%
-      select(matches('^AddFeatureModuleServerGeneModule')) %>%
+      dplyr::select(matches('^AddFeatureModuleServerGeneModule')) %>%
       purrr::set_names(input$module_name) %>%
       cbind(seurat$gene_module_scores) -> seurat$gene_module_scores
 

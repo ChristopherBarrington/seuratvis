@@ -38,7 +38,7 @@ seurat_object_options.ui <- function(id, seurat) {
 #' 
 seurat_object_choices.ui <- function(id, available_seurats)
   available_seurats %>%
-    plyr::dlply(~env, select, choiceName, choiceValue) %>%
+    plyr::dlply(~env, dplyr::select, choiceName, choiceValue) %>%
     lapply(deframe) %>%
     pickerInput(inputId=NS(id,'picker'), label='Select a Seurat object',
                 multiple=FALSE, options=list(`live-search`=TRUE, title='Objects in environments'))
@@ -152,7 +152,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
       return(NULL)
 
     seurat$n_features_variable <- input$n_features_picker
-    seurat$n_features_values <- select(seurat$metadata, input$n_features_picker) %>% unlist(use.names=FALSE)
+    seurat$n_features_values <- dplyr::select(seurat$metadata, input$n_features_picker) %>% unlist(use.names=FALSE)
     seurat$n_features_values_min <- min(seurat$n_features_values)
     seurat$n_features_values_max <- max(seurat$n_features_values)
     seurat$n_features_values_mean <- mean(seurat$n_features_values)
@@ -169,7 +169,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
       return(NULL)
 
     seurat$n_umi_variable <- input$n_umi_picker
-    seurat$n_umi_values <- select(seurat$metadata, input$n_umi_picker) %>% unlist(use.names=FALSE)
+    seurat$n_umi_values <- dplyr::select(seurat$metadata, input$n_umi_picker) %>% unlist(use.names=FALSE)
     seurat$n_umi_sum <- sum(seurat$n_umi_values)
     seurat$n_umi_values_min <- min(seurat$n_umi_values)
     seurat$n_umi_values_max <- max(seurat$n_umi_values)
@@ -187,7 +187,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
       return(NULL)
 
     seurat$proportion_mt_variable <- input$proportion_mt_picker
-    seurat$proportion_mt_values <- select(seurat$metadata, input$proportion_mt_picker) %>% unlist(use.names=FALSE)
+    seurat$proportion_mt_values <- dplyr::select(seurat$metadata, input$proportion_mt_picker) %>% unlist(use.names=FALSE)
     seurat$proportion_mt_values_min <- min(seurat$proportion_mt_values)
     seurat$proportion_mt_values_max <- max(seurat$proportion_mt_values)
     seurat$proportion_mt_values_mean <- mean(seurat$proportion_mt_values)
@@ -201,7 +201,7 @@ process_seurat.server <- function(input, output, session, server_input, server_o
     req(seurat$metadata)
 
     seurat$gene_modules <- c(dummy_module='normal distribution')
-    seurat$gene_module_scores <- seurat$metadata %>% select(NULL) %>% mutate(dummy_module=rnorm(n()))
+    seurat$gene_module_scores <- seurat$metadata %>% dplyr::select(NULL) %>% mutate(dummy_module=rnorm(n()))
     gm_regex <- input$gene_modules_regex_text
 
     if(!is.null(seurat$object@misc$gene_modules)) {
