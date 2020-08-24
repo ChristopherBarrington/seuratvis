@@ -64,7 +64,7 @@ colour_picker.ui <- function(id, label='Plot colours', include=c(Low='low', Mid=
                                 `inferno`='viridis:inferno',
                                 `viridis`='viridis:viridis')) %>%
     pickerInput(inputId=NS(id, 'predefined_palette'), label='Select a palette', selected='viridis:plasma',
-                multiple=FALSE, options=list(`live-search`=FALSE, size=NULL), inline=FALSE) -> spectrum_picker
+                multiple=FALSE, options=list(`live-search`=FALSE, size=10), inline=FALSE) -> spectrum_picker
 
   # make a selection for gradient direction
   prettyToggle(inputId=NS(id, 'palette_direction'),
