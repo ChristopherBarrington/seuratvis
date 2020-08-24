@@ -12,7 +12,6 @@ Encoding: UTF-8
 LazyData: true
 biocViews:
 Remotes:
-  ChristopherBarrington/esquisse
 Imports:
   biomaRt,
   esquisse,
