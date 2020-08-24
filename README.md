@@ -17,6 +17,20 @@ require(devtools) || install.packages('devtools')
 install_github('ChristopherBarrington/seuratvis')
 ```
 
+### possible errors
+
+If a package binary is unavailable for your installed `R` version, you may get an error something like:
+
+```r
+Error: (converted from warning) package 'shinydashboardPlus' was built under R version 3.6.3
+```
+
+This can be avoided with:
+
+```r
+install.packages('shinydashboardPlus', type='source')
+```
+
 ## clone this repository
 
 Make a local copy of the repository using `git clone ChristopherBarrington/seuratvis`. Now use `R` to load the package and run the `shiny` app (you will need to install all of the dependencies manually, sorry!).
