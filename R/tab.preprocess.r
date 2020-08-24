@@ -143,7 +143,8 @@ cluster_filtering_tab.server <- function(input, output, session, server_input, s
                         feature_picker.ui(id=tab, seurat=seurat),
                         show_filtering_parameters.ui(id=tab, label='Cell filtering parameters'))})  -> server_output$right_sidebar.data_opts
       renderUI({tagList(point_size.ui(id=tab),
-                        opacity.ui(id=tab))}) -> server_output$right_sidebar.plotting_opts}})
+                        opacity.ui(id=tab),
+                        colour_picker.ui(id=tab, include=c(`Background`='background')))}) -> server_output$right_sidebar.plotting_opts}})
 
   # call the modules for this tab
   dimension_reduction <- callModule(module=dimension_reduction.server, id='', seurat=seurat, regex='.*')
@@ -151,7 +152,7 @@ cluster_filtering_tab.server <- function(input, output, session, server_input, s
   feature_picker <- callModule(module=feature_picker.server, id='', seurat=seurat)
   point_size <- callModule(module=point_size.server, id='')
   opacity <- callModule(module=opacity.server, id='')
-  colour_picker <- list(low='linen', mid='white', high='darkviolet', background=rgb(255, 255, 255, 255, max=255))
+  colour_picker <- callModule(module=colour_picker.server, id='')
 
   filtering_parameters <- callModule(module=dataset_filtering.server, id='filtering', seurat=seurat, filters=list(cluster_resolution))
 
