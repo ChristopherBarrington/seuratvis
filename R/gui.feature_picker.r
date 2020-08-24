@@ -147,7 +147,8 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
       ## slider to limit colour range
       min_value <- 0
       max_value <- 1
-      if(!is.null(picked_feature_values$value) && class(picked_feature_values$value)=='numeric') {
+
+      if(!is.null(picked_feature_values$value) && is.numeric(picked_feature_values$value)) {
         min_value <- min(picked_feature_values$value) %>% subtract(0.05) %>% round(digits=1)
         max_value <- max(picked_feature_values$value) %>% add(0.05) %>% round(digits=1)
       }
