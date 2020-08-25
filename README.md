@@ -14,7 +14,13 @@ Could use `devtools` to install the master branch as a package. This method _sho
 
 ```r
 require(devtools) || install.packages('devtools')
-install_github('ChristopherBarrington/seuratvis')
+install_github(repo='ChristopherBarrington/seuratvis')
+```
+
+Or use the `dev` branch if you are brave.
+
+```r
+install_github(repo='ChristopherBarrington/seuratvis', ref='dev')
 ```
 
 ### possible errors
