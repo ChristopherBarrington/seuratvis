@@ -3,7 +3,7 @@
 cluster_classification.tab <- function() {
   bquote({
     menuItem(text='Cluster classification', icon=icon('object-group'), startExpanded=TRUE,
-             menuSubItem(text='FindMarkers results', tabName='findmarkers_results_tab', icon=menuSubItem_icon()),
+             menuSubItem(text='FindMarkers results', tabName='findmarkers_results_tab', icon=under_construction_icon()),
              menuItem(text='Gene modules', startExpanded=TRUE, icon=icon('layer-group'),
                       menuSubItem(text='Score in clusters', tabName='gene_module_score_in_clusters_tab', icon=menuSubItem_icon()),
                       menuSubItem(text='Scores in a cluster', tabName='gene_module_scores_in_a_cluster_tab', icon=menuSubItem_icon())) %>%
