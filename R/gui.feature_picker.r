@@ -133,9 +133,13 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
     picked <- picked_feature$name
 
     # get the values for the selected feature(s) from the loaded Seurat
+    #! TODO: need to deal with missing feature request; eg switching between species
     if(input$feature_type=='gene_modules') {
       picked %<>% str_split(pattern=',') %>% unlist()
-      picked_feature_values <- select_at(seurat$gene_module_scores, vars(picked))
+      picked_feature_values <- dplyr::select(seurat$gene_module_scores, any_of(picked))
+      if(ncol(picked_feature_values)!=length(picked)) #± TODO: messy
+        for(p in picked[! picked %in% names(picked_feature_values)])
+          picked_feature_values %<>% add_column(data.frame(z=rep(0,nrow(picked_feature_values))) %>% set_names(p))
     } else {
       picked_feature_values <- FetchData(object=seurat$object, vars=picked)
     }
