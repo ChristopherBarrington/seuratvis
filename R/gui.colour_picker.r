@@ -1,6 +1,8 @@
 #'
 #' @import shinyWidgets
 #' @import RColorBrewer
+#' @import scales
+#' @import esquisse
 #'
 colour_picker.ui <- function(id, label='Plot colours', include=c(Low='low', Mid='mid', High='high', `Plot background`='background')) {
 
@@ -39,32 +41,33 @@ colour_picker.ui <- function(id, label='Plot colours', include=c(Low='low', Mid=
    do.call(what=spectrumInput)) -> pickers
 
   # make a dropdown of pre-defined spectra
-  list(`Brewer [divergent]`=c(`Red-Yellow-Green`='brewer:RdYlGn',
-                              `Purple-Green`='brewer:PRGn',
-                              `Red-Yellow-Blue`='brewer:RdYlBu',
-                              `Red-Grey`='brewer:RdGy',
-                              `Red-Blue`='brewer:RdBu',
-                              `Orange-Purple`='brewer:PuOr',
-                              `Pink-Green`='brewer:PiYG',
-                              `Brown-Teal`='brewer:BrBG',
-                              `Spectral`='brewer:Spectral'),
-       `Brewer [sequential]`=c(`Blues`='brewer:Blues',
-                               `Blue-Purple`='brewer:BuPu',
-                               `Green-Blue`='brewer:GnBu',
-                               `Greens`='brewer:Greens',
-                               `Greys`='brewer:Greys',
-                               `Oranges`='brewer:Oranges',
-                               `Purples`='brewer:Purples',
-                               `Red-Purple`='brewer:RdPu',
-                               `Reds`='brewer:Reds',
-                               `Yellow-Green`='brewer:YlGn',
-                               `Yellow-Green-Blue`='brewer:YlGnBu'),
-       `Viridis [sequential]`=c(`magma`='viridis:magma',
-                                `plasma`='viridis:plasma',
-                                `inferno`='viridis:inferno',
-                                `viridis`='viridis:viridis')) %>%
-    pickerInput(inputId=NS(id, 'predefined_palette'), label='Select a palette', selected='viridis:plasma',
-                multiple=FALSE, options=list(`live-search`=FALSE, size=10), inline=FALSE) -> spectrum_picker
+  list(`Brewer [divergent]`=list(`brewer:RdYlGn`=brewer_pal(palette='RdYlGn')(8),
+                                 `brewer:PRGn`=brewer_pal(palette='PRGn')(8),
+                                 `brewer:RdYlBu`=brewer_pal(palette='RdYlBu')(8),
+                                 `brewer:RdGy`=brewer_pal(palette='RdGy')(8),
+                                 `brewer:RdBu`=brewer_pal(palette='RdBu')(8),
+                                 `brewer:PuOr`=brewer_pal(palette='PuOr')(8),
+                                 `brewer:PiYG`=brewer_pal(palette='PiYG')(8),
+                                 `brewer:BrBG`=brewer_pal(palette='BrBG')(8),
+                                 `brewer:Spectral`=brewer_pal(palette='Spectral')(8)),
+       `Brewer [sequential]`=list(`brewer:Blues`=brewer_pal(palette='Blues')(8),
+                                  `brewer:BuPu`=brewer_pal(palette='BuPu')(8),
+                                  `brewer:GnBu`=brewer_pal(palette='GnBu')(8),
+                                  `brewer:Greens`=brewer_pal(palette='Greens')(8),
+                                  `brewer:Greys`=brewer_pal(palette='Greys')(8),
+                                  `brewer:Oranges`=brewer_pal(palette='Oranges')(8),
+                                  `brewer:Purples`=brewer_pal(palette='Purples')(8),
+                                  `brewer:RdPu`=brewer_pal(palette='RdPu')(8),
+                                  `brewer:Reds`=brewer_pal(palette='Reds')(8),
+                                  `brewer:YlGn`=brewer_pal(palette='YlGn')(8),
+                                  `brewer:YlGnBu`=brewer_pal(palette='YlGnBu')(8)),
+       `Viridis [sequential]`=list(`viridis:magma`=viridis_pal(option='magma')(8),
+                                   `viridis:plasma`=viridis_pal(option='plasma')(8),
+                                   `viridis:inferno`=viridis_pal(option='inferno')(8),
+                                   `viridis:viridis`=viridis_pal(option='viridis')(8))) %>%
+    palettePicker(inputId=NS(id, 'predefined_palette'), label='Select a palette', 
+                  selected='brewer:YlGnBu', textColor=rgb(red=0, green=0, blue=0, alpha=0),
+                  pickerOpts=list(`live-search`=FALSE, size=10)) -> spectrum_picker
 
   # make a selection for gradient direction
   prettyToggle(inputId=NS(id, 'palette_direction'),
