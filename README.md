@@ -14,7 +14,27 @@ Could use `devtools` to install the master branch as a package. This method _sho
 
 ```r
 require(devtools) || install.packages('devtools')
-install_github('ChristopherBarrington/seuratvis')
+install_github(repo='ChristopherBarrington/seuratvis')
+```
+
+Or use the `dev` branch if you are brave.
+
+```r
+install_github(repo='ChristopherBarrington/seuratvis', ref='dev')
+```
+
+### possible errors
+
+If a package binary is unavailable for your installed `R` version, you may get an error something like:
+
+```r
+Error: (converted from warning) package 'shinydashboardPlus' was built under R version 3.6.3
+```
+
+This can be avoided with:
+
+```r
+install.packages('shinydashboardPlus', type='source')
 ```
 
 ## clone this repository
