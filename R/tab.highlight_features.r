@@ -136,7 +136,7 @@ highlight_multiple_features.server <- function(input, output, session, server_in
       renderUI({tagList(point_size.ui(id=tab),
                         opacity.ui(id=tab),
                         colour_picker.ui(id=tab, include=c(`Background`='background')))}) -> server_output$right_sidebar.plotting_opts
-      renderUI({tagList(feature_picker.ui(id=str_c(tab, 'feature0'), seurat=seurat))}) -> output$`feature0-dropdown`}})
+      renderUI({tagList(feature_picker.ui(id=str_c(tab, 'feature0'), seurat=seurat))}) -> output$`feature0-feature_picker`}})
 
   # react to the action button being pressed
   observeEvent(eventExpr=input$add_plot_ui, label='highlight_multiple_features/add_plot', handlerExpr={
@@ -144,7 +144,7 @@ highlight_multiple_features.server <- function(input, output, session, server_in
     feature_id <- str_c('feature', feature_n)
     box_id <- NS('highlight_multiple_features_tab', feature_id)
     div_id <- sprintf(fmt='#boxid%s', feature_n-1)
-    ddn_id <- NS(feature_id, 'dropdown')
+    ddn_id <- NS(feature_id, 'feature_picker')
 
     dimension_reduction.plotbox(id=box_id, n=feature_n) -> ui
     insertUI(selector=div_id, where='afterEnd', ui=ui)
