@@ -29,7 +29,8 @@ dimension_reduction.server <- function(input, output, session, seurat, regex='.*
     picked <- input$picker
 
     # get the embeddings
-    Embeddings(object=seurat$object, reduction=picked)[,1:2] %>%
+    embeddings <- tryCatch(Embeddings(object=seurat$object, reduction=picked), error=function(...) return(data.frame(DIMRED_1=numeric(), DIMRED_2=numeric())))
+    embeddings[,1:2] %>%
       as.data.frame() %>%
       set_names(c('DIMRED_1','DIMRED_2')) -> embeddings
 

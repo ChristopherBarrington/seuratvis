@@ -38,8 +38,11 @@ cluster_picker.server <- function(input, output, session, seurat, ...) {
     req(seurat$object)
     req(input$resolution_picker)
     
+    clusters$idents <- tryCatch({FetchData(object=seurat$object, vars=input$resolution_picker) %>% unlist()}, error=function(...) {return(NULL)})
+    if(is.null(clusters$idents))
+      return(NULL)
+
     clusters$variable <- input$resolution_picker
-    clusters$idents <- FetchData(object=seurat$object, vars=input$resolution_picker) %>% unlist()
     clusters$distinct_idents <- unique(clusters$idents) %>% mixedsort()
 
     choices <- seurat$all_idents[[input$resolution_picker]]
@@ -57,7 +60,7 @@ cluster_picker.server <- function(input, output, session, seurat, ...) {
     clusters$picked_idents <- input$ident_picker
     clusters$in_set <- input$ident_picker %>% str_c(collapse="', '") %>% sprintf(fmt="c('%s')")})
 
-  # react to idents being picked
+  # react to cluster label display
   observeEvent(eventExpr=input$label_clusters, label='cluster_picker/label_clusters', handlerExpr={
     clusters$label_clusters <- input$label_clusters})
 
