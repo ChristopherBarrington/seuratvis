@@ -12,4 +12,5 @@ contact_links.menu <- function()
 contact_links.list <- function()
   list(bug_report=menuItem(text='report a bug', href='http://github.com/ChristopherBarrington/seuratvis/issues/new', icon=icon('bug'), newtab=FALSE),
        feature_request=menuItem(text='suggest a feature', href='http://github.com/ChristopherBarrington/seuratvis/issues/new', icon=icon('lightbulb'), newtab=FALSE),
-       github_link=menuItem(text=sprintf('GitHub (version: %s)', packageVersion('seuratvis')), href='http://github.com/ChristopherBarrington/seuratvis', icon=icon('code-branch'), newtab=FALSE))
+       github_link=menuItem(text=sprintf('GitHub (version: %s)', packageVersion('seuratvis')), href='http://github.com/ChristopherBarrington/seuratvis', icon=icon('code-branch'), newtab=FALSE),
+       email_me=menuItem(text='mail me', href='mailto:christopher.barrington@crick.ac.uk?subject=[seuratvis] Hello there', icon=icon('envelope-open'), newtab=FALSE))
