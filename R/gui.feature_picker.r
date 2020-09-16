@@ -48,12 +48,17 @@ feature_picker.ui <- function(id, seurat, label='Feature selection', selected='f
     conditionalPanel(condition=sprintf('input["%s"]=="metadata"', ns(id='feature_type'))) -> metadata_picker_conditional
 
   ## gene modules drop down box
+  # list(inputId=ns(id='feature_picker_gene_module'), label=NULL,
+  #      choices=feature_picker_options$gene_modules, selected=feature_picker_options$gene_modules, multiple=FALSE,
+  #      options=list(`actions-box`=TRUE, header='Gene module(s) selection', title='Gene module selection',
+  #                   `selected-text-format`='count', `count-selected-text`='{0} module(s)')) %>%
+  #   modifyList(val=gene_modules_opts) %>%
+  #   do.call(what=pickerInput) %>%
+  #   conditionalPanel(condition=sprintf('input["%s"]=="gene_modules"', ns(id='feature_type'))) -> gene_module_picker_conditional
   list(inputId=ns(id='feature_picker_gene_module'), label=NULL,
-       choices=feature_picker_options$gene_modules, selected=feature_picker_options$gene_modules, multiple=FALSE,
-       options=list(`actions-box`=TRUE, header='Gene module(s) selection', title='Gene module selection',
-                    `selected-text-format`='count', `count-selected-text`='{0} module(s)')) %>%
+       choices=feature_picker_options$gene_modules, selected=feature_picker_options$gene_modules, multiple=FALSE) %>%
     modifyList(val=gene_modules_opts) %>%
-    do.call(what=pickerInput) %>%
+    do.call(what=selectizeInput) %>%
     conditionalPanel(condition=sprintf('input["%s"]=="gene_modules"', ns(id='feature_type'))) -> gene_module_picker_conditional
 
   ## slider to limit colour range

@@ -83,7 +83,9 @@ findmarkers_results_tab.server <- function(input, output, session, server_input,
                   rownames=FALSE,
                   options=list(columnDefs=list(list(className='dt-right', targets=c(1,6))),
                                ordering=FALSE,
-                               dom='litp'),
+                               dom='litp',
+                               pageLength=20,
+                               lengthMenu=list(c(10, 20, 50, 100, -1), c(10, 20, 50, 100,'All'))),
                   style='bootstrap4',
                   class='stripe') %>%
     formatRound(columns=c('Cluster detection', 'Map detection'), digits=2) %>%

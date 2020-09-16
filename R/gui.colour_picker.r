@@ -86,7 +86,7 @@ colour_picker.ui <- function(id, label='Plot colours', include=c(Low='low', Mid=
 #'
 #'
 colour_picker.server <- function(input, output, session) {
-  colours <- reactiveValues(low='linen', mid='ivory', high='#5E4FA2', background='white', palette=list('viridis','plasma'), direction=1)
+  colours <- reactiveValues(low='linen', mid='ivory', high='#5E4FA2', background='white', palette=list('brewer','YlGnBu'), direction=1)
 
   # react to the colours being picked
   ## low

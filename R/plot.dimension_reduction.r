@@ -8,17 +8,17 @@ dimension_reduction.plot <- function(id)
 dimension_reduction.plotbox <- function(id, n=0) {
   # make the ui elements
   ## drop down config
-  dropdownButton(inputId=NS(id,'ddn'),
+  dropdownButton(inputId=NS(id,'dropdown_button'),
                  circle=TRUE, status='primary', icon=icon('wrench'), size='xs',
-                 uiOutput(outputId=NS(id,'dropdown'))) -> dropdown_menu
+                 uiOutput(outputId=NS(id,'feature_picker'))) -> dropdown_button_menu
 
-  tags$head(tags$style(HTML(sprintf('#%s {background: #222D32 !important;}', NS(NS('dropdown-menu',id),'ddn'))))) -> css
+  tags$head(tags$style(HTML(sprintf('#%s {background: #222D32 !important;}', NS(NS('dropdown-menu',id),'dropdown_button'))))) -> css
 
   ## map plot output
   NS(id, 'map') %>% plotOutput() %>% withSpinner() -> plot_output
 
   # return the box
-  tagList(div(id=str_c('boxid', n), boxPlus(title=textOutput(outputId=NS(id, 'box_title')), status='primary', closable=FALSE, width=4, dropdown_menu, css, plot_output)))
+  tagList(div(id=str_c('boxid', n), boxPlus(title=textOutput(outputId=NS(id, 'box_title')), status='primary', closable=FALSE, width=4, dropdown_button_menu, css, plot_output)))
 }
 
 #'
