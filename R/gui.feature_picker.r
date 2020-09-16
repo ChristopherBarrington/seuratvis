@@ -60,6 +60,14 @@ feature_picker.ui <- function(id, seurat, label='Feature selection', selected='f
   sliderInput(inputId=ns(id='value_range'), label='Colour range limits',
               min=0, max=1, step=0.1, value=c(-Inf,Inf)) -> value_range
 
+  ## checkbox to use log-scale
+  prettyToggle(inputId=ns(id='log_scale_toggle'),
+               label_on='Log', icon_on=icon('tree'), status_on='success',
+               label_off='Linear', icon_off=icon('signal'), status_off='success',
+               outline=TRUE, plain=TRUE) -> log_scale_toggle
+  if(!include_values_range)
+    log_scale_toggle %<>% hidden()
+
   ## checkbox for feature type
   prettyRadioButtons(inputId=ns(id='feature_type'), status='primary', label=label, 
                      choices=choices, selected=selected,
@@ -76,6 +84,7 @@ feature_picker.ui <- function(id, seurat, label='Feature selection', selected='f
           metadata_picker_conditional,
           gene_module_picker_conditional,
           if(include_values_range) value_range,
+          log_scale_toggle,
           picked_feature_text_input)
 }
 
@@ -129,6 +138,9 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
     req(input$feature_type)
     req(picked_feature$name)
 
+    if(is.null(input$log_scale_toggle))
+      return(NULL)
+
     # create variables for shorthand
     picked <- picked_feature$name
 
@@ -160,6 +172,11 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
         max_value <- max(picked_feature_values$value) %>% add(0.05) %>% round(digits=1)
       }
 
+      if(input$log_scale_toggle) {
+        min_value %<>% log(base=10)
+        max_value %<>% log(base=10)
+      }
+
       updateSliderInput(session=session, inputId='value_range',
                         min=min_value, max=max_value, value=c(-Inf,Inf))
     } else {
@@ -176,11 +193,16 @@ feature_picker.server <- function(input, output, session, seurat, features_regex
   # invalidate the reactive value when slider is changed but not after initialisation
   observeEvent(eventExpr=input$value_range, ignoreInit=TRUE, handlerExpr={
     picked_feature$refreshed <- rnorm(1)
+    value_range <- input$value_range
+    
+    # if the scale is logged, unlog it
+    if(input$log_scale_toggle)
+      value_range %<>% raise_to_power(e1=10, e2=.)
 
     # determine if the values are divergent
-    input$value_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1) -> picked_feature$is_divergent
+    value_range %>% sign() %>% Reduce(f='*') %>% magrittr::equals(-1) -> picked_feature$is_divergent
 
-    picked_feature$values_range <- input$value_range})
+    picked_feature$values_range <- value_range})
 
   # reset the reactive when the seurat is (re)loaded
   observeEvent(eventExpr=seurat$object, handlerExpr={
