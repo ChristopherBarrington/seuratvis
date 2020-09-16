@@ -5,7 +5,7 @@ highlight_features.tab <- function() {
     menuItem(text='Highlight features', icon=icon('highlighter'), startExpanded=TRUE,
              menuSubItem(text='Visualise dataset', tabName='visualise_dataset_tab', icon=menuSubItem_icon()),
              menuSubItem(text='Highlight feature', tabName='highlight_feature_tab', icon=menuSubItem_icon()),
-             menuSubItem(text='Highlight feature and cluster', tabName='highlight_feature_and_clusters_tab', icon=menuSubItem_icon()),
+             # menuSubItem(text='Highlight feature and cluster', tabName='highlight_feature_and_clusters_tab', icon=menuSubItem_icon()),
              menuSubItem(text='Highlight multiple features', tabName='highlight_multiple_features_tab', icon=menuSubItem_icon())) %>%
     modify_stop_propagation() -> menu_item
 

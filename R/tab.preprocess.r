@@ -5,8 +5,8 @@ preprocessing.tab <- function() {
     # define the menu for this group of tabs
     menuItem(text='Preprocessing', icon=icon('toolbox'), startExpanded=TRUE,
              menuSubItem(text='Cell filtering', tabName='cell_filtering_tab', icon=menuSubItem_icon()),
-             menuSubItem(text='Dimensionality', tabName='dimensionality_tab', icon=menuSubItem_icon()),
-             menuSubItem(text='Cluster filtering', tabName='cluster_filtering_tab', icon=menuSubItem_icon())) %>%
+             menuSubItem(text='Cluster filtering', tabName='cluster_filtering_tab', icon=menuSubItem_icon()),
+             menuSubItem(text='Dimensionality', tabName='dimensionality_tab', icon=menuSubItem_icon())) %>%
       modify_stop_propagation() -> menu_item
 
     # define the content of each tab
