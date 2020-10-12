@@ -10,7 +10,12 @@ seurat_object_options.ui <- function(id, seurat) {
   list(inputId=NS(id, 'gene_modules_regex_text'), value='^GeneModule-', label='Gene modules regex', placeholder='regex') %>% modifyList(x=textInput_defaults) %>% do.call(what=textInput) -> gene_modules_picker
 
   # define the biomaRt options
-  biomaRt::listEnsemblArchives() %>% filter(str_detect(url, 'archive')) %>% transmute(label=sprintf(fmt='%s [%s]', name, date), value=url) %>% deframe() -> mart_urls
+  tryCatch(expr={biomaRt::listEnsemblArchives()},
+           error=function(...) data.frame(url=character(), name=character(), date=character(), stringsAsFactors=FALSE)) %>%
+    filter(str_detect(url, 'archive')) %>%
+    transmute(label=sprintf(fmt='%s [%s]', name, date), value=url) %>%
+    deframe() -> mart_urls
+
   list(inputId=NS(id, 'mart_url_picker'), label='Ensembl version', options=list(`live-search`=TRUE, size=5), choices=mart_urls, selected='http://jul2018.archive.ensembl.org') %>%
     modifyList(x=pickerInput_defaults) %>%
     do.call(what=pickerInput) %>%
