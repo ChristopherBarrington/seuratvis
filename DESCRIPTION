@@ -14,7 +14,6 @@ biocViews:
 Remotes:
   daqana/dqshiny
 Imports:
-  biomaRt,
   esquisse,
   ggrepel,
   ggridges,
@@ -35,6 +34,7 @@ Depends:
   shinycssloaders,
   shinyWidgets,
   colourpicker,
+  biomaRt,
   Seurat,
   tidyverse,
   magrittr
