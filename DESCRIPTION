@@ -11,6 +11,7 @@ License: GNU General Public License v3.0
 Encoding: UTF-8
 LazyData: true
 biocViews:
+  Software
 Remotes:
   daqana/dqshiny
 Imports:
@@ -22,6 +23,7 @@ Imports:
   shinyAce,
   viridis
 Depends:
+  biomaRt,
   shiny,
   shinydashboard,
   shinydashboardPlus (== 0.7.0),
@@ -34,7 +36,6 @@ Depends:
   shinycssloaders,
   shinyWidgets,
   colourpicker,
-  biomaRt,
   Seurat,
   tidyverse,
   magrittr
